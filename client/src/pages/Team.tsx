@@ -165,10 +165,10 @@ const Team: React.FC = () => {
     mutationFn: (newMember: Omit<TeamMember, "id">) => 
       apiRequest("/api/team-members", { 
         method: "POST", 
-        body: JSON.stringify({
+        body: {
           ...newMember,
           avatar: newMember.avatar || null
-        })
+        }
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
@@ -183,10 +183,10 @@ const Team: React.FC = () => {
     mutationFn: (member: Partial<TeamMember> & { id: number }) => 
       apiRequest(`/api/team-members/${member.id}`, { 
         method: "PATCH", 
-        body: JSON.stringify({
+        body: {
           ...member,
           avatar: member.avatar ?? null
-        })
+        }
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
@@ -213,7 +213,7 @@ const Team: React.FC = () => {
     mutationFn: (newAllocation: Omit<Allocation, "id">) => 
       apiRequest("/api/allocations", { 
         method: "POST", 
-        body: JSON.stringify(newAllocation)
+        body: newAllocation
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
