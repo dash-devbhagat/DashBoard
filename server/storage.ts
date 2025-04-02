@@ -1,0 +1,537 @@
+import {
+  teamMembers, projects, tasks, allocations, timelinePhases,
+  type TeamMember, type InsertTeamMember,
+  type Project, type InsertProject,
+  type Task, type InsertTask,
+  type Allocation, type InsertAllocation,
+  type TimelinePhase, type InsertTimelinePhase
+} from "@shared/schema";
+
+export interface IStorage {
+  // Team Members
+  getTeamMembers(): Promise<TeamMember[]>;
+  getTeamMember(id: number): Promise<TeamMember | undefined>;
+  createTeamMember(teamMember: InsertTeamMember): Promise<TeamMember>;
+  updateTeamMember(id: number, teamMember: Partial<InsertTeamMember>): Promise<TeamMember | undefined>;
+  deleteTeamMember(id: number): Promise<boolean>;
+
+  // Projects
+  getProjects(): Promise<Project[]>;
+  getProject(id: number): Promise<Project | undefined>;
+  createProject(project: InsertProject): Promise<Project>;
+  updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined>;
+  deleteProject(id: number): Promise<boolean>;
+
+  // Tasks
+  getTasks(): Promise<Task[]>;
+  getTask(id: number): Promise<Task | undefined>;
+  getTasksByProject(projectId: number): Promise<Task[]>;
+  getUnassignedTasks(): Promise<Task[]>;
+  createTask(task: InsertTask): Promise<Task>;
+  updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
+  deleteTask(id: number): Promise<boolean>;
+
+  // Allocations
+  getAllocations(): Promise<Allocation[]>;
+  getAllocation(id: number): Promise<Allocation | undefined>;
+  getAllocationsByTeamMember(teamMemberId: number): Promise<Allocation[]>;
+  getAllocationsByProject(projectId: number): Promise<Allocation[]>;
+  createAllocation(allocation: InsertAllocation): Promise<Allocation>;
+  updateAllocation(id: number, allocation: Partial<InsertAllocation>): Promise<Allocation | undefined>;
+  deleteAllocation(id: number): Promise<boolean>;
+
+  // Timeline Phases
+  getTimelinePhases(): Promise<TimelinePhase[]>;
+  getTimelinePhasesByProject(projectId: number): Promise<TimelinePhase[]>;
+  createTimelinePhase(phase: InsertTimelinePhase): Promise<TimelinePhase>;
+  updateTimelinePhase(id: number, phase: Partial<InsertTimelinePhase>): Promise<TimelinePhase | undefined>;
+  deleteTimelinePhase(id: number): Promise<boolean>;
+
+  // Dashboard Stats
+  getDashboardStats(): Promise<DashboardStats>;
+  getTeamUtilization(): Promise<TeamUtilization[]>;
+}
+
+export type DashboardStats = {
+  activeProjects: number;
+  teamUtilizationAvg: number;
+  completedTasks: number;
+  unassignedTasks: number;
+};
+
+export type TeamUtilization = {
+  role: string;
+  memberCount: number;
+  utilizationPercentage: number;
+};
+
+export class MemStorage implements IStorage {
+  private teamMembers: Map<number, TeamMember>;
+  private projects: Map<number, Project>;
+  private tasks: Map<number, Task>;
+  private allocations: Map<number, Allocation>;
+  private timelinePhases: Map<number, TimelinePhase>;
+  
+  private teamMembersId: number;
+  private projectsId: number;
+  private tasksId: number;
+  private allocationsId: number;
+  private timelinePhasesId: number;
+
+  constructor() {
+    this.teamMembers = new Map();
+    this.projects = new Map();
+    this.tasks = new Map();
+    this.allocations = new Map();
+    this.timelinePhases = new Map();
+
+    this.teamMembersId = 1;
+    this.projectsId = 1;
+    this.tasksId = 1;
+    this.allocationsId = 1;
+    this.timelinePhasesId = 1;
+
+    this.seedData();
+  }
+
+  // Team Members
+  async getTeamMembers(): Promise<TeamMember[]> {
+    return Array.from(this.teamMembers.values());
+  }
+
+  async getTeamMember(id: number): Promise<TeamMember | undefined> {
+    return this.teamMembers.get(id);
+  }
+
+  async createTeamMember(teamMember: InsertTeamMember): Promise<TeamMember> {
+    const id = this.teamMembersId++;
+    const newTeamMember = { ...teamMember, id };
+    this.teamMembers.set(id, newTeamMember);
+    return newTeamMember;
+  }
+
+  async updateTeamMember(id: number, teamMember: Partial<InsertTeamMember>): Promise<TeamMember | undefined> {
+    const existingTeamMember = this.teamMembers.get(id);
+    if (!existingTeamMember) return undefined;
+
+    const updatedTeamMember = { ...existingTeamMember, ...teamMember };
+    this.teamMembers.set(id, updatedTeamMember);
+    return updatedTeamMember;
+  }
+
+  async deleteTeamMember(id: number): Promise<boolean> {
+    return this.teamMembers.delete(id);
+  }
+
+  // Projects
+  async getProjects(): Promise<Project[]> {
+    return Array.from(this.projects.values());
+  }
+
+  async getProject(id: number): Promise<Project | undefined> {
+    return this.projects.get(id);
+  }
+
+  async createProject(project: InsertProject): Promise<Project> {
+    const id = this.projectsId++;
+    const newProject = { ...project, id };
+    this.projects.set(id, newProject);
+    return newProject;
+  }
+
+  async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> {
+    const existingProject = this.projects.get(id);
+    if (!existingProject) return undefined;
+
+    const updatedProject = { ...existingProject, ...project };
+    this.projects.set(id, updatedProject);
+    return updatedProject;
+  }
+
+  async deleteProject(id: number): Promise<boolean> {
+    return this.projects.delete(id);
+  }
+
+  // Tasks
+  async getTasks(): Promise<Task[]> {
+    return Array.from(this.tasks.values());
+  }
+
+  async getTask(id: number): Promise<Task | undefined> {
+    return this.tasks.get(id);
+  }
+
+  async getTasksByProject(projectId: number): Promise<Task[]> {
+    return Array.from(this.tasks.values()).filter(task => task.projectId === projectId);
+  }
+
+  async getUnassignedTasks(): Promise<Task[]> {
+    return Array.from(this.tasks.values()).filter(task => task.assigneeId === null || task.assigneeId === undefined);
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    const id = this.tasksId++;
+    const newTask = { ...task, id };
+    this.tasks.set(id, newTask);
+    return newTask;
+  }
+
+  async updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined> {
+    const existingTask = this.tasks.get(id);
+    if (!existingTask) return undefined;
+
+    const updatedTask = { ...existingTask, ...task };
+    this.tasks.set(id, updatedTask);
+    return updatedTask;
+  }
+
+  async deleteTask(id: number): Promise<boolean> {
+    return this.tasks.delete(id);
+  }
+
+  // Allocations
+  async getAllocations(): Promise<Allocation[]> {
+    return Array.from(this.allocations.values());
+  }
+
+  async getAllocation(id: number): Promise<Allocation | undefined> {
+    return this.allocations.get(id);
+  }
+
+  async getAllocationsByTeamMember(teamMemberId: number): Promise<Allocation[]> {
+    return Array.from(this.allocations.values()).filter(
+      allocation => allocation.teamMemberId === teamMemberId
+    );
+  }
+
+  async getAllocationsByProject(projectId: number): Promise<Allocation[]> {
+    return Array.from(this.allocations.values()).filter(
+      allocation => allocation.projectId === projectId
+    );
+  }
+
+  async createAllocation(allocation: InsertAllocation): Promise<Allocation> {
+    const id = this.allocationsId++;
+    const newAllocation = { ...allocation, id };
+    this.allocations.set(id, newAllocation);
+    return newAllocation;
+  }
+
+  async updateAllocation(id: number, allocation: Partial<InsertAllocation>): Promise<Allocation | undefined> {
+    const existingAllocation = this.allocations.get(id);
+    if (!existingAllocation) return undefined;
+
+    const updatedAllocation = { ...existingAllocation, ...allocation };
+    this.allocations.set(id, updatedAllocation);
+    return updatedAllocation;
+  }
+
+  async deleteAllocation(id: number): Promise<boolean> {
+    return this.allocations.delete(id);
+  }
+
+  // Timeline Phases
+  async getTimelinePhases(): Promise<TimelinePhase[]> {
+    return Array.from(this.timelinePhases.values());
+  }
+
+  async getTimelinePhasesByProject(projectId: number): Promise<TimelinePhase[]> {
+    return Array.from(this.timelinePhases.values()).filter(
+      phase => phase.projectId === projectId
+    );
+  }
+
+  async createTimelinePhase(phase: InsertTimelinePhase): Promise<TimelinePhase> {
+    const id = this.timelinePhasesId++;
+    const newPhase = { ...phase, id };
+    this.timelinePhases.set(id, newPhase);
+    return newPhase;
+  }
+
+  async updateTimelinePhase(id: number, phase: Partial<InsertTimelinePhase>): Promise<TimelinePhase | undefined> {
+    const existingPhase = this.timelinePhases.get(id);
+    if (!existingPhase) return undefined;
+
+    const updatedPhase = { ...existingPhase, ...phase };
+    this.timelinePhases.set(id, updatedPhase);
+    return updatedPhase;
+  }
+
+  async deleteTimelinePhase(id: number): Promise<boolean> {
+    return this.timelinePhases.delete(id);
+  }
+
+  // Dashboard Stats
+  async getDashboardStats(): Promise<DashboardStats> {
+    const activeProjects = Array.from(this.projects.values()).filter(
+      project => project.status === 'active'
+    ).length;
+
+    let totalUtilization = 0;
+    const teamMembers = Array.from(this.teamMembers.values());
+    teamMembers.forEach(member => {
+      const memberAllocations = Array.from(this.allocations.values()).filter(
+        allocation => allocation.teamMemberId === member.id
+      );
+      const utilizationSum = memberAllocations.reduce(
+        (sum, allocation) => sum + allocation.percentage, 
+        0
+      );
+      totalUtilization += utilizationSum;
+    });
+    const teamUtilizationAvg = teamMembers.length > 0 
+      ? Math.min(100, Math.round(totalUtilization / teamMembers.length)) 
+      : 0;
+
+    const completedTasks = Array.from(this.tasks.values()).filter(
+      task => task.status === 'completed'
+    ).length;
+
+    const unassignedTasks = Array.from(this.tasks.values()).filter(
+      task => task.assigneeId === null || task.assigneeId === undefined
+    ).length;
+
+    return {
+      activeProjects,
+      teamUtilizationAvg,
+      completedTasks,
+      unassignedTasks
+    };
+  }
+
+  async getTeamUtilization(): Promise<TeamUtilization[]> {
+    const roleMap = new Map<string, { count: number, utilization: number }>();
+    
+    // Group team members by role
+    Array.from(this.teamMembers.values()).forEach(member => {
+      if (!roleMap.has(member.role)) {
+        roleMap.set(member.role, { count: 0, utilization: 0 });
+      }
+      const roleData = roleMap.get(member.role)!;
+      roleData.count++;
+      
+      // Calculate utilization for this member
+      const memberAllocations = Array.from(this.allocations.values()).filter(
+        allocation => allocation.teamMemberId === member.id
+      );
+      const utilizationSum = memberAllocations.reduce(
+        (sum, allocation) => sum + allocation.percentage, 
+        0
+      );
+      roleData.utilization += Math.min(100, utilizationSum);
+    });
+    
+    // Convert to array and calculate averages
+    return Array.from(roleMap.entries()).map(([role, data]) => ({
+      role,
+      memberCount: data.count,
+      utilizationPercentage: Math.round(data.utilization / data.count)
+    }));
+  }
+
+  // Seed initial data
+  private seedData() {
+    // Seed team members
+    const teamMembers: InsertTeamMember[] = [
+      { name: 'Sarah Johnson', role: 'UI Designer', avatar: 'https://randomuser.me/api/portraits/women/44.jpg', availability: 25 },
+      { name: 'Michael Chen', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', availability: 0 },
+      { name: 'David Kim', role: 'Backend Developer', avatar: 'https://randomuser.me/api/portraits/men/68.jpg', availability: 50 },
+      { name: 'Emily Rodriguez', role: 'UX Researcher', avatar: 'https://randomuser.me/api/portraits/women/17.jpg', availability: 20 },
+      { name: 'Alex Morgan', role: 'QA Engineer', avatar: 'https://randomuser.me/api/portraits/men/75.jpg', availability: 70 },
+      { name: 'Jessica Lee', role: 'UI Designer', avatar: 'https://randomuser.me/api/portraits/women/33.jpg', availability: 40 },
+      { name: 'Robert Johnson', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/men/91.jpg', availability: 10 },
+      { name: 'Lisa Wang', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/women/23.jpg', availability: 35 },
+      { name: 'Mark Wilson', role: 'Backend Developer', avatar: 'https://randomuser.me/api/portraits/men/41.jpg', availability: 0 },
+      { name: 'Anna Martinez', role: 'QA Engineer', avatar: 'https://randomuser.me/api/portraits/women/37.jpg', availability: 60 },
+      { name: 'James Taylor', role: 'DevOps Engineer', avatar: 'https://randomuser.me/api/portraits/men/22.jpg', availability: 30 },
+      { name: 'Kevin Zhou', role: 'DevOps Engineer', avatar: 'https://randomuser.me/api/portraits/men/18.jpg', availability: 45 },
+      { name: 'Sophia Davis', role: 'UI Designer', avatar: 'https://randomuser.me/api/portraits/women/19.jpg', availability: 55 },
+      { name: 'Ryan Thomas', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/men/54.jpg', availability: 75 },
+      { name: 'Olivia Wilson', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/women/26.jpg', availability: 15 },
+      { name: 'Daniel Martinez', role: 'Backend Developer', avatar: 'https://randomuser.me/api/portraits/men/39.jpg', availability: 85 },
+      { name: 'Emma Johnson', role: 'UX Researcher', avatar: 'https://randomuser.me/api/portraits/women/63.jpg', availability: 25 }
+    ];
+
+    teamMembers.forEach(member => {
+      const id = this.teamMembersId++;
+      this.teamMembers.set(id, { ...member, id });
+    });
+
+    // Seed projects
+    const now = new Date();
+    const projectsData: InsertProject[] = [
+      { 
+        name: 'E-commerce Redesign',
+        status: 'active',
+        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30),
+        endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate()),
+        description: 'Redesign the e-commerce platform to improve user experience and conversion rates',
+        color: '#2563eb'
+      },
+      { 
+        name: 'CRM Dashboard',
+        status: 'active',
+        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 15),
+        endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 15),
+        description: 'Develop a comprehensive CRM dashboard for sales team',
+        color: '#4f46e5'
+      },
+      { 
+        name: 'API Integration',
+        status: 'active',
+        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 5),
+        endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 25),
+        description: 'Integrate third-party APIs for payment processing and shipping',
+        color: '#22c55e'
+      },
+      { 
+        name: 'Mobile App Redesign',
+        status: 'active',
+        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 20),
+        endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate() + 10),
+        description: 'Redesign the mobile app interface and improve performance',
+        color: '#eab308'
+      },
+      { 
+        name: 'Testing Automation',
+        status: 'active',
+        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5),
+        endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 5),
+        description: 'Implement automated testing framework for CI/CD pipeline',
+        color: '#ef4444'
+      }
+    ];
+
+    projectsData.forEach(project => {
+      const id = this.projectsId++;
+      this.projects.set(id, { ...project, id });
+    });
+
+    // Seed timeline phases
+    const timelinePhasesData: InsertTimelinePhase[] = [
+      { projectId: 1, name: 'Planning', startWeek: 1, durationWeeks: 3, color: '#bfdbfe' },
+      { projectId: 2, name: 'Design', startWeek: 3, durationWeeks: 4, color: '#c7d2fe' },
+      { projectId: 3, name: 'Development', startWeek: 0, durationWeeks: 2, color: '#bbf7d0' },
+      { projectId: 4, name: 'Testing', startWeek: 2, durationWeeks: 5, color: '#fef08a' },
+      { projectId: 5, name: 'Deployment', startWeek: 6, durationWeeks: 3, color: '#fecaca' }
+    ];
+
+    timelinePhasesData.forEach(phase => {
+      const id = this.timelinePhasesId++;
+      this.timelinePhases.set(id, { ...phase, id });
+    });
+
+    // Seed allocations
+    const allocationsData: InsertAllocation[] = [
+      { teamMemberId: 1, projectId: 1, percentage: 75, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30), endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate()) },
+      { teamMemberId: 2, projectId: 2, percentage: 100, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 15), endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 15) },
+      { teamMemberId: 3, projectId: 3, percentage: 50, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 5), endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 25) },
+      { teamMemberId: 4, projectId: 4, percentage: 80, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 20), endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate() + 10) },
+      { teamMemberId: 5, projectId: 5, percentage: 30, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5), endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 5) }
+    ];
+
+    allocationsData.forEach(allocation => {
+      const id = this.allocationsId++;
+      this.allocations.set(id, { ...allocation, id });
+    });
+
+    // Seed tasks
+    const tasksData: InsertTask[] = [
+      { 
+        title: 'API Authentication Flow', 
+        description: 'Implement secure authentication flow for the API', 
+        priority: 'medium', 
+        status: 'unassigned', 
+        estimatedHours: 8, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3), 
+        category: 'Backend Development',
+        projectId: 3,
+        assigneeId: undefined
+      },
+      { 
+        title: 'Implement Analytics Dashboard', 
+        description: 'Create analytics dashboard with charts and filters', 
+        priority: 'high', 
+        status: 'unassigned', 
+        estimatedHours: 16, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), 
+        category: 'Frontend Development',
+        projectId: 2,
+        assigneeId: undefined
+      },
+      { 
+        title: 'User Onboarding Flow Testing', 
+        description: 'Test the user onboarding flow for bugs and usability issues', 
+        priority: 'low', 
+        status: 'unassigned', 
+        estimatedHours: 6, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5), 
+        category: 'QA',
+        projectId: 1,
+        assigneeId: undefined
+      },
+      { 
+        title: 'Optimize Database Queries', 
+        description: 'Improve performance of database queries for product listing', 
+        priority: 'medium', 
+        status: 'unassigned', 
+        estimatedHours: 12, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2), 
+        category: 'Backend Development',
+        projectId: 1,
+        assigneeId: undefined
+      },
+      { 
+        title: 'Design Login Screen', 
+        description: 'Create design for the new login screen', 
+        priority: 'medium', 
+        status: 'in-progress', 
+        estimatedHours: 6, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7), 
+        category: 'UI Design',
+        projectId: 4,
+        assigneeId: 1
+      },
+      { 
+        title: 'Implement Responsive Layout', 
+        description: 'Make the dashboard responsive for all device sizes', 
+        priority: 'high', 
+        status: 'in-progress', 
+        estimatedHours: 10, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 4), 
+        category: 'Frontend Development',
+        projectId: 2,
+        assigneeId: 2
+      },
+      { 
+        title: 'Setup CI/CD Pipeline', 
+        description: 'Configure CI/CD pipeline for automated testing and deployment', 
+        priority: 'high', 
+        status: 'completed', 
+        estimatedHours: 8, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1), 
+        category: 'DevOps',
+        projectId: 5,
+        assigneeId: 11
+      },
+      { 
+        title: 'Implement Search Feature', 
+        description: 'Add search functionality to the product listings', 
+        priority: 'medium', 
+        status: 'in-progress', 
+        estimatedHours: 12, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 6), 
+        category: 'Frontend Development',
+        projectId: 1,
+        assigneeId: 15
+      }
+    ];
+
+    tasksData.forEach(task => {
+      const id = this.tasksId++;
+      this.tasks.set(id, { ...task, id });
+    });
+  }
+}
+
+export const storage = new MemStorage();
