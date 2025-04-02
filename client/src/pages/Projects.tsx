@@ -40,6 +40,7 @@ import {
   TabsTrigger 
 } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import ResourceAllocationInput from "@/components/dialogs/ResourceAllocationInput";
 
 type Project = {
   id: number;
@@ -98,6 +99,10 @@ const projectFormSchema = z.object({
   endDate: z.string().min(1, { message: "End date is required" }),
   description: z.string().optional(),
   color: z.string().min(1, { message: "Color is required" }),
+  teamAllocations: z.array(z.object({
+    teamMemberId: z.number(),
+    percentage: z.number().min(1).max(100),
+  })).optional(),
 });
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
@@ -152,36 +157,41 @@ const Projects: React.FC = () => {
 
   // Create project mutation
   const createProjectMutation = useMutation({
-    mutationFn: (newProject: Omit<Project, "id">) => 
-      apiRequest("/api/projects", { 
+    mutationFn: (newProject: Omit<Project, "id">) => {
+      // Extract team allocations before sending to API
+      const { teamAllocations, ...projectData } = newProject as any;
+      
+      return apiRequest("/api/projects", { 
         method: "POST", 
         body: {
-          ...newProject,
-          description: newProject.description || null
+          ...projectData,
+          description: projectData.description || null
         }
-      }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
-      setIsNewProjectDialogOpen(false);
-      newProjectForm.reset();
     },
   });
 
   // Update project mutation
   const updateProjectMutation = useMutation({
-    mutationFn: (project: Partial<Project> & { id: number }) => 
-      apiRequest(`/api/projects/${project.id}`, { 
+    mutationFn: (project: Partial<Project> & { id: number }) => {
+      // Extract team allocations before sending to API
+      const { teamAllocations, ...projectData } = project as any;
+      
+      return apiRequest(`/api/projects/${projectData.id}`, { 
         method: "PATCH", 
         body: {
-          ...project,
-          description: project.description ?? null
+          ...projectData,
+          description: projectData.description ?? null
         }
-      }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
-      setIsEditProjectDialogOpen(false);
     },
   });
 
@@ -271,19 +281,79 @@ const Projects: React.FC = () => {
     return Math.round((statusCount.completed / totalTasks) * 100);
   };
 
+  // Create allocation mutation
+  const createAllocationMutation = useMutation({
+    mutationFn: (newAllocation: Omit<Allocation, "id">) => 
+      apiRequest("/api/allocations", { 
+        method: "POST", 
+        body: newAllocation
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
+    }
+  });
+
   // Handle create project form submission
-  const onCreateProjectSubmit = (data: ProjectFormValues) => {
-    createProjectMutation.mutate(data);
+  const onCreateProjectSubmit = async (data: ProjectFormValues) => {
+    try {
+      // First create the project
+      const newProject: Project = await createProjectMutation.mutateAsync(data);
+      
+      // If there are team allocations, create them
+      if (data.teamAllocations && data.teamAllocations.length > 0) {
+        // Create allocations in sequence to avoid race conditions
+        for (const allocation of data.teamAllocations) {
+          if (allocation.teamMemberId > 0) {
+            await createAllocationMutation.mutateAsync({
+              teamMemberId: allocation.teamMemberId,
+              projectId: newProject.id,
+              percentage: allocation.percentage,
+              startDate: data.startDate,
+              endDate: data.endDate
+            });
+          }
+        }
+      }
+      
+      setIsNewProjectDialogOpen(false);
+      newProjectForm.reset();
+    } catch (error) {
+      console.error("Error creating project:", error);
+    }
   };
 
   // Handle edit project form submission
-  const onEditProjectSubmit = (data: ProjectFormValues) => {
+  const onEditProjectSubmit = async (data: ProjectFormValues) => {
     if (!currentProject) return;
     
-    updateProjectMutation.mutate({
-      id: currentProject.id,
-      ...data
-    });
+    try {
+      // First update the project
+      await updateProjectMutation.mutateAsync({
+        id: currentProject.id,
+        ...data
+      });
+      
+      // If there are team allocations, create them
+      if (data.teamAllocations && data.teamAllocations.length > 0) {
+        // Create allocations in sequence to avoid race conditions
+        for (const allocation of data.teamAllocations) {
+          if (allocation.teamMemberId > 0) {
+            await createAllocationMutation.mutateAsync({
+              teamMemberId: allocation.teamMemberId,
+              projectId: currentProject.id,
+              percentage: allocation.percentage,
+              startDate: data.startDate,
+              endDate: data.endDate
+            });
+          }
+        }
+      }
+      
+      setIsEditProjectDialogOpen(false);
+    } catch (error) {
+      console.error("Error updating project:", error);
+    }
   };
 
   // Handler for viewing project details
@@ -296,6 +366,14 @@ const Projects: React.FC = () => {
   // Handler for editing a project
   const handleProjectEdit = (project: Project) => {
     setCurrentProject(project);
+    
+    // Get current allocations for this project
+    const projectAllocations = allocations?.filter(a => a.projectId === project.id) || [];
+    const teamAllocs = projectAllocations.map(a => ({
+      teamMemberId: a.teamMemberId,
+      percentage: a.percentage
+    }));
+    
     editProjectForm.reset({
       name: project.name,
       status: project.status,
@@ -303,7 +381,9 @@ const Projects: React.FC = () => {
       endDate: project.endDate,
       description: project.description || "",
       color: project.color,
+      teamAllocations: teamAllocs.length > 0 ? teamAllocs : undefined
     });
+    
     setIsEditProjectDialogOpen(true);
   };
 
@@ -522,6 +602,15 @@ const Projects: React.FC = () => {
                 )}
               />
               
+              <div className="pt-2 pb-2">
+                <div className="border-t border-slate-200 my-4" />
+                <ResourceAllocationInput 
+                  control={newProjectForm.control} 
+                  name="teamAllocations" 
+                  disabled={createProjectMutation.isPending}
+                />
+              </div>
+              
               <DialogFooter>
                 <Button 
                   type="button" 
@@ -663,6 +752,15 @@ const Projects: React.FC = () => {
                   </FormItem>
                 )}
               />
+              
+              <div className="pt-2 pb-2">
+                <div className="border-t border-slate-200 my-4" />
+                <ResourceAllocationInput 
+                  control={editProjectForm.control} 
+                  name="teamAllocations" 
+                  disabled={updateProjectMutation.isPending}
+                />
+              </div>
               
               <DialogFooter className="gap-2 flex-col-reverse sm:flex-row">
                 <Button 
