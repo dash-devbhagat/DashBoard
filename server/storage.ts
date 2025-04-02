@@ -534,4 +534,301 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // Team Members
+  async getTeamMembers(): Promise<TeamMember[]> {
+    const { db } = await import('./db');
+    return await db.select().from(teamMembers);
+  }
+
+  async getTeamMember(id: number): Promise<TeamMember | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.select().from(teamMembers).where(eq(teamMembers.id, id));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async createTeamMember(teamMember: InsertTeamMember): Promise<TeamMember> {
+    const { db } = await import('./db');
+    const result = await db.insert(teamMembers).values(teamMember).returning();
+    return result[0];
+  }
+
+  async updateTeamMember(id: number, teamMember: Partial<InsertTeamMember>): Promise<TeamMember | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.update(teamMembers)
+      .set(teamMember)
+      .where(eq(teamMembers.id, id))
+      .returning();
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async deleteTeamMember(id: number): Promise<boolean> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.delete(teamMembers).where(eq(teamMembers.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Projects
+  async getProjects(): Promise<Project[]> {
+    const { db } = await import('./db');
+    return await db.select().from(projects);
+  }
+
+  async getProject(id: number): Promise<Project | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.select().from(projects).where(eq(projects.id, id));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async createProject(project: InsertProject): Promise<Project> {
+    const { db } = await import('./db');
+    const result = await db.insert(projects).values(project).returning();
+    return result[0];
+  }
+
+  async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.update(projects)
+      .set(project)
+      .where(eq(projects.id, id))
+      .returning();
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async deleteProject(id: number): Promise<boolean> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.delete(projects).where(eq(projects.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Tasks
+  async getTasks(): Promise<Task[]> {
+    const { db } = await import('./db');
+    return await db.select().from(tasks);
+  }
+
+  async getTask(id: number): Promise<Task | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.select().from(tasks).where(eq(tasks.id, id));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async getTasksByProject(projectId: number): Promise<Task[]> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    return await db.select().from(tasks).where(eq(tasks.projectId, projectId));
+  }
+
+  async getUnassignedTasks(): Promise<Task[]> {
+    const { db } = await import('./db');
+    const { isNull } = await import('drizzle-orm');
+    return await db.select().from(tasks).where(isNull(tasks.assigneeId));
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    const { db } = await import('./db');
+    const result = await db.insert(tasks).values(task).returning();
+    return result[0];
+  }
+
+  async updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.update(tasks)
+      .set(task)
+      .where(eq(tasks.id, id))
+      .returning();
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async deleteTask(id: number): Promise<boolean> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.delete(tasks).where(eq(tasks.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Allocations
+  async getAllocations(): Promise<Allocation[]> {
+    const { db } = await import('./db');
+    return await db.select().from(allocations);
+  }
+
+  async getAllocation(id: number): Promise<Allocation | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.select().from(allocations).where(eq(allocations.id, id));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async getAllocationsByTeamMember(teamMemberId: number): Promise<Allocation[]> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    return await db.select().from(allocations).where(eq(allocations.teamMemberId, teamMemberId));
+  }
+
+  async getAllocationsByProject(projectId: number): Promise<Allocation[]> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    return await db.select().from(allocations).where(eq(allocations.projectId, projectId));
+  }
+
+  async createAllocation(allocation: InsertAllocation): Promise<Allocation> {
+    const { db } = await import('./db');
+    const result = await db.insert(allocations).values(allocation).returning();
+    return result[0];
+  }
+
+  async updateAllocation(id: number, allocation: Partial<InsertAllocation>): Promise<Allocation | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.update(allocations)
+      .set(allocation)
+      .where(eq(allocations.id, id))
+      .returning();
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async deleteAllocation(id: number): Promise<boolean> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.delete(allocations).where(eq(allocations.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Timeline Phases
+  async getTimelinePhases(): Promise<TimelinePhase[]> {
+    const { db } = await import('./db');
+    return await db.select().from(timelinePhases);
+  }
+
+  async getTimelinePhasesByProject(projectId: number): Promise<TimelinePhase[]> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    return await db.select().from(timelinePhases).where(eq(timelinePhases.projectId, projectId));
+  }
+
+  async createTimelinePhase(phase: InsertTimelinePhase): Promise<TimelinePhase> {
+    const { db } = await import('./db');
+    const result = await db.insert(timelinePhases).values(phase).returning();
+    return result[0];
+  }
+
+  async updateTimelinePhase(id: number, phase: Partial<InsertTimelinePhase>): Promise<TimelinePhase | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.update(timelinePhases)
+      .set(phase)
+      .where(eq(timelinePhases.id, id))
+      .returning();
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async deleteTimelinePhase(id: number): Promise<boolean> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.delete(timelinePhases).where(eq(timelinePhases.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Dashboard Stats
+  async getDashboardStats(): Promise<DashboardStats> {
+    const { db } = await import('./db');
+    const { eq, isNull, count, and, sql } = await import('drizzle-orm');
+    
+    // Get active projects count
+    const activeProjectsResult = await db
+      .select({ count: count() })
+      .from(projects)
+      .where(eq(projects.status, 'active'));
+    const activeProjects = activeProjectsResult[0].count;
+    
+    // Get team utilization average
+    const allAllocations = await db.select().from(allocations);
+    const allTeamMembers = await db.select().from(teamMembers);
+    
+    let totalUtilization = 0;
+    allTeamMembers.forEach(member => {
+      const memberAllocations = allAllocations.filter(
+        allocation => allocation.teamMemberId === member.id
+      );
+      const utilizationSum = memberAllocations.reduce(
+        (sum, allocation) => sum + allocation.percentage, 
+        0
+      );
+      totalUtilization += utilizationSum;
+    });
+    
+    const teamUtilizationAvg = allTeamMembers.length > 0 
+      ? Math.min(100, Math.round(totalUtilization / allTeamMembers.length)) 
+      : 0;
+    
+    // Get completed tasks count
+    const completedTasksResult = await db
+      .select({ count: count() })
+      .from(tasks)
+      .where(eq(tasks.status, 'completed'));
+    const completedTasks = completedTasksResult[0].count;
+    
+    // Get unassigned tasks count
+    const unassignedTasksResult = await db
+      .select({ count: count() })
+      .from(tasks)
+      .where(isNull(tasks.assigneeId));
+    const unassignedTasks = unassignedTasksResult[0].count;
+    
+    return {
+      activeProjects,
+      teamUtilizationAvg,
+      completedTasks,
+      unassignedTasks
+    };
+  }
+
+  async getTeamUtilization(): Promise<TeamUtilization[]> {
+    const { db } = await import('./db');
+    const { eq, sql } = await import('drizzle-orm');
+    
+    // Get all team members and allocations
+    const allTeamMembers = await db.select().from(teamMembers);
+    const allAllocations = await db.select().from(allocations);
+    
+    // Group team members by role
+    const roleMap = new Map<string, { count: number, utilization: number }>();
+    
+    allTeamMembers.forEach(member => {
+      if (!roleMap.has(member.role)) {
+        roleMap.set(member.role, { count: 0, utilization: 0 });
+      }
+      const roleData = roleMap.get(member.role)!;
+      roleData.count++;
+      
+      // Calculate utilization for this member
+      const memberAllocations = allAllocations.filter(
+        allocation => allocation.teamMemberId === member.id
+      );
+      const utilizationSum = memberAllocations.reduce(
+        (sum, allocation) => sum + allocation.percentage, 
+        0
+      );
+      roleData.utilization += Math.min(100, utilizationSum);
+    });
+    
+    // Convert to array and calculate averages
+    return Array.from(roleMap.entries()).map(([role, data]) => ({
+      role,
+      memberCount: data.count,
+      utilizationPercentage: Math.round(data.utilization / data.count)
+    }));
+  }
+}
+
+// Use DatabaseStorage instead of MemStorage
+export const storage = new DatabaseStorage();

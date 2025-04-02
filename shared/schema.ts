@@ -1,6 +1,7 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // Team Member Schema
 export const teamMembers = pgTable("team_members", {
@@ -10,6 +11,11 @@ export const teamMembers = pgTable("team_members", {
   avatar: text("avatar"),
   availability: integer("availability").notNull().default(100), // Percentage available
 });
+
+export const teamMembersRelations = relations(teamMembers, ({ many }) => ({
+  allocations: many(allocations),
+  tasks: many(tasks, { relationName: "assignee" }),
+}));
 
 export const insertTeamMemberSchema = createInsertSchema(teamMembers).pick({
   name: true,
@@ -23,11 +29,17 @@ export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   status: text("status").notNull().default("active"), // active, completed, on-hold
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date").notNull(),
+  startDate: text("start_date").notNull(), // Using text for ease of handling dates in JavaScript
+  endDate: text("end_date").notNull(),
   description: text("description"),
   color: text("color").notNull().default("#2563eb"), // Project color for UI
 });
+
+export const projectsRelations = relations(projects, ({ many }) => ({
+  tasks: many(tasks),
+  allocations: many(allocations),
+  timelinePhases: many(timelinePhases),
+}));
 
 export const insertProjectSchema = createInsertSchema(projects).pick({
   name: true,
@@ -44,13 +56,24 @@ export const tasks = pgTable("tasks", {
   title: text("title").notNull(),
   description: text("description"),
   priority: text("priority").notNull().default("medium"), // low, medium, high
-  status: text("status").notNull().default("unassigned"), // unassigned, in-progress, completed
+  status: text("status").notNull().default("not-started"), // not-started, in-progress, completed
   estimatedHours: integer("estimated_hours").notNull(),
-  dueDate: timestamp("due_date").notNull(),
+  dueDate: text("due_date").notNull(), // Using text for ease of handling dates in JavaScript
   category: text("category").notNull(), // Frontend, Backend, UI/UX, QA, etc.
   projectId: integer("project_id"),
   assigneeId: integer("assignee_id"),
 });
+
+export const tasksRelations = relations(tasks, ({ one }) => ({
+  project: one(projects, {
+    fields: [tasks.projectId],
+    references: [projects.id],
+  }),
+  assignee: one(teamMembers, {
+    fields: [tasks.assigneeId],
+    references: [teamMembers.id],
+  }),
+}));
 
 export const insertTaskSchema = createInsertSchema(tasks).pick({
   title: true,
@@ -70,9 +93,20 @@ export const allocations = pgTable("allocations", {
   teamMemberId: integer("team_member_id").notNull(),
   projectId: integer("project_id").notNull(),
   percentage: integer("percentage").notNull(), // Percentage of time allocated to this project
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date").notNull(),
+  startDate: text("start_date").notNull(), // Using text for ease of handling dates in JavaScript
+  endDate: text("end_date").notNull(),
 });
+
+export const allocationsRelations = relations(allocations, ({ one }) => ({
+  teamMember: one(teamMembers, {
+    fields: [allocations.teamMemberId],
+    references: [teamMembers.id],
+  }),
+  project: one(projects, {
+    fields: [allocations.projectId],
+    references: [projects.id],
+  }),
+}));
 
 export const insertAllocationSchema = createInsertSchema(allocations).pick({
   teamMemberId: true,
@@ -91,6 +125,13 @@ export const timelinePhases = pgTable("timeline_phases", {
   durationWeeks: integer("duration_weeks").notNull(), // Number of weeks
   color: text("color").notNull(), // Phase color
 });
+
+export const timelinePhasesRelations = relations(timelinePhases, ({ one }) => ({
+  project: one(projects, {
+    fields: [timelinePhases.projectId],
+    references: [projects.id],
+  }),
+}));
 
 export const insertTimelinePhaseSchema = createInsertSchema(timelinePhases).pick({
   projectId: true,
@@ -115,3 +156,17 @@ export type InsertAllocation = z.infer<typeof insertAllocationSchema>;
 
 export type TimelinePhase = typeof timelinePhases.$inferSelect;
 export type InsertTimelinePhase = z.infer<typeof insertTimelinePhaseSchema>;
+
+// Extra types for dashboard
+export type DashboardStats = {
+  activeProjects: number;
+  teamUtilizationAvg: number;
+  completedTasks: number;
+  unassignedTasks: number;
+};
+
+export type TeamUtilization = {
+  role: string;
+  memberCount: number;
+  utilizationPercentage: number;
+};
