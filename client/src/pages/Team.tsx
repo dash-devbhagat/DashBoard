@@ -314,9 +314,9 @@ const Team: React.FC = () => {
   };
 
   const getAvailabilityStatus = (allocation: number) => {
-    if (allocation >= 100) return { label: "Fully Booked", class: "bg-red-100 text-red-800" };
-    if (allocation >= 50) return { label: "Partially Available", class: "bg-yellow-100 text-yellow-800" };
-    return { label: "Available", class: "bg-green-100 text-green-800" };
+    if (allocation >= 100) return { label: "Fully Allocated", class: "bg-green-100 text-green-800" };
+    if (allocation >= 75) return { label: "Partially Allocated", class: "bg-yellow-100 text-yellow-800" };
+    return { label: "Needs Allocation", class: "bg-red-100 text-red-800" };
   };
 
   // Filter team members based on search
@@ -483,10 +483,10 @@ const Team: React.FC = () => {
                     className="h-2"
                     indicatorClassName={
                       totalAllocation >= 100 
-                        ? "bg-red-500" 
-                        : totalAllocation >= 50 
+                        ? "bg-green-500" 
+                        : totalAllocation >= 75 
                           ? "bg-yellow-500" 
-                          : "bg-green-500"
+                          : "bg-red-500"
                     }
                   />
                 </div>

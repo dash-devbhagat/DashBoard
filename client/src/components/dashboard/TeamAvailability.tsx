@@ -22,16 +22,16 @@ const TeamAvailability: React.FC<TeamAvailabilityProps> = ({ onAssignResource })
 
   // Function to determine color based on utilization percentage
   const getUtilizationColor = (percentage: number) => {
-    if (percentage >= 80) return "bg-red-500";
-    if (percentage >= 50) return "bg-amber-500";
-    return "bg-emerald-500";
+    if (percentage >= 100) return "bg-emerald-500";
+    if (percentage >= 75) return "bg-amber-500";
+    return "bg-red-500";
   };
   
   // Function to get text color matching utilization
   const getUtilizationTextColor = (percentage: number) => {
-    if (percentage >= 80) return "text-red-600";
-    if (percentage >= 50) return "text-amber-600";
-    return "text-emerald-600";
+    if (percentage >= 100) return "text-emerald-600";
+    if (percentage >= 75) return "text-amber-600";
+    return "text-red-600";
   };
 
   if (isLoading) {
@@ -48,9 +48,9 @@ const TeamAvailability: React.FC<TeamAvailabilityProps> = ({ onAssignResource })
   }
 
   // Calculate availability stats
-  const availableCount = utilizationData?.filter(u => u.utilizationPercentage < 50).reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
-  const partialCount = utilizationData?.filter(u => u.utilizationPercentage >= 50 && u.utilizationPercentage < 80).reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
-  const fullyBookedCount = utilizationData?.filter(u => u.utilizationPercentage >= 80).reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
+  const needsAllocationCount = utilizationData?.filter(u => u.utilizationPercentage < 75).reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
+  const partialCount = utilizationData?.filter(u => u.utilizationPercentage >= 75 && u.utilizationPercentage < 100).reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
+  const fullyAllocatedCount = utilizationData?.filter(u => u.utilizationPercentage >= 100).reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
 
   return (
     <Card>
@@ -65,23 +65,23 @@ const TeamAvailability: React.FC<TeamAvailabilityProps> = ({ onAssignResource })
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-emerald-500 mr-2"></div>
-              <span className="text-sm font-medium text-emerald-700">Available</span>
+              <span className="text-sm font-medium text-emerald-700">Fully Allocated</span>
             </div>
-            <span className="text-sm font-semibold bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full">{availableCount} team members</span>
+            <span className="text-sm font-semibold bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full">{fullyAllocatedCount} team members</span>
           </div>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
-              <span className="text-sm font-medium text-amber-700">Partially Booked</span>
+              <span className="text-sm font-medium text-amber-700">Partially Allocated</span>
             </div>
             <span className="text-sm font-semibold bg-amber-50 text-amber-700 px-2 py-1 rounded-full">{partialCount} team members</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-              <span className="text-sm font-medium text-red-700">Fully Booked</span>
+              <span className="text-sm font-medium text-red-700">Needs Allocation</span>
             </div>
-            <span className="text-sm font-semibold bg-red-50 text-red-700 px-2 py-1 rounded-full">{fullyBookedCount} team members</span>
+            <span className="text-sm font-semibold bg-red-50 text-red-700 px-2 py-1 rounded-full">{needsAllocationCount} team members</span>
           </div>
         </div>
 
@@ -95,11 +95,11 @@ const TeamAvailability: React.FC<TeamAvailabilityProps> = ({ onAssignResource })
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-slate-700">{item.role}</span>
                       <span className={`text-xs font-semibold px-2 py-1 rounded-md ${getUtilizationTextColor(item.utilizationPercentage)} ${
-                        item.utilizationPercentage >= 80 
-                          ? "bg-red-50" 
-                          : item.utilizationPercentage >= 50 
+                        item.utilizationPercentage >= 100 
+                          ? "bg-emerald-50" 
+                          : item.utilizationPercentage >= 75 
                             ? "bg-amber-50" 
-                            : "bg-emerald-50"
+                            : "bg-red-50"
                       }`}>
                         {item.utilizationPercentage}% Utilized
                       </span>
