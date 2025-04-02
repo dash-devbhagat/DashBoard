@@ -39,6 +39,7 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { format, isAfter, isBefore, parseISO } from "date-fns";
+import SkillsInput from "@/components/SkillsInput";
 
 type TeamMember = {
   id: number;
@@ -46,6 +47,7 @@ type TeamMember = {
   role: string;
   avatar: string;
   availability: number;
+  skills?: string[];
 };
 
 type Allocation = {
@@ -86,6 +88,7 @@ const teamMemberFormSchema = z.object({
   role: z.string().min(1, { message: "Role is required" }),
   avatar: z.string().url({ message: "Please enter a valid URL for the avatar" }),
   availability: z.coerce.number().min(0).max(100),
+  skills: z.array(z.string()).optional().default([]),
 });
 
 type TeamMemberFormValues = z.infer<typeof teamMemberFormSchema>;
@@ -162,10 +165,10 @@ const Team: React.FC = () => {
     mutationFn: (newMember: Omit<TeamMember, "id">) => 
       apiRequest("/api/team-members", { 
         method: "POST", 
-        body: {
+        body: JSON.stringify({
           ...newMember,
           avatar: newMember.avatar || null
-        }
+        })
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
@@ -180,10 +183,10 @@ const Team: React.FC = () => {
     mutationFn: (member: Partial<TeamMember> & { id: number }) => 
       apiRequest(`/api/team-members/${member.id}`, { 
         method: "PATCH", 
-        body: {
+        body: JSON.stringify({
           ...member,
           avatar: member.avatar ?? null
-        }
+        })
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
@@ -210,7 +213,7 @@ const Team: React.FC = () => {
     mutationFn: (newAllocation: Omit<Allocation, "id">) => 
       apiRequest("/api/allocations", { 
         method: "POST", 
-        body: newAllocation
+        body: JSON.stringify(newAllocation)
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
@@ -322,7 +325,11 @@ const Team: React.FC = () => {
     return teamMembers.filter(
       member => 
         member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.role.toLowerCase().includes(searchTerm.toLowerCase())
+        member.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        // Filter by skills
+        (member.skills && member.skills.some(skill => 
+          skill.toLowerCase().includes(searchTerm.toLowerCase())
+        ))
     );
   }, [teamMembers, searchTerm]);
 
@@ -366,6 +373,7 @@ const Team: React.FC = () => {
       role: member.role,
       avatar: member.avatar,
       availability: member.availability,
+      skills: member.skills || [],
     });
     setIsEditMemberDialogOpen(true);
   };
@@ -430,7 +438,7 @@ const Team: React.FC = () => {
           <Input
             type="text"
             className="pl-10 w-full"
-            placeholder="Search by name or role..."
+            placeholder="Search by name, role, or skills..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -510,6 +518,23 @@ const Team: React.FC = () => {
                     </div>
                   )}
                 </div>
+                
+                {member.skills && member.skills.length > 0 && (
+                  <div className="mt-4 text-sm">
+                    <p className="font-medium mb-2">Skills:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {member.skills.map((skill) => (
+                        <Badge 
+                          key={skill} 
+                          variant="secondary"
+                          className="text-xs"
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 
                 <div className="mt-4 pt-4 border-t border-slate-200 flex justify-between">
                   <Button 
@@ -634,6 +659,24 @@ const Team: React.FC = () => {
                 )}
               />
               
+              <FormField
+                control={newMemberForm.control}
+                name="skills"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Skills</FormLabel>
+                    <FormControl>
+                      <SkillsInput 
+                        value={field.value || []} 
+                        onChange={field.onChange}
+                        placeholder="Type a skill and press Enter..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               <DialogFooter>
                 <Button 
                   type="button" 
@@ -744,6 +787,24 @@ const Team: React.FC = () => {
                         min={0} 
                         max={100} 
                         {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editMemberForm.control}
+                name="skills"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Skills</FormLabel>
+                    <FormControl>
+                      <SkillsInput 
+                        value={field.value || []} 
+                        onChange={field.onChange}
+                        placeholder="Type a skill and press Enter..."
                       />
                     </FormControl>
                     <FormMessage />
@@ -959,6 +1020,27 @@ const Team: React.FC = () => {
                             </CardContent>
                           </Card>
                         </div>
+                        
+                        {currentMember.skills && currentMember.skills.length > 0 && (
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-md">Skills</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="flex flex-wrap gap-2">
+                                {currentMember.skills.map((skill) => (
+                                  <Badge 
+                                    key={skill} 
+                                    variant="secondary"
+                                    className="text-sm px-3 py-1"
+                                  >
+                                    {skill}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
                         
                         <Card>
                           <CardHeader className="flex flex-row items-center justify-between">

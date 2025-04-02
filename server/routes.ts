@@ -18,7 +18,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Team Members
   app.get('/api/team-members', async (req: Request, res: Response) => {
     try {
-      const teamMembers = await storage.getTeamMembers();
+      const { skill } = req.query;
+      let teamMembers = await storage.getTeamMembers();
+      
+      // Filter by skill if provided
+      if (skill && typeof skill === 'string') {
+        teamMembers = teamMembers.filter(member => 
+          member.skills && member.skills.some(s => 
+            s.toLowerCase().includes(skill.toLowerCase())
+          )
+        );
+      }
+      
       res.json(teamMembers);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch team members" });

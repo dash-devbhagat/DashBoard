@@ -10,6 +10,7 @@ export const teamMembers = pgTable("team_members", {
   role: text("role").notNull(),
   avatar: text("avatar"),
   availability: integer("availability").notNull().default(100), // Percentage available
+  skills: text("skills").array(), // Array of skills
 });
 
 export const teamMembersRelations = relations(teamMembers, ({ many }) => ({
@@ -24,6 +25,7 @@ export const insertTeamMemberSchema = createInsertSchema(teamMembers)
     role: true,
     avatar: true,
     availability: true,
+    skills: true,
   })
   .extend({
     name: z.string()
@@ -40,6 +42,7 @@ export const insertTeamMemberSchema = createInsertSchema(teamMembers)
       .int("Availability must be a whole number")
       .min(0, "Availability cannot be negative")
       .max(100, "Availability cannot exceed 100%"),
+    skills: z.array(z.string()).optional().default([]),
   });
 
 // Project Schema
