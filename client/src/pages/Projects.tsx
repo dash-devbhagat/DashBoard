@@ -195,10 +195,10 @@ const Projects: React.FC = () => {
       
       return apiRequest<Project>("/api/projects", { 
         method: "POST", 
-        body: JSON.stringify({
+        body: {
           ...projectData,
           description: projectData.description || null
-        })
+        }
       });
     },
     onSuccess: () => {
@@ -215,10 +215,10 @@ const Projects: React.FC = () => {
       
       return apiRequest<Project>(`/api/projects/${projectData.id}`, { 
         method: "PATCH", 
-        body: JSON.stringify({
+        body: {
           ...projectData,
           description: projectData.description || null
-        })
+        }
       });
     },
     onSuccess: () => {
@@ -324,7 +324,7 @@ const Projects: React.FC = () => {
     mutationFn: (newAllocation: Omit<Allocation, "id">) => 
       apiRequest<Allocation>("/api/allocations", { 
         method: "POST", 
-        body: JSON.stringify(newAllocation)
+        body: newAllocation
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
