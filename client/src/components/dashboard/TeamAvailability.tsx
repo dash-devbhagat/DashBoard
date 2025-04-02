@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 type TeamUtilization = {
   role: string;
@@ -21,9 +22,16 @@ const TeamAvailability: React.FC<TeamAvailabilityProps> = ({ onAssignResource })
 
   // Function to determine color based on utilization percentage
   const getUtilizationColor = (percentage: number) => {
-    if (percentage >= 80) return "bg-danger";
-    if (percentage >= 50) return "bg-warning";
-    return "bg-success";
+    if (percentage >= 80) return "bg-red-500";
+    if (percentage >= 50) return "bg-amber-500";
+    return "bg-emerald-500";
+  };
+  
+  // Function to get text color matching utilization
+  const getUtilizationTextColor = (percentage: number) => {
+    if (percentage >= 80) return "text-red-600";
+    if (percentage >= 50) return "text-amber-600";
+    return "text-emerald-600";
   };
 
   if (isLoading) {
@@ -53,45 +61,59 @@ const TeamAvailability: React.FC<TeamAvailabilityProps> = ({ onAssignResource })
         </Button>
       </CardHeader>
       <CardContent className="p-5">
-        <div className="mb-4">
-          <div className="flex items-center justify-between mb-2">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
-              <div className="w-2 h-2 rounded-full bg-success mr-2"></div>
-              <span className="text-sm text-slate-700">Available</span>
+              <div className="w-3 h-3 rounded-full bg-emerald-500 mr-2"></div>
+              <span className="text-sm font-medium text-emerald-700">Available</span>
             </div>
-            <span className="text-sm font-medium">{availableCount} team members</span>
+            <span className="text-sm font-semibold bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full">{availableCount} team members</span>
           </div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
-              <div className="w-2 h-2 rounded-full bg-warning mr-2"></div>
-              <span className="text-sm text-slate-700">Partially Available</span>
+              <div className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
+              <span className="text-sm font-medium text-amber-700">Partially Booked</span>
             </div>
-            <span className="text-sm font-medium">{partialCount} team members</span>
+            <span className="text-sm font-semibold bg-amber-50 text-amber-700 px-2 py-1 rounded-full">{partialCount} team members</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <div className="w-2 h-2 rounded-full bg-danger mr-2"></div>
-              <span className="text-sm text-slate-700">Fully Booked</span>
+              <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+              <span className="text-sm font-medium text-red-700">Fully Booked</span>
             </div>
-            <span className="text-sm font-medium">{fullyBookedCount} team members</span>
+            <span className="text-sm font-semibold bg-red-50 text-red-700 px-2 py-1 rounded-full">{fullyBookedCount} team members</span>
           </div>
         </div>
 
         <div className="mt-6">
           <div className="chart-container">
-            <div className="bg-slate-100 rounded-lg p-4 h-full flex flex-col justify-center items-center">
+            <div className="bg-slate-50 rounded-xl p-5 shadow-inner h-full">
+              <h3 className="text-sm font-semibold mb-4 text-slate-800">Utilization by Role</h3>
               <div className="w-full">
                 {utilizationData?.map((item, index) => (
-                  <div key={index} className="mb-4 last:mb-0">
-                    <div className="flex items-center justify-between mb-2 text-xs text-slate-500">
-                      <span>{item.role}</span>
-                      <span>{item.memberCount} members</span>
+                  <div key={index} className="mb-5 last:mb-0">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-slate-700">{item.role}</span>
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-md ${getUtilizationTextColor(item.utilizationPercentage)} ${
+                        item.utilizationPercentage >= 80 
+                          ? "bg-red-50" 
+                          : item.utilizationPercentage >= 50 
+                            ? "bg-amber-50" 
+                            : "bg-emerald-50"
+                      }`}>
+                        {item.utilizationPercentage}% Utilized
+                      </span>
                     </div>
-                    <Progress 
-                      value={item.utilizationPercentage} 
-                      className="h-2.5 bg-slate-200"
-                      indicatorClassName={getUtilizationColor(item.utilizationPercentage)}
-                    />
+                    <div className="relative">
+                      <Progress 
+                        value={item.utilizationPercentage} 
+                        className="h-3 bg-slate-200"
+                        indicatorClassName={getUtilizationColor(item.utilizationPercentage)}
+                      />
+                      <span className="absolute -right-1 -top-1 bg-white text-xs text-slate-600 px-1 rounded border border-slate-200">
+                        {item.memberCount} members
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -99,13 +121,13 @@ const TeamAvailability: React.FC<TeamAvailabilityProps> = ({ onAssignResource })
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-slate-200">
+        <div className="mt-6 pt-4 border-t border-slate-200">
           <Button 
-            className="w-full py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center"
+            className="w-full py-2.5 bg-gradient-to-r from-primary to-indigo-500 text-white rounded-lg hover:shadow-md transition-all duration-200 flex items-center justify-center"
             onClick={onAssignResource}
           >
-            <span className="material-icons mr-2 text-sm">add</span>
-            <span>Assign New Resource</span>
+            <span className="material-icons mr-2 text-sm">person_add</span>
+            <span className="font-medium">Assign New Resource</span>
           </Button>
         </div>
       </CardContent>
