@@ -91,19 +91,51 @@ type TimelinePhase = {
   color: string;
 };
 
-// Form schema for project creation and editing
+// Form schema for project creation and editing with enhanced validations
 const projectFormSchema = z.object({
-  name: z.string().min(1, { message: "Project name is required" }),
-  status: z.string(),
-  startDate: z.string().min(1, { message: "Start date is required" }),
-  endDate: z.string().min(1, { message: "End date is required" }),
-  description: z.string().optional(),
-  color: z.string().min(1, { message: "Color is required" }),
+  name: z.string()
+    .min(3, { message: "Project name must be at least 3 characters" })
+    .max(100, { message: "Project name cannot exceed 100 characters" })
+    .refine(val => /^[a-zA-Z0-9\s\-_]+$/.test(val), {
+      message: "Project name must contain only alphanumeric characters, spaces, hyphens, and underscores"
+    }),
+  status: z.enum(["active", "completed", "pending"], {
+    errorMap: () => ({ message: "Status must be one of: active, completed, pending" }),
+  }),
+  startDate: z.string()
+    .min(1, { message: "Start date is required" })
+    .refine(val => /^\d{4}-\d{2}-\d{2}$/.test(val), {
+      message: "Start date must be in the format YYYY-MM-DD",
+    }),
+  endDate: z.string()
+    .min(1, { message: "End date is required" })
+    .refine(val => /^\d{4}-\d{2}-\d{2}$/.test(val), {
+      message: "End date must be in the format YYYY-MM-DD",
+    }),
+  description: z.string().max(500, { message: "Description cannot exceed 500 characters" }).nullable().optional(),
+  color: z.string()
+    .min(1, { message: "Color is required" })
+    .refine(val => /^#[0-9A-Fa-f]{6}$/.test(val), {
+      message: "Color must be a valid hex code (e.g., #2563eb)",
+    }),
   teamAllocations: z.array(z.object({
-    teamMemberId: z.number(),
-    percentage: z.number().min(1).max(100),
+    teamMemberId: z.number().int().positive("Team member must be selected"),
+    percentage: z.number().min(1, "Allocation must be at least 1%").max(100, "Allocation cannot exceed 100%"),
   })).optional(),
-});
+}).refine(
+  data => {
+    if (data.startDate && data.endDate) {
+      const start = new Date(data.startDate);
+      const end = new Date(data.endDate);
+      return start <= end;
+    }
+    return true;
+  },
+  {
+    message: "End date must be after or equal to start date",
+    path: ["endDate"],
+  }
+);
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
 
@@ -157,16 +189,16 @@ const Projects: React.FC = () => {
 
   // Create project mutation
   const createProjectMutation = useMutation({
-    mutationFn: (newProject: Omit<Project, "id">) => {
+    mutationFn: (newProject: ProjectFormValues) => {
       // Extract team allocations before sending to API
-      const { teamAllocations, ...projectData } = newProject as any;
+      const { teamAllocations, ...projectData } = newProject;
       
-      return apiRequest("/api/projects", { 
+      return apiRequest<Project>("/api/projects", { 
         method: "POST", 
-        body: {
+        body: JSON.stringify({
           ...projectData,
           description: projectData.description || null
-        }
+        })
       });
     },
     onSuccess: () => {
@@ -177,16 +209,16 @@ const Projects: React.FC = () => {
 
   // Update project mutation
   const updateProjectMutation = useMutation({
-    mutationFn: (project: Partial<Project> & { id: number }) => {
+    mutationFn: (project: ProjectFormValues & { id: number }) => {
       // Extract team allocations before sending to API
-      const { teamAllocations, ...projectData } = project as any;
+      const { teamAllocations, ...projectData } = project;
       
-      return apiRequest(`/api/projects/${projectData.id}`, { 
+      return apiRequest<Project>(`/api/projects/${projectData.id}`, { 
         method: "PATCH", 
-        body: {
+        body: JSON.stringify({
           ...projectData,
-          description: projectData.description ?? null
-        }
+          description: projectData.description || null
+        })
       });
     },
     onSuccess: () => {
@@ -250,7 +282,13 @@ const Projects: React.FC = () => {
     if (!allocations) return [];
     
     const projectAllocations = allocations.filter(a => a.projectId === projectId);
-    const memberIds = [...new Set(projectAllocations.map(a => a.teamMemberId))];
+    // Use array.reduce instead of Set to ensure compatibility
+    const memberIds = projectAllocations.reduce((acc: number[], alloc) => {
+      if (!acc.includes(alloc.teamMemberId)) {
+        acc.push(alloc.teamMemberId);
+      }
+      return acc;
+    }, []);
     
     return teamMembers?.filter(member => memberIds.includes(member.id)) || [];
   };
@@ -284,9 +322,9 @@ const Projects: React.FC = () => {
   // Create allocation mutation
   const createAllocationMutation = useMutation({
     mutationFn: (newAllocation: Omit<Allocation, "id">) => 
-      apiRequest("/api/allocations", { 
+      apiRequest<Allocation>("/api/allocations", { 
         method: "POST", 
-        body: newAllocation
+        body: JSON.stringify(newAllocation)
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
@@ -376,7 +414,7 @@ const Projects: React.FC = () => {
     
     editProjectForm.reset({
       name: project.name,
-      status: project.status,
+      status: project.status as "active" | "completed" | "pending",
       startDate: project.startDate,
       endDate: project.endDate,
       description: project.description || "",
@@ -570,6 +608,7 @@ const Projects: React.FC = () => {
                         placeholder="Describe the project"
                         className="resize-none"
                         {...field} 
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />
@@ -721,6 +760,7 @@ const Projects: React.FC = () => {
                         placeholder="Describe the project"
                         className="resize-none"
                         {...field} 
+                        value={field.value || ""}
                       />
                     </FormControl>
                     <FormMessage />

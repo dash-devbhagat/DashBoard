@@ -52,7 +52,20 @@ export async function seed() {
   console.log('Seeding database with initial data...');
   
   try {
-    // Team Members
+    // Clear the existing data if needed (but keep foreign key constraints)
+    // This is done to ensure a fresh start without conflicts
+    try {
+      await db.delete(timelinePhases);
+      await db.delete(allocations);
+      await db.delete(tasks);
+      await db.delete(projects);
+      await db.delete(teamMembers);
+    } catch (deleteError) {
+      console.log('Error clearing existing data (continuing anyway):', deleteError);
+    }
+
+    // 1. First insert team members
+    console.log('Seeding team members...');
     await db.insert(teamMembers).values([
       { name: "Sarah Johnson", role: "UI Designer", avatar: "https://randomuser.me/api/portraits/women/44.jpg", availability: 60 },
       { name: "Michael Chen", role: "Full Stack Developer", avatar: "https://randomuser.me/api/portraits/men/32.jpg", availability: 20 },
@@ -64,21 +77,75 @@ export async function seed() {
       { name: "Ethan Wilson", role: "Backend Developer", avatar: "https://randomuser.me/api/portraits/men/54.jpg", availability: 25 }
     ]).onConflictDoNothing();
     
-    // Projects
+    // 2. Then insert projects
+    console.log('Seeding projects...');
     const projectValues = [
-      { name: "E-commerce Redesign", status: "active", startDate: "2023-06-01", endDate: "2023-12-15", description: "Redesign the user interface and improve UX for the e-commerce platform", color: "#4361ee" },
-      { name: "API Integration", status: "active", startDate: "2023-07-15", endDate: "2023-10-30", description: "Integrate third-party APIs for payment processing and shipping", color: "#3a86ff" },
-      { name: "Mobile App Development", status: "active", startDate: "2023-08-01", endDate: "2024-01-31", description: "Develop a native mobile app for iOS and Android", color: "#7209b7" },
-      { name: "Database Migration", status: "pending", startDate: "2023-11-01", endDate: "2024-02-28", description: "Migrate from SQL to NoSQL database for better scalability", color: "#f72585" },
-      { name: "DevOps Implementation", status: "active", startDate: "2023-09-01", endDate: "2024-03-31", description: "Implement CI/CD pipeline and containerization", color: "#4cc9f0" },
-      { name: "Security Audit", status: "completed", startDate: "2023-05-01", endDate: "2023-07-31", description: "Conduct security audit and implement recommendations", color: "#560bad" }
+      { 
+        id: 1, // Explicitly set IDs to ensure consistency
+        name: "E-commerce Redesign", 
+        status: "active", 
+        startDate: "2023-06-01", 
+        endDate: "2023-12-15", 
+        description: "Redesign the user interface and improve UX for the e-commerce platform", 
+        color: "#4361ee" 
+      },
+      { 
+        id: 2,
+        name: "API Integration", 
+        status: "active", 
+        startDate: "2023-07-15", 
+        endDate: "2023-10-30", 
+        description: "Integrate third-party APIs for payment processing and shipping", 
+        color: "#3a86ff" 
+      },
+      { 
+        id: 3,
+        name: "Mobile App Development", 
+        status: "active", 
+        startDate: "2023-08-01", 
+        endDate: "2024-01-31", 
+        description: "Develop a native mobile app for iOS and Android", 
+        color: "#7209b7" 
+      },
+      { 
+        id: 4,
+        name: "Database Migration", 
+        status: "pending", 
+        startDate: "2023-11-01", 
+        endDate: "2024-02-28", 
+        description: "Migrate from SQL to NoSQL database for better scalability", 
+        color: "#f72585" 
+      },
+      { 
+        id: 5,
+        name: "DevOps Implementation", 
+        status: "active", 
+        startDate: "2023-09-01", 
+        endDate: "2024-03-31", 
+        description: "Implement CI/CD pipeline and containerization", 
+        color: "#4cc9f0" 
+      },
+      { 
+        id: 6,
+        name: "Security Audit", 
+        status: "completed", 
+        startDate: "2023-05-01", 
+        endDate: "2023-07-31", 
+        description: "Conduct security audit and implement recommendations", 
+        color: "#560bad" 
+      }
     ];
     
     for (const project of projectValues) {
       await db.insert(projects).values(project).onConflictDoNothing();
     }
     
-    // Tasks
+    // Get the inserted projects to confirm they exist
+    const insertedProjects = await db.select().from(projects);
+    console.log(`Inserted ${insertedProjects.length} projects`);
+    
+    // 3. Now we can insert tasks that reference these projects
+    console.log('Seeding tasks...');
     const taskValues = [
       { title: "UI Component Library", description: "Create a reusable component library for the e-commerce platform", priority: "high", status: "in-progress", estimatedHours: 40, dueDate: "2023-08-15", category: "frontend", projectId: 1, assigneeId: 1 },
       { title: "Database Schema Design", description: "Design the database schema for the new NoSQL structure", priority: "medium", status: "not-started", estimatedHours: 20, dueDate: "2023-11-15", category: "backend", projectId: 4, assigneeId: 4 },
@@ -93,7 +160,8 @@ export async function seed() {
       await db.insert(tasks).values(task).onConflictDoNothing();
     }
     
-    // Allocations
+    // 4. Insert allocations
+    console.log('Seeding allocations...');
     const allocationValues = [
       { teamMemberId: 1, projectId: 1, percentage: 60, startDate: "2023-06-01", endDate: "2023-09-30" },
       { teamMemberId: 2, projectId: 2, percentage: 80, startDate: "2023-07-15", endDate: "2023-10-30" },
@@ -110,7 +178,8 @@ export async function seed() {
       await db.insert(allocations).values(allocation).onConflictDoNothing();
     }
     
-    // Timeline Phases
+    // 5. Insert timeline phases
+    console.log('Seeding timeline phases...');
     const phaseValues = [
       { projectId: 1, name: "Planning", startWeek: 1, durationWeeks: 3, color: "#4361ee" },
       { projectId: 1, name: "Design", startWeek: 4, durationWeeks: 6, color: "#3a0ca3" },
