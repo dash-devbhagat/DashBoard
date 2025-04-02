@@ -153,7 +153,13 @@ const Projects: React.FC = () => {
   // Create project mutation
   const createProjectMutation = useMutation({
     mutationFn: (newProject: Omit<Project, "id">) => 
-      apiRequest("/api/projects", { method: "POST", body: JSON.stringify(newProject) }),
+      apiRequest("/api/projects", { 
+        method: "POST", 
+        body: {
+          ...newProject,
+          description: newProject.description || null
+        }
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
@@ -167,7 +173,10 @@ const Projects: React.FC = () => {
     mutationFn: (project: Partial<Project> & { id: number }) => 
       apiRequest(`/api/projects/${project.id}`, { 
         method: "PATCH", 
-        body: JSON.stringify(project) 
+        body: {
+          ...project,
+          description: project.description ?? null
+        }
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
