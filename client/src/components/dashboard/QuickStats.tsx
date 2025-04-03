@@ -9,8 +9,8 @@ const QuickStats: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {[...Array(4)].map((_, i) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+        {[...Array(6)].map((_, i) => (
           <Card key={i} className="p-5 animate-pulse">
             <div className="h-20 bg-slate-200 rounded"></div>
           </Card>
@@ -27,6 +27,7 @@ const QuickStats: React.FC = () => {
       iconBg: "bg-blue-100",
       iconColor: "text-primary",
       trend: { value: "8%", direction: "up", text: "from last month" },
+      colSpan: "col-span-1",
     },
     {
       title: "Team Utilization",
@@ -35,6 +36,25 @@ const QuickStats: React.FC = () => {
       iconBg: "bg-indigo-100",
       iconColor: "text-accent",
       trend: { value: "4%", direction: "up", text: "from last month" },
+      colSpan: "col-span-1",
+    },
+    {
+      title: "Unallocated Team",
+      value: stats?.zeroAllocationCount ?? 0,
+      icon: "person_off",
+      iconBg: "bg-red-100",
+      iconColor: "text-danger",
+      trend: { value: "", direction: "none", text: "Team members with 0% allocation" },
+      colSpan: "col-span-1",
+    },
+    {
+      title: "Fully Allocated",
+      value: stats?.fullyAllocatedCount ?? 0,
+      icon: "person_check",
+      iconBg: "bg-green-100",
+      iconColor: "text-success",
+      trend: { value: "", direction: "none", text: "Team members with 100%+ allocation" },
+      colSpan: "col-span-1",
     },
     {
       title: "Tasks Completed",
@@ -43,6 +63,7 @@ const QuickStats: React.FC = () => {
       iconBg: "bg-green-100",
       iconColor: "text-success",
       trend: { value: "3%", direction: "down", text: "from last month" },
+      colSpan: "col-span-1",
     },
     {
       title: "Unassigned Tasks",
@@ -50,14 +71,15 @@ const QuickStats: React.FC = () => {
       icon: "assignment_late",
       iconBg: "bg-yellow-100",
       iconColor: "text-warning",
-      trend: { value: "", direction: "none", text: "Same as last month" },
+      trend: { value: "", direction: "none", text: "Tasks without assigned resources" },
+      colSpan: "col-span-1",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
       {statCards.map((card, index) => (
-        <Card key={index} className="bg-white p-5">
+        <Card key={index} className={`bg-white p-5 ${card.colSpan}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500">{card.title}</p>
@@ -74,8 +96,8 @@ const QuickStats: React.FC = () => {
                   ? "text-success"
                   : card.trend.direction === "down"
                   ? "text-danger"
-                  : "text-warning"
-              } font-medium flex items-center`}
+                  : "text-muted-foreground"
+              } font-medium flex items-center text-xs`}
             >
               {card.trend.direction !== "none" && (
                 <span className="material-icons text-sm mr-1">
@@ -83,7 +105,7 @@ const QuickStats: React.FC = () => {
                 </span>
               )}
               {card.trend.direction === "none" ? (
-                <span className="material-icons text-sm mr-1">remove</span>
+                ""
               ) : (
                 card.trend.value
               )}{" "}

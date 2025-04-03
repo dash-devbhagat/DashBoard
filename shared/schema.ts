@@ -305,6 +305,8 @@ export type DashboardStats = {
   teamUtilizationAvg: number;
   completedTasks: number;
   unassignedTasks: number;
+  zeroAllocationCount: number; // Count of team members with 0% allocation
+  fullyAllocatedCount: number; // Count of team members with 100% or more allocation
 };
 
 export type TeamUtilization = {

@@ -269,6 +269,11 @@ export class MemStorage implements IStorage {
 
     let totalUtilization = 0;
     const teamMembers = Array.from(this.teamMembers.values());
+    
+    // Team member allocation stats
+    let zeroAllocationCount = 0;
+    let fullyAllocatedCount = 0;
+    
     teamMembers.forEach(member => {
       const memberAllocations = Array.from(this.allocations.values()).filter(
         allocation => allocation.teamMemberId === member.id
@@ -277,8 +282,19 @@ export class MemStorage implements IStorage {
         (sum, allocation) => sum + allocation.percentage, 
         0
       );
+      
       totalUtilization += utilizationSum;
+      
+      // Track zero allocation and fully allocated members
+      if (utilizationSum === 0) {
+        zeroAllocationCount++;
+      }
+      
+      if (utilizationSum >= 100) {
+        fullyAllocatedCount++;
+      }
     });
+    
     const teamUtilizationAvg = teamMembers.length > 0 
       ? Math.min(100, Math.round(totalUtilization / teamMembers.length)) 
       : 0;
@@ -295,7 +311,9 @@ export class MemStorage implements IStorage {
       activeProjects,
       teamUtilizationAvg,
       completedTasks,
-      unassignedTasks
+      unassignedTasks,
+      zeroAllocationCount,
+      fullyAllocatedCount
     };
   }
 
@@ -750,11 +768,15 @@ export class DatabaseStorage implements IStorage {
       .where(eq(projects.status, 'active'));
     const activeProjects = activeProjectsResult[0].count;
     
-    // Get team utilization average
+    // Get team utilization average and allocation statistics
     const allAllocations = await db.select().from(allocations);
     const allTeamMembers = await db.select().from(teamMembers);
     
     let totalUtilization = 0;
+    let zeroAllocationCount = 0;
+    let fullyAllocatedCount = 0;
+    
+    // Calculate allocation statistics for each team member
     allTeamMembers.forEach(member => {
       const memberAllocations = allAllocations.filter(
         allocation => allocation.teamMemberId === member.id
@@ -763,7 +785,17 @@ export class DatabaseStorage implements IStorage {
         (sum, allocation) => sum + allocation.percentage, 
         0
       );
+      
       totalUtilization += utilizationSum;
+      
+      // Track zero allocation and fully allocated members
+      if (utilizationSum === 0) {
+        zeroAllocationCount++;
+      }
+      
+      if (utilizationSum >= 100) {
+        fullyAllocatedCount++;
+      }
     });
     
     const teamUtilizationAvg = allTeamMembers.length > 0 
@@ -788,7 +820,9 @@ export class DatabaseStorage implements IStorage {
       activeProjects,
       teamUtilizationAvg,
       completedTasks,
-      unassignedTasks
+      unassignedTasks,
+      zeroAllocationCount,
+      fullyAllocatedCount
     };
   }
 
