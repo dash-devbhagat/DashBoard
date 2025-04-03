@@ -180,7 +180,10 @@ const Team: React.FC = () => {
       
       return apiRequest("/api/team-members", { 
         method: "POST", 
-        body: memberData
+        body: JSON.stringify(memberData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {
@@ -205,7 +208,10 @@ const Team: React.FC = () => {
       
       return apiRequest(`/api/team-members/${member.id}`, { 
         method: "PATCH", 
-        body: memberData
+        body: JSON.stringify(memberData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {
@@ -242,7 +248,10 @@ const Team: React.FC = () => {
       
       return apiRequest<Allocation>("/api/allocations", { 
         method: "POST", 
-        body: allocationData
+        body: JSON.stringify(allocationData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {
@@ -277,7 +286,10 @@ const Team: React.FC = () => {
       
       return apiRequest(`/api/allocations/${allocation.id}`, { 
         method: "PATCH", 
-        body: allocationData
+        body: JSON.stringify(allocationData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {
@@ -584,14 +596,14 @@ const Team: React.FC = () => {
           {/* Role Filter */}
           <div>
             <Select 
-              value={filterRole || ""} 
-              onValueChange={value => setFilterRole(value === "" ? null : value)}
+              value={filterRole || "all-roles"} 
+              onValueChange={value => setFilterRole(value === "all-roles" ? null : value)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filter by Role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Roles</SelectItem>
+                <SelectItem value="all-roles">All Roles</SelectItem>
                 {availableRoles.map(role => (
                   <SelectItem key={role} value={role}>{role}</SelectItem>
                 ))}
@@ -602,14 +614,14 @@ const Team: React.FC = () => {
           {/* Skills Filter */}
           <div>
             <Select 
-              value={filterSkill || ""} 
-              onValueChange={value => setFilterSkill(value === "" ? null : value)}
+              value={filterSkill || "all-skills"} 
+              onValueChange={value => setFilterSkill(value === "all-skills" ? null : value)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filter by Skill" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Skills</SelectItem>
+                <SelectItem value="all-skills">All Skills</SelectItem>
                 {allSkills.map(skill => (
                   <SelectItem key={skill} value={skill}>{skill}</SelectItem>
                 ))}
@@ -620,14 +632,14 @@ const Team: React.FC = () => {
           {/* Project Filter */}
           <div>
             <Select 
-              value={filterProject?.toString() || ""} 
-              onValueChange={value => setFilterProject(value === "" ? null : parseInt(value))}
+              value={filterProject?.toString() || "all-projects"} 
+              onValueChange={value => setFilterProject(value === "all-projects" ? null : parseInt(value))}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filter by Project" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Projects</SelectItem>
+                <SelectItem value="all-projects">All Projects</SelectItem>
                 {activeProjects.map(project => (
                   <SelectItem key={project.id} value={project.id.toString()}>
                     {project.name}
@@ -640,14 +652,14 @@ const Team: React.FC = () => {
           {/* Allocation Filter */}
           <div>
             <Select 
-              value={filterAllocation || ""} 
-              onValueChange={value => setFilterAllocation(value === "" ? null : value)}
+              value={filterAllocation || "all-allocations"} 
+              onValueChange={value => setFilterAllocation(value === "all-allocations" ? null : value)}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filter by Allocation" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Allocations</SelectItem>
+                <SelectItem value="all-allocations">All Allocations</SelectItem>
                 <SelectItem value="fully-allocated">Fully Allocated (≥100%)</SelectItem>
                 <SelectItem value="partially-allocated">Partially Allocated (75-99%)</SelectItem>
                 <SelectItem value="needs-allocation">Needs Allocation (0-74%)</SelectItem>
