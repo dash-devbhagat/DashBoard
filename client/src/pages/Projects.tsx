@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
+import { format, parse, isWithinInterval } from "date-fns";
 import { 
   Dialog, 
   DialogContent, 
@@ -29,6 +29,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -158,6 +163,14 @@ const Projects: React.FC = () => {
   const [isProjectDetailDialogOpen, setIsProjectDetailDialogOpen] = useState(false);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [selectedTab, setSelectedTab] = useState("overview");
+  
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<{startDate: string | null, endDate: string | null}>({
+    startDate: null,
+    endDate: null
+  });
 
   // Queries
   const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
@@ -460,6 +473,34 @@ const Projects: React.FC = () => {
       deleteProjectMutation.mutate(currentProject.id);
     }
   };
+  
+  // Filter projects based on search query and filters
+  const filteredProjects = projects?.filter(project => {
+    // Apply search filter
+    const matchesSearch = searchQuery === "" || 
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    // Apply status filter
+    const matchesStatus = statusFilter === null || project.status === statusFilter;
+    
+    // Apply date filters
+    let matchesDateFilter = true;
+    
+    if (dateFilter.startDate) {
+      const filterStartDate = new Date(dateFilter.startDate);
+      const projectStartDate = new Date(project.startDate);
+      matchesDateFilter = matchesDateFilter && projectStartDate >= filterStartDate;
+    }
+    
+    if (dateFilter.endDate) {
+      const filterEndDate = new Date(dateFilter.endDate);
+      const projectEndDate = new Date(project.endDate);
+      matchesDateFilter = matchesDateFilter && projectEndDate <= filterEndDate;
+    }
+    
+    return matchesSearch && matchesStatus && matchesDateFilter;
+  }) || [];
 
   // Loading state
   if (isLoading) {
@@ -484,9 +525,96 @@ const Projects: React.FC = () => {
           New Project
         </Button>
       </div>
+      
+      {/* Search and Filter Controls */}
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Search Input */}
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 material-icons text-sm">search</span>
+          <Input
+            className="pl-10"
+            placeholder="Search projects..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        
+        {/* Status Filter */}
+        <Select 
+          value={statusFilter || ""}
+          onValueChange={(value) => setStatusFilter(value === "" ? null : value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Statuses</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+          </SelectContent>
+        </Select>
+        
+        {/* Date Filter */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="w-full justify-start text-left font-normal">
+              <span className="material-icons mr-2 text-sm">date_range</span>
+              {dateFilter.startDate || dateFilter.endDate 
+                ? `${dateFilter.startDate ? format(new Date(dateFilter.startDate), "MMM d, yyyy") : "Any start"} - ${dateFilter.endDate ? format(new Date(dateFilter.endDate), "MMM d, yyyy") : "Any end"}`
+                : "Filter by date range"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-4" align="end">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <h4 className="font-medium">Date Range</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="grid gap-1">
+                    <label className="text-sm font-medium">Start Date</label>
+                    <Input
+                      type="date"
+                      value={dateFilter.startDate || ""}
+                      onChange={(e) => setDateFilter(prev => ({...prev, startDate: e.target.value || null}))}
+                    />
+                  </div>
+                  <div className="grid gap-1">
+                    <label className="text-sm font-medium">End Date</label>
+                    <Input
+                      type="date"
+                      value={dateFilter.endDate || ""}
+                      onChange={(e) => setDateFilter(prev => ({...prev, endDate: e.target.value || null}))}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-end space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setDateFilter({startDate: null, endDate: null})}
+                >
+                  Reset
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={() => document.body.click()} // Close the popover
+                >
+                  Apply
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      {/* Results count */}
+      <div className="mb-4 text-sm text-slate-500">
+        {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'} found
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects?.map((project) => (
+        {filteredProjects.map((project) => (
           <Card 
             key={project.id} 
             className="overflow-hidden hover:shadow-md transition-shadow duration-300"
