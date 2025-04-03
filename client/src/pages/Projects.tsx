@@ -541,14 +541,14 @@ const Projects: React.FC = () => {
         
         {/* Status Filter */}
         <Select 
-          value={statusFilter || ""}
-          onValueChange={(value) => setStatusFilter(value === "" ? null : value)}
+          value={statusFilter || "all"}
+          onValueChange={(value) => setStatusFilter(value === "all" ? null : value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Statuses</SelectItem>
+            <SelectItem value="all">All Statuses</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
