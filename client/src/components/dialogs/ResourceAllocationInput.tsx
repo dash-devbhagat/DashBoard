@@ -21,7 +21,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { 
   useFieldArray,
   type Control,
-  useWatch
+  useWatch,
+  useFormContext
 } from "react-hook-form";
 import { Separator } from "@/components/ui/separator";
 
@@ -93,6 +94,19 @@ const ResourceAllocationInput: React.FC<ResourceAllocationInputProps> = ({
   }) as TeamAllocation[];
 
   const selectedTeamMemberIds = teamAllocationsWatch.map(alloc => alloc.teamMemberId);
+
+  // Initialize the form fields with existing allocations when in edit mode
+  useEffect(() => {
+    if (projectId && allocations && allocations.length > 0 && fields.length === 0) {
+      // Clear any existing fields first (shouldn't be necessary, but just to be safe)
+      allocations.forEach(allocation => {
+        append({
+          teamMemberId: allocation.teamMemberId,
+          percentage: allocation.percentage,
+        });
+      });
+    }
+  }, [projectId, allocations, fields.length, append]);
 
   const handleAdd = () => {
     append({

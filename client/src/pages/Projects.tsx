@@ -191,12 +191,15 @@ const Projects: React.FC = () => {
       // Extract team allocations before sending to API
       const { teamAllocations, ...projectData } = newProject;
       
+      // Construct the project data object to send to the API
+      const projectToCreate = {
+        ...projectData,
+        description: projectData.description || null
+      };
+      
       return apiRequest<Project>("/api/projects", { 
         method: "POST", 
-        body: {
-          ...projectData,
-          description: projectData.description || null
-        }
+        body: projectToCreate
       });
     },
     onSuccess: () => {
@@ -211,12 +214,15 @@ const Projects: React.FC = () => {
       // Extract team allocations before sending to API
       const { teamAllocations, ...projectData } = project;
       
+      // Construct the project data object to send to the API
+      const projectToUpdate = {
+        ...projectData,
+        description: projectData.description || null
+      };
+      
       return apiRequest<Project>(`/api/projects/${projectData.id}`, { 
         method: "PATCH", 
-        body: {
-          ...projectData,
-          description: projectData.description || null
-        }
+        body: projectToUpdate
       });
     },
     onSuccess: () => {
@@ -319,11 +325,21 @@ const Projects: React.FC = () => {
 
   // Create allocation mutation
   const createAllocationMutation = useMutation({
-    mutationFn: (newAllocation: Omit<Allocation, "id">) => 
-      apiRequest<Allocation>("/api/allocations", { 
+    mutationFn: (newAllocation: Omit<Allocation, "id">) => {
+      // Create a serializable object for the allocation
+      const allocationData = {
+        teamMemberId: newAllocation.teamMemberId,
+        projectId: newAllocation.projectId,
+        percentage: newAllocation.percentage,
+        startDate: newAllocation.startDate,
+        endDate: newAllocation.endDate
+      };
+      
+      return apiRequest<Allocation>("/api/allocations", { 
         method: "POST", 
-        body: newAllocation
-      }),
+        body: allocationData
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
@@ -370,11 +386,13 @@ const Projects: React.FC = () => {
         ...data
       });
       
-      // If there are team allocations, create them
+      // Handle team allocations
       if (data.teamAllocations && data.teamAllocations.length > 0) {
-        // Create allocations in sequence to avoid race conditions
+        // Process allocations in sequence to avoid race conditions
         for (const allocation of data.teamAllocations) {
           if (allocation.teamMemberId > 0) {
+            // The server-side logic will handle checking if this allocation already exists
+            // and update it instead of creating a duplicate
             await createAllocationMutation.mutateAsync({
               teamMemberId: allocation.teamMemberId,
               projectId: currentProject.id,
@@ -386,7 +404,10 @@ const Projects: React.FC = () => {
         }
       }
       
+      // Successfully updated, close dialog and show toast
       setIsEditProjectDialogOpen(false);
+      editProjectForm.reset(); // Reset form state
+      
     } catch (error) {
       console.error("Error updating project:", error);
     }
