@@ -824,6 +824,7 @@ const Projects: React.FC = () => {
                   control={editProjectForm.control} 
                   name="teamAllocations" 
                   disabled={updateProjectMutation.isPending}
+                  projectId={currentProject?.id}
                 />
               </div>
               

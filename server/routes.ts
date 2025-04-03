@@ -423,6 +423,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/allocations', async (req: Request, res: Response) => {
     try {
       const validatedData = insertAllocationSchema.parse(req.body);
+      
+      // Check if an allocation already exists for this team member and project
+      const existingAllocations = await storage.getAllocationsByProject(validatedData.projectId);
+      const existingAllocation = existingAllocations.find(
+        a => a.teamMemberId === validatedData.teamMemberId
+      );
+      
+      if (existingAllocation) {
+        // Update the existing allocation with the new percentage
+        const updatedAllocation = await storage.updateAllocation(existingAllocation.id, {
+          percentage: validatedData.percentage,
+          startDate: validatedData.startDate,
+          endDate: validatedData.endDate
+        });
+        return res.status(200).json(updatedAllocation);
+      }
+      
+      // Create a new allocation if none exists
       const newAllocation = await storage.createAllocation(validatedData);
       res.status(201).json(newAllocation);
     } catch (error) {
