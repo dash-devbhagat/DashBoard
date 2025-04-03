@@ -180,7 +180,7 @@ const Team: React.FC = () => {
       
       return apiRequest("/api/team-members", { 
         method: "POST", 
-        body: JSON.stringify(memberData),
+        body: memberData,
         headers: {
           'Content-Type': 'application/json'
         }
@@ -208,7 +208,7 @@ const Team: React.FC = () => {
       
       return apiRequest(`/api/team-members/${member.id}`, { 
         method: "PATCH", 
-        body: JSON.stringify(memberData),
+        body: memberData,
         headers: {
           'Content-Type': 'application/json'
         }
@@ -248,7 +248,7 @@ const Team: React.FC = () => {
       
       return apiRequest<Allocation>("/api/allocations", { 
         method: "POST", 
-        body: JSON.stringify(allocationData),
+        body: allocationData,
         headers: {
           'Content-Type': 'application/json'
         }
@@ -286,7 +286,7 @@ const Team: React.FC = () => {
       
       return apiRequest(`/api/allocations/${allocation.id}`, { 
         method: "PATCH", 
-        body: JSON.stringify(allocationData),
+        body: allocationData,
         headers: {
           'Content-Type': 'application/json'
         }
