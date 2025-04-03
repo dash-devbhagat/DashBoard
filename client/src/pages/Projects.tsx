@@ -166,12 +166,10 @@ const Projects: React.FC = () => {
 
   const { data: teamMembers, isLoading: isLoadingTeamMembers } = useQuery<TeamMember[]>({
     queryKey: ["/api/team-members"],
-    enabled: isProjectDetailDialogOpen,
   });
 
   const { data: allocations, isLoading: isLoadingAllocations } = useQuery<Allocation[]>({
     queryKey: ["/api/allocations"],
-    enabled: isProjectDetailDialogOpen,
   });
 
   const { data: tasks, isLoading: isLoadingTasks } = useQuery<Task[]>({
@@ -184,7 +182,7 @@ const Projects: React.FC = () => {
     enabled: isProjectDetailDialogOpen,
   });
 
-  const isLoading = isLoadingProjects;
+  const isLoading = isLoadingProjects || isLoadingTeamMembers || isLoadingAllocations;
   const isDetailLoading = isLoadingTeamMembers || isLoadingAllocations || isLoadingTasks || isLoadingTimelinePhases;
 
   // Create project mutation
@@ -490,6 +488,33 @@ const Projects: React.FC = () => {
                     <span>{calculateProjectProgress(project.id)}%</span>
                   </div>
                   <Progress value={calculateProjectProgress(project.id)} className="h-1.5" />
+                </div>
+                
+                {/* Team Members */}
+                <div className="mt-2 pt-2">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span>Team</span>
+                    <span>{getProjectTeamMembers(project.id).length} members</span>
+                  </div>
+                  <div className="flex -space-x-2 overflow-hidden">
+                    {getProjectTeamMembers(project.id).slice(0, 5).map((member) => (
+                      <img
+                        key={member.id}
+                        src={member.avatar}
+                        alt={member.name}
+                        title={`${member.name} (${member.role})`}
+                        className="inline-block h-6 w-6 rounded-full ring-2 ring-white"
+                      />
+                    ))}
+                    {getProjectTeamMembers(project.id).length > 5 && (
+                      <div className="flex items-center justify-center h-6 w-6 rounded-full bg-slate-200 text-xs font-medium text-slate-600 ring-2 ring-white">
+                        +{getProjectTeamMembers(project.id).length - 5}
+                      </div>
+                    )}
+                    {getProjectTeamMembers(project.id).length === 0 && (
+                      <span className="text-xs text-slate-400">No team members assigned</span>
+                    )}
+                  </div>
                 </div>
               </div>
               
