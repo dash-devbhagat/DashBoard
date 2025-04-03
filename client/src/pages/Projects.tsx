@@ -199,10 +199,7 @@ const Projects: React.FC = () => {
       
       return apiRequest<Project>("/api/projects", { 
         method: "POST", 
-        body: JSON.stringify(projectToCreate),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        body: projectToCreate
       });
     },
     onSuccess: () => {
@@ -225,10 +222,7 @@ const Projects: React.FC = () => {
       
       return apiRequest<Project>(`/api/projects/${projectData.id}`, { 
         method: "PATCH", 
-        body: JSON.stringify(projectToUpdate),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        body: projectToUpdate
       });
     },
     onSuccess: () => {
@@ -343,10 +337,7 @@ const Projects: React.FC = () => {
       
       return apiRequest<Allocation>("/api/allocations", { 
         method: "POST", 
-        body: JSON.stringify(allocationData),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        body: allocationData
       });
     },
     onSuccess: () => {
