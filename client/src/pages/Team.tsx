@@ -132,6 +132,10 @@ const defaultAvatars = [
 const Team: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterRole, setFilterRole] = useState<string | null>(null);
+  const [filterSkill, setFilterSkill] = useState<string | null>(null);
+  const [filterProject, setFilterProject] = useState<number | null>(null);
+  const [filterAllocation, setFilterAllocation] = useState<string | null>(null);
   const [isNewMemberDialogOpen, setIsNewMemberDialogOpen] = useState(false);
   const [isEditMemberDialogOpen, setIsEditMemberDialogOpen] = useState(false);
   const [isMemberDetailDialogOpen, setIsMemberDetailDialogOpen] = useState(false);
@@ -381,19 +385,64 @@ const Team: React.FC = () => {
     return { label: "Needs Allocation", class: "bg-red-100 text-red-800" };
   };
 
-  // Filter team members based on search
+  // Extract all skills from team members
+  const allSkills = React.useMemo(() => {
+    if (!teamMembers) return [];
+    const skillsSet = new Set<string>();
+    teamMembers.forEach(member => {
+      if (member.skills) {
+        member.skills.forEach(skill => skillsSet.add(skill));
+      }
+    });
+    return Array.from(skillsSet).sort();
+  }, [teamMembers]);
+
+  // Extract all active projects
+  const activeProjects = React.useMemo(() => {
+    if (!projects) return [];
+    return projects.filter(project => project.status === "active");
+  }, [projects]);
+
+  // Filter team members based on all criteria
   const filteredTeamMembers = React.useMemo(() => {
     if (!teamMembers) return [];
-    return teamMembers.filter(
-      member => 
+    
+    return teamMembers.filter(member => {
+      // Search term filter
+      const matchesSearch = 
+        searchTerm === "" ||
         member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        // Filter by skills
         (member.skills && member.skills.some(skill => 
           skill.toLowerCase().includes(searchTerm.toLowerCase())
-        ))
-    );
-  }, [teamMembers, searchTerm]);
+        ));
+      
+      // Role filter
+      const matchesRole = filterRole === null || member.role === filterRole;
+      
+      // Skill filter
+      const matchesSkill = filterSkill === null || 
+        (member.skills && member.skills.includes(filterSkill));
+      
+      // Project filter
+      const matchesProject = filterProject === null || 
+        getMemberCurrentAllocations(member.id).some(a => a.projectId === filterProject);
+      
+      // Allocation status filter
+      const totalAllocation = getTotalAllocation(member.id);
+      let matchesAllocation = true;
+      
+      if (filterAllocation === "fully-allocated") {
+        matchesAllocation = totalAllocation >= 100;
+      } else if (filterAllocation === "partially-allocated") {
+        matchesAllocation = totalAllocation >= 75 && totalAllocation < 100;
+      } else if (filterAllocation === "needs-allocation") {
+        matchesAllocation = totalAllocation < 75;
+      }
+      
+      return matchesSearch && matchesRole && matchesSkill && matchesProject && matchesAllocation;
+    });
+  }, [teamMembers, searchTerm, filterRole, filterSkill, filterProject, filterAllocation]);
 
   // Handle create member form submission
   const onCreateMemberSubmit = (data: TeamMemberFormValues) => {
@@ -515,7 +564,8 @@ const Team: React.FC = () => {
         </Button>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 space-y-4">
+        {/* Search Bar */}
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <span className="material-icons text-slate-400 text-sm">search</span>
@@ -527,6 +577,169 @@ const Team: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+        </div>
+        
+        {/* Filter Controls */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          {/* Role Filter */}
+          <div>
+            <Select 
+              value={filterRole || ""} 
+              onValueChange={value => setFilterRole(value === "" ? null : value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filter by Role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Roles</SelectItem>
+                {availableRoles.map(role => (
+                  <SelectItem key={role} value={role}>{role}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Skills Filter */}
+          <div>
+            <Select 
+              value={filterSkill || ""} 
+              onValueChange={value => setFilterSkill(value === "" ? null : value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filter by Skill" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Skills</SelectItem>
+                {allSkills.map(skill => (
+                  <SelectItem key={skill} value={skill}>{skill}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Project Filter */}
+          <div>
+            <Select 
+              value={filterProject?.toString() || ""} 
+              onValueChange={value => setFilterProject(value === "" ? null : parseInt(value))}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filter by Project" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Projects</SelectItem>
+                {activeProjects.map(project => (
+                  <SelectItem key={project.id} value={project.id.toString()}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Allocation Filter */}
+          <div>
+            <Select 
+              value={filterAllocation || ""} 
+              onValueChange={value => setFilterAllocation(value === "" ? null : value)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Filter by Allocation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Allocations</SelectItem>
+                <SelectItem value="fully-allocated">Fully Allocated (≥100%)</SelectItem>
+                <SelectItem value="partially-allocated">Partially Allocated (75-99%)</SelectItem>
+                <SelectItem value="needs-allocation">Needs Allocation (0-74%)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        {/* Filter Tags (shows active filters with ability to remove) */}
+        <div className="flex flex-wrap gap-2">
+          {filterRole && (
+            <Badge 
+              variant="secondary" 
+              className="flex items-center gap-1"
+            >
+              Role: {filterRole}
+              <button 
+                onClick={() => setFilterRole(null)} 
+                className="text-xs text-gray-500 hover:text-gray-800"
+              >
+                <span className="material-icons text-xs">close</span>
+              </button>
+            </Badge>
+          )}
+          
+          {filterSkill && (
+            <Badge 
+              variant="secondary" 
+              className="flex items-center gap-1"
+            >
+              Skill: {filterSkill}
+              <button 
+                onClick={() => setFilterSkill(null)} 
+                className="text-xs text-gray-500 hover:text-gray-800"
+              >
+                <span className="material-icons text-xs">close</span>
+              </button>
+            </Badge>
+          )}
+          
+          {filterProject !== null && (
+            <Badge 
+              variant="secondary" 
+              className="flex items-center gap-1"
+            >
+              Project: {getProjectName(filterProject)}
+              <button 
+                onClick={() => setFilterProject(null)} 
+                className="text-xs text-gray-500 hover:text-gray-800"
+              >
+                <span className="material-icons text-xs">close</span>
+              </button>
+            </Badge>
+          )}
+          
+          {filterAllocation && (
+            <Badge 
+              variant="secondary" 
+              className="flex items-center gap-1"
+            >
+              {filterAllocation === "fully-allocated" ? "Fully Allocated" :
+                filterAllocation === "partially-allocated" ? "Partially Allocated" :
+                "Needs Allocation"}
+              <button 
+                onClick={() => setFilterAllocation(null)} 
+                className="text-xs text-gray-500 hover:text-gray-800"
+              >
+                <span className="material-icons text-xs">close</span>
+              </button>
+            </Badge>
+          )}
+          
+          {(filterRole || filterSkill || filterProject !== null || filterAllocation) && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="h-7 text-xs"
+              onClick={() => {
+                setFilterRole(null);
+                setFilterSkill(null);
+                setFilterProject(null);
+                setFilterAllocation(null);
+              }}
+            >
+              Clear All
+            </Button>
+          )}
+        </div>
+        
+        {/* Results count */}
+        <div className="text-sm text-slate-500">
+          Showing {filteredTeamMembers.length} of {teamMembers?.length || 0} team members
         </div>
       </div>
 
