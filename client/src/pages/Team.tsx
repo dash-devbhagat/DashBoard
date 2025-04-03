@@ -164,14 +164,21 @@ const Team: React.FC = () => {
 
   // Create member mutation
   const createMemberMutation = useMutation({
-    mutationFn: (newMember: Omit<TeamMember, "id">) => 
-      apiRequest("/api/team-members", { 
+    mutationFn: (newMember: Omit<TeamMember, "id">) => {
+      // Create a serializable object for the team member
+      const memberData = {
+        name: newMember.name,
+        role: newMember.role,
+        avatar: newMember.avatar || null,
+        availability: newMember.availability,
+        skills: newMember.skills
+      };
+      
+      return apiRequest("/api/team-members", { 
         method: "POST", 
-        body: {
-          ...newMember,
-          avatar: newMember.avatar || null
-        }
-      }),
+        body: memberData
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
@@ -182,14 +189,21 @@ const Team: React.FC = () => {
 
   // Update member mutation
   const updateMemberMutation = useMutation({
-    mutationFn: (member: Partial<TeamMember> & { id: number }) => 
-      apiRequest(`/api/team-members/${member.id}`, { 
+    mutationFn: (member: Partial<TeamMember> & { id: number }) => {
+      // Create a serializable object for the team member update
+      const memberData = {
+        name: member.name,
+        role: member.role,
+        avatar: member.avatar ?? null,
+        availability: member.availability,
+        skills: member.skills
+      };
+      
+      return apiRequest(`/api/team-members/${member.id}`, { 
         method: "PATCH", 
-        body: {
-          ...member,
-          avatar: member.avatar ?? null
-        }
-      }),
+        body: memberData
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
@@ -212,11 +226,21 @@ const Team: React.FC = () => {
 
   // Create allocation mutation
   const createAllocationMutation = useMutation({
-    mutationFn: (newAllocation: Omit<Allocation, "id">) => 
-      apiRequest("/api/allocations", { 
+    mutationFn: (newAllocation: Omit<Allocation, "id">) => {
+      // Create a serializable object for the allocation
+      const allocationData = {
+        teamMemberId: newAllocation.teamMemberId,
+        projectId: newAllocation.projectId,
+        percentage: newAllocation.percentage,
+        startDate: newAllocation.startDate,
+        endDate: newAllocation.endDate
+      };
+      
+      return apiRequest<Allocation>("/api/allocations", { 
         method: "POST", 
-        body: newAllocation
-      }),
+        body: allocationData
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
@@ -237,11 +261,21 @@ const Team: React.FC = () => {
   
   // Update allocation mutation
   const updateAllocationMutation = useMutation({
-    mutationFn: (allocation: Partial<Allocation> & { id: number }) => 
-      apiRequest(`/api/allocations/${allocation.id}`, { 
+    mutationFn: (allocation: Partial<Allocation> & { id: number }) => {
+      // Create a serializable object for the allocation update
+      const allocationData = {
+        teamMemberId: allocation.teamMemberId,
+        projectId: allocation.projectId,
+        percentage: allocation.percentage,
+        startDate: allocation.startDate,
+        endDate: allocation.endDate,
+      };
+      
+      return apiRequest(`/api/allocations/${allocation.id}`, { 
         method: "PATCH", 
-        body: allocation
-      }),
+        body: allocationData
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
@@ -1242,10 +1276,44 @@ const Team: React.FC = () => {
                                         <div className="text-sm text-slate-600 w-1/3 text-center">
                                           {format(new Date(allocation.startDate), "MMM d, yyyy")} - {format(new Date(allocation.endDate), "MMM d, yyyy")}
                                         </div>
-                                        <div className="w-1/6 text-center">
-                                          <Badge variant={isActive ? "default" : "outline"}>
-                                            {allocation.percentage}%
-                                          </Badge>
+                                        <div className="w-1/6 text-center flex items-center justify-center">
+                                          {isActive && (
+                                            <div className="flex items-center gap-1">
+                                              <Input
+                                                type="number"
+                                                className="w-16 h-8 text-center"
+                                                min={1}
+                                                max={100}
+                                                defaultValue={allocation.percentage}
+                                                onBlur={(e) => {
+                                                  const newPercentage = parseInt(e.target.value);
+                                                  if (newPercentage !== allocation.percentage && 
+                                                      newPercentage >= 1 && 
+                                                      newPercentage <= 100) {
+                                                    updateAllocationMutation.mutate({
+                                                      id: allocation.id,
+                                                      teamMemberId: allocation.teamMemberId,
+                                                      projectId: allocation.projectId,
+                                                      percentage: newPercentage,
+                                                      startDate: allocation.startDate,
+                                                      endDate: allocation.endDate
+                                                    });
+                                                  }
+                                                }}
+                                                onKeyDown={(e) => {
+                                                  if (e.key === 'Enter') {
+                                                    e.currentTarget.blur();
+                                                  }
+                                                }}
+                                              />
+                                              <span>%</span>
+                                            </div>
+                                          )}
+                                          {!isActive && (
+                                            <Badge variant="outline">
+                                              {allocation.percentage}%
+                                            </Badge>
+                                          )}
                                         </div>
                                         <div className="flex justify-end w-1/6 gap-1">
                                           <Button 
