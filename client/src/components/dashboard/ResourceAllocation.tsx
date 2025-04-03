@@ -77,9 +77,13 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
       const totalAllocation = memberAllocations.reduce((sum, a) => sum + a.percentage, 0);
       const allocationStatus = getAllocationStatus(totalAllocation);
       
-      // Use the first project for display purposes
-      const primaryAllocation = memberAllocations[0];
-      const projectName = primaryAllocation ? getProjectName(primaryAllocation.projectId) : "Unassigned";
+      // Create a formatted string of all projects and their allocation percentages
+      const projectDetails = memberAllocations.map(allocation => {
+        const projectName = getProjectName(allocation.projectId);
+        return `${projectName} (${allocation.percentage}%)`;
+      }).join(", ");
+      
+      const projectName = projectDetails || "Unassigned";
 
       return {
         id: member.id,
@@ -88,7 +92,13 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
         avatar: member.avatar,
         project: projectName,
         allocation: totalAllocation,
-        status: allocationStatus
+        status: allocationStatus,
+        // Store the full list of allocations for this member
+        allocations: memberAllocations.map(a => ({
+          projectId: a.projectId,
+          projectName: getProjectName(a.projectId),
+          percentage: a.percentage
+        }))
       };
     });
   }, [teamMembers, allocations, projects]);
@@ -135,7 +145,7 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
             <thead>
               <tr className="text-sm font-medium text-left text-slate-500 border-b border-slate-200">
                 <th className="pb-3 pl-2">Team Member</th>
-                <th className="pb-3">Project</th>
+                <th className="pb-3">Projects</th>
                 <th className="pb-3">Allocation</th>
                 <th className="pb-3">Status</th>
                 <th className="pb-3 pr-2">Actions</th>
@@ -154,7 +164,18 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
                     </div>
                   </td>
                   <td className="py-3">
-                    <span className="font-medium">{resource.project}</span>
+                    {resource.allocations && resource.allocations.length > 0 ? (
+                      <div className="flex flex-col gap-1">
+                        {resource.allocations.map((alloc, idx) => (
+                          <div key={idx} className="flex items-center">
+                            <span className="text-xs font-medium text-slate-700">{alloc.projectName}:</span>
+                            <span className="text-xs ml-1 text-slate-600">{alloc.percentage}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-500">Unassigned</span>
+                    )}
                   </td>
                   <td className="py-3">
                     <div className="w-full bg-slate-200 rounded-full h-2.5">
@@ -193,7 +214,7 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
             <Button variant="outline" size="icon" className="h-8 w-8 p-0">
               <span className="material-icons text-sm">chevron_left</span>
             </Button>
-            <Button variant="primary" size="icon" className="h-8 w-8 p-0 bg-primary text-white">
+            <Button variant="default" size="icon" className="h-8 w-8 p-0 bg-primary text-white">
               1
             </Button>
             <Button variant="outline" size="icon" className="h-8 w-8 p-0">
