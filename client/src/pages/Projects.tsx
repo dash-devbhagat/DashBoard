@@ -199,7 +199,10 @@ const Projects: React.FC = () => {
       
       return apiRequest<Project>("/api/projects", { 
         method: "POST", 
-        body: projectToCreate
+        body: JSON.stringify(projectToCreate),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {
@@ -222,7 +225,10 @@ const Projects: React.FC = () => {
       
       return apiRequest<Project>(`/api/projects/${projectData.id}`, { 
         method: "PATCH", 
-        body: projectToUpdate
+        body: JSON.stringify(projectToUpdate),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {
@@ -337,7 +343,10 @@ const Projects: React.FC = () => {
       
       return apiRequest<Allocation>("/api/allocations", { 
         method: "POST", 
-        body: allocationData
+        body: JSON.stringify(allocationData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {
@@ -923,9 +932,8 @@ const Projects: React.FC = () => {
               
               <div>
                 <Tabs defaultValue="overview" value={selectedTab} onValueChange={setSelectedTab}>
-                  <TabsList className="grid grid-cols-3 mb-4">
+                  <TabsList className="grid grid-cols-2 mb-4">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="team">Team</TabsTrigger>
                     <TabsTrigger value="tasks">Tasks</TabsTrigger>
                   </TabsList>
                   
@@ -937,7 +945,7 @@ const Projects: React.FC = () => {
                   ) : (
                     <>
                       <TabsContent value="overview" className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <Card>
                             <CardHeader className="py-3">
                               <CardTitle className="text-sm font-medium">Start Date</CardTitle>
@@ -958,22 +966,6 @@ const Projects: React.FC = () => {
                               </p>
                             </CardContent>
                           </Card>
-                          <Card>
-                            <CardHeader className="py-3">
-                              <CardTitle className="text-sm font-medium">Project Progress</CardTitle>
-                            </CardHeader>
-                            <CardContent className="py-0">
-                              <div className="flex items-end gap-2">
-                                <p className="text-lg font-semibold">
-                                  {calculateProjectProgress(currentProject.id)}%
-                                </p>
-                                <Progress 
-                                  value={calculateProjectProgress(currentProject.id)} 
-                                  className="h-2 flex-1" 
-                                />
-                              </div>
-                            </CardContent>
-                          </Card>
                         </div>
                         
                         <Card>
@@ -987,45 +979,6 @@ const Projects: React.FC = () => {
                           </CardContent>
                         </Card>
                         
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-md">Timeline</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            {getProjectTimelinePhases(currentProject.id).length === 0 ? (
-                              <p className="text-slate-500 text-sm">No timeline phases defined yet.</p>
-                            ) : (
-                              <div className="space-y-4">
-                                <div className="relative h-16">
-                                  {getProjectTimelinePhases(currentProject.id).map((phase) => (
-                                    <div 
-                                      key={phase.id}
-                                      className="absolute h-8 rounded-lg flex items-center justify-center text-white text-xs font-medium px-2 overflow-hidden text-ellipsis whitespace-nowrap"
-                                      style={{ 
-                                        left: `${phase.startWeek * 5}%`, 
-                                        width: `${phase.durationWeeks * 5}%`,
-                                        backgroundColor: phase.color,
-                                        minWidth: '60px'
-                                      }}
-                                    >
-                                      {phase.name}
-                                    </div>
-                                  ))}
-                                </div>
-                                <div className="flex text-xs text-slate-500 justify-between border-t pt-2">
-                                  {Array.from({ length: 5 }).map((_, i) => (
-                                    <div key={i} className="text-center">
-                                      Week {i * 5 + 1}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </TabsContent>
-                      
-                      <TabsContent value="team" className="space-y-4">
                         <Card>
                           <CardHeader>
                             <CardTitle className="text-md">Project Team</CardTitle>
@@ -1073,6 +1026,7 @@ const Projects: React.FC = () => {
                         </Card>
                       </TabsContent>
                       
+
                       <TabsContent value="tasks" className="space-y-4">
                         <Card>
                           <CardHeader>
