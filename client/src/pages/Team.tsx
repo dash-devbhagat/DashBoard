@@ -180,7 +180,10 @@ const Team: React.FC = () => {
       
       return apiRequest("/api/team-members", { 
         method: "POST", 
-        body: memberData
+        body: JSON.stringify(memberData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {
@@ -205,7 +208,10 @@ const Team: React.FC = () => {
       
       return apiRequest(`/api/team-members/${member.id}`, { 
         method: "PATCH", 
-        body: memberData
+        body: JSON.stringify(memberData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {
@@ -242,7 +248,10 @@ const Team: React.FC = () => {
       
       return apiRequest<Allocation>("/api/allocations", { 
         method: "POST", 
-        body: allocationData
+        body: JSON.stringify(allocationData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {
@@ -277,7 +286,10 @@ const Team: React.FC = () => {
       
       return apiRequest(`/api/allocations/${allocation.id}`, { 
         method: "PATCH", 
-        body: allocationData
+        body: JSON.stringify(allocationData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     },
     onSuccess: () => {

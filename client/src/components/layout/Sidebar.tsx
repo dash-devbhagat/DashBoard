@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import React from "react";
 import { cn } from "@/lib/utils";
+import dashboardLogo from "@/assets/dashboard-logo.svg";
 
 type SidebarProps = {
   open: boolean;
@@ -14,7 +15,6 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
     { href: "/", label: "Dashboard", icon: "dashboard" },
     { href: "/projects", label: "Projects", icon: "work" },
     { href: "/team", label: "Team", icon: "people" },
-    { href: "/tasks", label: "Tasks", icon: "task" },
     { href: "/reports", label: "Reports", icon: "bar_chart" },
   ];
 
@@ -29,7 +29,8 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between h-16 px-4 border-b border-slate-700/50">
           <div className="flex items-center">
-            <span className="bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent text-2xl font-bold ml-2">ResourcePro</span>
+            <img src={dashboardLogo} alt="Dashboard Logo" className="w-10 h-10" />
+            <span className="bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent text-2xl font-bold ml-2">Dashboard</span>
           </div>
           <button
             onClick={() => setOpen(false)}

@@ -1,4 +1,5 @@
 import React from "react";
+import dashboardLogo from "@/assets/dashboard-logo.svg";
 
 type HeaderProps = {
   sidebarOpen: boolean;
@@ -16,9 +17,12 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
           >
             <span className="material-icons">menu</span>
           </button>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
-            Resource Management Dashboard
-          </h1>
+          <div className="flex items-center">
+            <img src={dashboardLogo} alt="Dashboard Logo" className="w-8 h-8 mr-2" />
+            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
+              Dashboard
+            </h1>
+          </div>
         </div>
         <div className="flex items-center space-x-3">
           <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
