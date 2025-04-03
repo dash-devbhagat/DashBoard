@@ -32,12 +32,12 @@ const TeamAvailability: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="h-full flex flex-col">
         <CardHeader className="border-b border-slate-200 px-5 py-4">
           <CardTitle className="text-slate-800 text-lg font-semibold">Team Availability</CardTitle>
         </CardHeader>
-        <CardContent className="p-5 animate-pulse">
-          <div className="h-64 bg-slate-200 rounded"></div>
+        <CardContent className="p-5 flex-grow animate-pulse">
+          <div className="h-full bg-slate-200 rounded"></div>
         </CardContent>
       </Card>
     );
@@ -49,14 +49,14 @@ const TeamAvailability: React.FC = () => {
   const fullyAllocatedCount = utilizationData?.filter(u => u.utilizationPercentage >= 100).reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader className="border-b border-slate-200 px-5 py-4 flex flex-row items-center justify-between">
         <CardTitle className="text-slate-800 text-lg font-semibold">Team Availability</CardTitle>
         <Button variant="ghost" size="icon" className="h-9 w-9">
           <span className="material-icons text-slate-500">refresh</span>
         </Button>
       </CardHeader>
-      <CardContent className="p-5">
+      <CardContent className="p-5 flex-grow flex flex-col">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
@@ -81,8 +81,8 @@ const TeamAvailability: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-6">
-          <div className="chart-container">
+        <div className="mt-4 flex-grow">
+          <div className="chart-container h-full">
             <div className="bg-slate-50 rounded-xl p-5 shadow-inner h-full">
               <h3 className="text-sm font-semibold mb-4 text-slate-800">Utilization by Role</h3>
               <div className="w-full">

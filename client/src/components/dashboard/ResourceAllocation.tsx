@@ -196,14 +196,14 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="h-full flex flex-col">
         <CardHeader className="border-b border-slate-200 px-5 py-4">
           <CardTitle className="text-slate-800 text-lg font-semibold">Resource Allocation</CardTitle>
         </CardHeader>
-        <CardContent className="p-5">
-          <div className="animate-pulse space-y-4">
+        <CardContent className="p-5 flex-grow">
+          <div className="animate-pulse space-y-4 h-full">
             <div className="h-10 bg-slate-200 rounded w-full"></div>
-            <div className="h-64 bg-slate-200 rounded w-full"></div>
+            <div className="h-[calc(100%-2.5rem)] bg-slate-200 rounded w-full"></div>
           </div>
         </CardContent>
       </Card>
@@ -211,7 +211,7 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
   }
 
   return (
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader className="border-b border-slate-200 px-5 py-4 flex flex-row items-center justify-between">
         <CardTitle className="text-slate-800 text-lg font-semibold">Resource Allocation</CardTitle>
         <div className="flex space-x-2">
@@ -230,8 +230,8 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-5">
-        <div className="overflow-x-auto">
+      <CardContent className="p-5 flex-grow flex flex-col">
+        <div className="overflow-x-auto flex-grow">
           <table className="w-full">
             <thead>
               <tr className="text-sm font-medium text-left text-slate-500 border-b border-slate-200">
@@ -310,7 +310,7 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
             </tbody>
           </table>
         </div>
-        <div className="mt-5 flex justify-between items-center">
+        <div className="mt-auto pt-4 flex justify-between items-center">
           <Link href="/team">
             <Button variant="link" className="text-sm text-primary font-medium p-0">
               View All Resources
