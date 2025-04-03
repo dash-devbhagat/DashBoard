@@ -11,11 +11,7 @@ type TeamUtilization = {
   utilizationPercentage: number;
 };
 
-interface TeamAvailabilityProps {
-  onAssignResource: () => void;
-}
-
-const TeamAvailability: React.FC<TeamAvailabilityProps> = ({ onAssignResource }) => {
+const TeamAvailability: React.FC = () => {
   const { data: utilizationData, isLoading } = useQuery<TeamUtilization[]>({
     queryKey: ["/api/dashboard/team-utilization"],
   });
@@ -119,16 +115,6 @@ const TeamAvailability: React.FC<TeamAvailabilityProps> = ({ onAssignResource })
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="mt-6 pt-4 border-t border-slate-200">
-          <Button 
-            className="w-full py-2.5 bg-gradient-to-r from-primary to-indigo-500 text-white rounded-lg hover:shadow-md transition-all duration-200 flex items-center justify-center"
-            onClick={onAssignResource}
-          >
-            <span className="material-icons mr-2 text-sm">person_add</span>
-            <span className="font-medium">Assign New Resource</span>
-          </Button>
         </div>
       </CardContent>
     </Card>

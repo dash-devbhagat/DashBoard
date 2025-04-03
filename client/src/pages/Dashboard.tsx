@@ -3,13 +3,10 @@ import QuickStats from "@/components/dashboard/QuickStats";
 import ResourceAllocation from "@/components/dashboard/ResourceAllocation";
 import TeamAvailability from "@/components/dashboard/TeamAvailability";
 import ProjectTimeline from "@/components/dashboard/ProjectTimeline";
-import TaskAssignment from "@/components/dashboard/TaskAssignment";
 import AssignResourceDialog from "@/components/dialogs/AssignResourceDialog";
-import CreateTaskDialog from "@/components/dialogs/CreateTaskDialog";
 
 const Dashboard: React.FC = () => {
   const [assignResourceDialogOpen, setAssignResourceDialogOpen] = useState(false);
-  const [createTaskDialogOpen, setCreateTaskDialogOpen] = useState(false);
   const [selectedTeamMemberId, setSelectedTeamMemberId] = useState<number | undefined>(undefined);
 
   const handleEditResource = (teamMemberId: number) => {
@@ -17,34 +14,22 @@ const Dashboard: React.FC = () => {
     setAssignResourceDialogOpen(true);
   };
 
-  const handleAssignResource = () => {
-    setSelectedTeamMemberId(undefined);
-    setAssignResourceDialogOpen(true);
-  };
-
-  const handleCreateTask = () => {
-    setCreateTaskDialogOpen(true);
-  };
-
   return (
     <>
       <QuickStats />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <TeamAvailability />
+        </div>
         <div className="lg:col-span-2">
           <ResourceAllocation onEdit={handleEditResource} />
-        </div>
-        <div className="lg:col-span-1">
-          <TeamAvailability onAssignResource={handleAssignResource} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 mb-6">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <ProjectTimeline />
-        </div>
-        <div className="lg:col-span-1">
-          <TaskAssignment onCreateTask={handleCreateTask} />
         </div>
       </div>
 
@@ -53,11 +38,6 @@ const Dashboard: React.FC = () => {
         open={assignResourceDialogOpen}
         onOpenChange={setAssignResourceDialogOpen}
         teamMemberId={selectedTeamMemberId}
-      />
-      
-      <CreateTaskDialog
-        open={createTaskDialogOpen}
-        onOpenChange={setCreateTaskDialogOpen}
       />
     </>
   );
