@@ -85,7 +85,7 @@ const TeamAvailability: React.FC = () => {
           <div className="chart-container">
             <div className="bg-slate-50 rounded-xl p-5 shadow-inner h-full">
               <h3 className="text-sm font-semibold mb-4 text-slate-800">Utilization by Role</h3>
-              <div className="w-full max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
+              <div className="w-full">
                 {utilizationData?.map((item, index) => (
                   <div key={index} className="mb-5 last:mb-0">
                     <div className="flex items-center justify-between mb-2">
