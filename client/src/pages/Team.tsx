@@ -184,7 +184,7 @@ const Team: React.FC = () => {
         skills: newMember.skills
       };
       
-      return apiRequest("/api/team-members", { 
+      return apiRequest<TeamMember>("/api/team-members", { 
         method: "POST", 
         body: memberData
       });
@@ -209,7 +209,7 @@ const Team: React.FC = () => {
         skills: member.skills
       };
       
-      return apiRequest(`/api/team-members/${member.id}`, { 
+      return apiRequest<TeamMember>(`/api/team-members/${member.id}`, { 
         method: "PATCH", 
         body: memberData
       });
@@ -281,7 +281,7 @@ const Team: React.FC = () => {
         endDate: allocation.endDate,
       };
       
-      return apiRequest(`/api/allocations/${allocation.id}`, { 
+      return apiRequest<Allocation>(`/api/allocations/${allocation.id}`, { 
         method: "PATCH", 
         body: allocationData
       });
