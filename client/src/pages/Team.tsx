@@ -186,10 +186,7 @@ const Team: React.FC = () => {
       
       return apiRequest("/api/team-members", { 
         method: "POST", 
-        body: JSON.stringify(memberData),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        body: JSON.stringify(memberData)
       });
     },
     onSuccess: () => {
