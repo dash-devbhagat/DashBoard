@@ -43,10 +43,24 @@ const TeamAvailability: React.FC = () => {
     );
   }
 
-  // Calculate availability stats
-  const needsAllocationCount = utilizationData?.filter(u => u.utilizationPercentage < 75).reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
-  const partialCount = utilizationData?.filter(u => u.utilizationPercentage >= 75 && u.utilizationPercentage < 100).reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
-  const fullyAllocatedCount = utilizationData?.filter(u => u.utilizationPercentage >= 100).reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
+  // Calculate availability stats - Fixed to correctly handle individual team members
+  const totalTeamMembers = utilizationData?.reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
+  
+  // Calculate counts for each team member across all roles
+  let needsAllocationCount = 0;
+  let partialCount = 0;
+  let fullyAllocatedCount = 0;
+  
+  // Process each role group and add its member count to the appropriate category
+  utilizationData?.forEach(role => {
+    if (role.utilizationPercentage >= 100) {
+      fullyAllocatedCount += role.memberCount;
+    } else if (role.utilizationPercentage >= 75) {
+      partialCount += role.memberCount;
+    } else {
+      needsAllocationCount += role.memberCount;
+    }
+  });
 
   return (
     <Card className="h-full flex flex-col">
