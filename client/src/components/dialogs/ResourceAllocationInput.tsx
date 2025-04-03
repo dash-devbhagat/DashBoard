@@ -106,9 +106,9 @@ const ResourceAllocationInput: React.FC<ResourceAllocationInputProps> = ({
     return selectedTeamMemberIds.includes(teamMemberId);
   };
 
-  const isLoading = isLoadingTeamMembers || isLoadingAllocations;
+  const isLoadingData = isLoadingTeamMembers || (!!projectId && isLoadingAllocations);
 
-  if (isLoading) {
+  if (isLoadingData) {
     return <div className="text-sm text-slate-500">Loading...</div>;
   }
 

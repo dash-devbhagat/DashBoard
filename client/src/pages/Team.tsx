@@ -136,7 +136,9 @@ const Team: React.FC = () => {
   const [isEditMemberDialogOpen, setIsEditMemberDialogOpen] = useState(false);
   const [isMemberDetailDialogOpen, setIsMemberDetailDialogOpen] = useState(false);
   const [isNewAllocationDialogOpen, setIsNewAllocationDialogOpen] = useState(false);
+  const [isEditAllocationDialogOpen, setIsEditAllocationDialogOpen] = useState(false);
   const [currentMember, setCurrentMember] = useState<TeamMember | null>(null);
+  const [currentAllocation, setCurrentAllocation] = useState<Allocation | null>(null);
   const [selectedTab, setSelectedTab] = useState("overview");
 
   // Queries
@@ -232,6 +234,21 @@ const Team: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
     },
   });
+  
+  // Update allocation mutation
+  const updateAllocationMutation = useMutation({
+    mutationFn: (allocation: Partial<Allocation> & { id: number }) => 
+      apiRequest(`/api/allocations/${allocation.id}`, { 
+        method: "PATCH", 
+        body: allocation
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
+      setIsEditAllocationDialogOpen(false);
+      setCurrentAllocation(null);
+    },
+  });
 
   // Create member form
   const newMemberForm = useForm<TeamMemberFormValues>({
@@ -257,6 +274,17 @@ const Team: React.FC = () => {
 
   // New allocation form
   const newAllocationForm = useForm<AllocationFormValues>({
+    resolver: zodResolver(allocationFormSchema),
+    defaultValues: {
+      projectId: 0,
+      percentage: 25,
+      startDate: new Date().toISOString().split("T")[0],
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    },
+  });
+  
+  // Edit allocation form
+  const editAllocationForm = useForm<AllocationFormValues>({
     resolver: zodResolver(allocationFormSchema),
     defaultValues: {
       projectId: 0,
@@ -357,6 +385,17 @@ const Team: React.FC = () => {
       ...data
     });
   };
+  
+  // Handle edit allocation form submission
+  const onEditAllocationSubmit = (data: AllocationFormValues) => {
+    if (!currentAllocation) return;
+    
+    updateAllocationMutation.mutate({
+      id: currentAllocation.id,
+      teamMemberId: currentAllocation.teamMemberId,
+      ...data
+    });
+  };
 
   // Handler for viewing member details
   const handleMemberDetailView = (member: TeamMember) => {
@@ -403,6 +442,18 @@ const Team: React.FC = () => {
     if (window.confirm("Are you sure you want to remove this project allocation?")) {
       deleteAllocationMutation.mutate(allocationId);
     }
+  };
+  
+  // Handler for editing an allocation
+  const handleEditAllocation = (allocation: Allocation) => {
+    setCurrentAllocation(allocation);
+    editAllocationForm.reset({
+      projectId: allocation.projectId,
+      percentage: allocation.percentage,
+      startDate: allocation.startDate,
+      endDate: allocation.endDate
+    });
+    setIsEditAllocationDialogOpen(true);
   };
 
   // Loading state
@@ -1196,7 +1247,15 @@ const Team: React.FC = () => {
                                             {allocation.percentage}%
                                           </Badge>
                                         </div>
-                                        <div className="flex justify-end w-1/6">
+                                        <div className="flex justify-end w-1/6 gap-1">
+                                          <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-7 w-7" 
+                                            onClick={() => handleEditAllocation(allocation)}
+                                          >
+                                            <span className="material-icons text-sm text-blue-500">edit</span>
+                                          </Button>
                                           <Button 
                                             variant="ghost" 
                                             size="icon" 

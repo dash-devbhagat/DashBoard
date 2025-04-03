@@ -544,7 +544,22 @@ const Projects: React.FC = () => {
       </div>
 
       {/* New Project Dialog */}
-      <Dialog open={isNewProjectDialogOpen} onOpenChange={setIsNewProjectDialogOpen}>
+      <Dialog 
+        open={isNewProjectDialogOpen} 
+        onOpenChange={(open) => {
+          setIsNewProjectDialogOpen(open);
+          if (!open) {
+            // Reset form when modal closes
+            newProjectForm.reset({
+              name: "",
+              status: "active",
+              startDate: new Date().toISOString().split("T")[0],
+              endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+              description: "",
+              color: projectColors[0],
+            });
+          }
+        }}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
@@ -696,7 +711,15 @@ const Projects: React.FC = () => {
       </Dialog>
 
       {/* Edit Project Dialog */}
-      <Dialog open={isEditProjectDialogOpen} onOpenChange={setIsEditProjectDialogOpen}>
+      <Dialog 
+        open={isEditProjectDialogOpen} 
+        onOpenChange={(open) => {
+          setIsEditProjectDialogOpen(open);
+          if (!open) {
+            // Reset form when modal closes
+            editProjectForm.reset();
+          }
+        }}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Edit Project</DialogTitle>
