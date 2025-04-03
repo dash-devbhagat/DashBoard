@@ -29,6 +29,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
   Tabs,
   TabsContent,
   TabsList,
@@ -132,9 +138,9 @@ const defaultAvatars = [
 const Team: React.FC = () => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterRole, setFilterRole] = useState<string | null>(null);
-  const [filterSkill, setFilterSkill] = useState<string | null>(null);
-  const [filterProject, setFilterProject] = useState<number | null>(null);
+  const [filterRoles, setFilterRoles] = useState<string[]>([]);
+  const [filterSkills, setFilterSkills] = useState<string[]>([]);
+  const [filterProjects, setFilterProjects] = useState<number[]>([]);
   const [filterAllocation, setFilterAllocation] = useState<string | null>(null);
   const [isNewMemberDialogOpen, setIsNewMemberDialogOpen] = useState(false);
   const [isEditMemberDialogOpen, setIsEditMemberDialogOpen] = useState(false);
@@ -430,15 +436,15 @@ const Team: React.FC = () => {
         ));
       
       // Role filter
-      const matchesRole = filterRole === null || member.role === filterRole;
+      const matchesRole = filterRoles.length === 0 || filterRoles.includes(member.role);
       
       // Skill filter
-      const matchesSkill = filterSkill === null || 
-        (member.skills && member.skills.includes(filterSkill));
+      const matchesSkill = filterSkills.length === 0 || 
+        (member.skills && member.skills.some(skill => filterSkills.includes(skill)));
       
       // Project filter
-      const matchesProject = filterProject === null || 
-        getMemberCurrentAllocations(member.id).some(a => a.projectId === filterProject);
+      const matchesProject = filterProjects.length === 0 || 
+        getMemberCurrentAllocations(member.id).some(a => filterProjects.includes(a.projectId));
       
       // Allocation status filter
       const totalAllocation = getTotalAllocation(member.id);
@@ -454,7 +460,7 @@ const Team: React.FC = () => {
       
       return matchesSearch && matchesRole && matchesSkill && matchesProject && matchesAllocation;
     });
-  }, [teamMembers, searchTerm, filterRole, filterSkill, filterProject, filterAllocation]);
+  }, [teamMembers, searchTerm, filterRoles, filterSkills, filterProjects, filterAllocation, allocations]);
 
   // Handle create member form submission
   const onCreateMemberSubmit = (data: TeamMemberFormValues) => {
@@ -593,60 +599,186 @@ const Team: React.FC = () => {
         
         {/* Filter Controls */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-          {/* Role Filter */}
-          <div>
-            <Select 
-              value={filterRole || "all-roles"} 
-              onValueChange={value => setFilterRole(value === "all-roles" ? null : value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filter by Role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-roles">All Roles</SelectItem>
-                {availableRoles.map(role => (
-                  <SelectItem key={role} value={role}>{role}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Role Filter - Using Dropdown with Checkbox */}
+          <div className="relative">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between text-left font-normal"
+                >
+                  <span>{filterRoles.length === 0 ? "Filter by Role" : `${filterRoles.length} Role${filterRoles.length > 1 ? 's' : ''} Selected`}</span>
+                  <span className="material-icons text-sm">expand_more</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-2" align="start">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 pb-2 border-b">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 text-xs"
+                      onClick={() => setFilterRoles([])}
+                    >
+                      Clear All
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 text-xs ml-auto"
+                      onClick={() => setFilterRoles([...availableRoles])}
+                    >
+                      Select All
+                    </Button>
+                  </div>
+                  {availableRoles.map(role => (
+                    <div key={role} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`role-${role}`} 
+                        checked={filterRoles.includes(role)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setFilterRoles([...filterRoles, role]);
+                          } else {
+                            setFilterRoles(filterRoles.filter(r => r !== role));
+                          }
+                        }}
+                      />
+                      <label 
+                        htmlFor={`role-${role}`}
+                        className="text-sm cursor-pointer flex-1"
+                      >
+                        {role}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           
-          {/* Skills Filter */}
-          <div>
-            <Select 
-              value={filterSkill || "all-skills"} 
-              onValueChange={value => setFilterSkill(value === "all-skills" ? null : value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filter by Skill" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-skills">All Skills</SelectItem>
-                {allSkills.map(skill => (
-                  <SelectItem key={skill} value={skill}>{skill}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Skills Filter - Using Dropdown with Checkbox */}
+          <div className="relative">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between text-left font-normal"
+                >
+                  <span>{filterSkills.length === 0 ? "Filter by Skill" : `${filterSkills.length} Skill${filterSkills.length > 1 ? 's' : ''} Selected`}</span>
+                  <span className="material-icons text-sm">expand_more</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-2" align="start">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 pb-2 border-b">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 text-xs"
+                      onClick={() => setFilterSkills([])}
+                    >
+                      Clear All
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 text-xs ml-auto"
+                      onClick={() => setFilterSkills([...allSkills])}
+                    >
+                      Select All
+                    </Button>
+                  </div>
+                  <div className="max-h-[200px] overflow-y-auto pr-1">
+                    {allSkills.map(skill => (
+                      <div key={skill} className="flex items-center space-x-2 py-1">
+                        <Checkbox 
+                          id={`skill-${skill}`} 
+                          checked={filterSkills.includes(skill)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setFilterSkills([...filterSkills, skill]);
+                            } else {
+                              setFilterSkills(filterSkills.filter(s => s !== skill));
+                            }
+                          }}
+                        />
+                        <label 
+                          htmlFor={`skill-${skill}`}
+                          className="text-sm cursor-pointer flex-1"
+                        >
+                          {skill}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           
-          {/* Project Filter */}
-          <div>
-            <Select 
-              value={filterProject?.toString() || "all-projects"} 
-              onValueChange={value => setFilterProject(value === "all-projects" ? null : parseInt(value))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Filter by Project" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-projects">All Projects</SelectItem>
-                {activeProjects.map(project => (
-                  <SelectItem key={project.id} value={project.id.toString()}>
-                    {project.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Project Filter - Using Dropdown with Checkbox */}
+          <div className="relative">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between text-left font-normal"
+                >
+                  <span>{filterProjects.length === 0 ? "Filter by Project" : `${filterProjects.length} Project${filterProjects.length > 1 ? 's' : ''} Selected`}</span>
+                  <span className="material-icons text-sm">expand_more</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-2" align="start">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 pb-2 border-b">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 text-xs"
+                      onClick={() => setFilterProjects([])}
+                    >
+                      Clear All
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 text-xs ml-auto"
+                      onClick={() => setFilterProjects(activeProjects.map(p => p.id))}
+                    >
+                      Select All
+                    </Button>
+                  </div>
+                  <div className="max-h-[200px] overflow-y-auto pr-1">
+                    {activeProjects.map(project => (
+                      <div key={project.id} className="flex items-center space-x-2 py-1">
+                        <Checkbox 
+                          id={`project-${project.id}`} 
+                          checked={filterProjects.includes(project.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setFilterProjects([...filterProjects, project.id]);
+                            } else {
+                              setFilterProjects(filterProjects.filter(p => p !== project.id));
+                            }
+                          }}
+                        />
+                        <label 
+                          htmlFor={`project-${project.id}`}
+                          className="text-sm cursor-pointer flex-1 flex items-center"
+                        >
+                          <div 
+                            className="w-2 h-2 rounded-full mr-1.5" 
+                            style={{ backgroundColor: project.color }}
+                          />
+                          {project.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
           
           {/* Allocation Filter */}
@@ -670,50 +802,53 @@ const Team: React.FC = () => {
         
         {/* Filter Tags (shows active filters with ability to remove) */}
         <div className="flex flex-wrap gap-2">
-          {filterRole && (
+          {filterRoles.length > 0 && filterRoles.map(role => (
             <Badge 
+              key={`role-tag-${role}`}
               variant="secondary" 
               className="flex items-center gap-1"
             >
-              Role: {filterRole}
+              Role: {role}
               <button 
-                onClick={() => setFilterRole(null)} 
+                onClick={() => setFilterRoles(filterRoles.filter(r => r !== role))} 
                 className="text-xs text-gray-500 hover:text-gray-800"
               >
                 <span className="material-icons text-xs">close</span>
               </button>
             </Badge>
-          )}
+          ))}
           
-          {filterSkill && (
+          {filterSkills.length > 0 && filterSkills.map(skill => (
             <Badge 
+              key={`skill-tag-${skill}`}
               variant="secondary" 
               className="flex items-center gap-1"
             >
-              Skill: {filterSkill}
+              Skill: {skill}
               <button 
-                onClick={() => setFilterSkill(null)} 
+                onClick={() => setFilterSkills(filterSkills.filter(s => s !== skill))} 
                 className="text-xs text-gray-500 hover:text-gray-800"
               >
                 <span className="material-icons text-xs">close</span>
               </button>
             </Badge>
-          )}
+          ))}
           
-          {filterProject !== null && (
+          {filterProjects.length > 0 && filterProjects.map(projectId => (
             <Badge 
+              key={`project-tag-${projectId}`}
               variant="secondary" 
               className="flex items-center gap-1"
             >
-              Project: {getProjectName(filterProject)}
+              Project: {getProjectName(projectId)}
               <button 
-                onClick={() => setFilterProject(null)} 
+                onClick={() => setFilterProjects(filterProjects.filter(p => p !== projectId))} 
                 className="text-xs text-gray-500 hover:text-gray-800"
               >
                 <span className="material-icons text-xs">close</span>
               </button>
             </Badge>
-          )}
+          ))}
           
           {filterAllocation && (
             <Badge 
@@ -732,15 +867,15 @@ const Team: React.FC = () => {
             </Badge>
           )}
           
-          {(filterRole || filterSkill || filterProject !== null || filterAllocation) && (
+          {(filterRoles.length > 0 || filterSkills.length > 0 || filterProjects.length > 0 || filterAllocation) && (
             <Button 
               variant="outline" 
               size="sm" 
               className="h-7 text-xs"
               onClick={() => {
-                setFilterRole(null);
-                setFilterSkill(null);
-                setFilterProject(null);
+                setFilterRoles([]);
+                setFilterSkills([]);
+                setFilterProjects([]);
                 setFilterAllocation(null);
               }}
             >
