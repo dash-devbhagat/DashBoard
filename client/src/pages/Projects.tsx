@@ -512,13 +512,7 @@ const Projects: React.FC = () => {
                   <span>End Date:</span>
                   <span className="font-medium">{format(new Date(project.endDate), "MMM d, yyyy")}</span>
                 </div>
-                <div className="mt-2">
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>Progress</span>
-                    <span>{calculateProjectProgress(project.id)}%</span>
-                  </div>
-                  <Progress value={calculateProjectProgress(project.id)} className="h-1.5" />
-                </div>
+
                 
                 {/* Team Members */}
                 <div className="mt-2 pt-2">
@@ -932,9 +926,8 @@ const Projects: React.FC = () => {
               
               <div>
                 <Tabs defaultValue="overview" value={selectedTab} onValueChange={setSelectedTab}>
-                  <TabsList className="grid grid-cols-2 mb-4">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                  <TabsList className="grid w-full mb-4">
+                    <TabsTrigger value="overview" className="w-full">Overview</TabsTrigger>
                   </TabsList>
                   
                   {isDetailLoading ? (
@@ -1025,80 +1018,7 @@ const Projects: React.FC = () => {
                           </CardContent>
                         </Card>
                       </TabsContent>
-                      
 
-                      <TabsContent value="tasks" className="space-y-4">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-md">Project Tasks</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            {getProjectTasks(currentProject.id).length === 0 ? (
-                              <p className="text-slate-500 text-sm">No tasks have been added to this project yet.</p>
-                            ) : (
-                              <div className="space-y-4">
-                                {getProjectTasks(currentProject.id).map((task) => {
-                                  const assignee = teamMembers?.find(m => m.id === task.assigneeId);
-                                  
-                                  let statusClass = "bg-slate-100 text-slate-800";
-                                  if (task.status === "completed") {
-                                    statusClass = "bg-green-100 text-green-800";
-                                  } else if (task.status === "in-progress") {
-                                    statusClass = "bg-blue-100 text-blue-800";
-                                  }
-                                  
-                                  let priorityClass = "bg-slate-100 text-slate-800";
-                                  if (task.priority === "high") {
-                                    priorityClass = "bg-red-100 text-red-800";
-                                  } else if (task.priority === "medium") {
-                                    priorityClass = "bg-amber-100 text-amber-800";
-                                  }
-                                  
-                                  return (
-                                    <div key={task.id} className="p-3 border rounded-lg">
-                                      <div className="flex justify-between items-start mb-2">
-                                        <h4 className="font-medium">{task.title}</h4>
-                                        <div className="flex gap-2">
-                                          <Badge className={priorityClass}>{task.priority}</Badge>
-                                          <Badge className={statusClass}>{task.status}</Badge>
-                                        </div>
-                                      </div>
-                                      
-                                      <p className="text-sm text-slate-600 mb-3 line-clamp-2">
-                                        {task.description || "No description provided."}
-                                      </p>
-                                      
-                                      <div className="flex justify-between text-xs text-slate-500">
-                                        <div className="flex items-center gap-2">
-                                          <span className="material-icons text-xs">schedule</span>
-                                          <span>{task.estimatedHours} hours</span>
-                                        </div>
-                                        
-                                        <div className="flex items-center gap-2">
-                                          <span className="material-icons text-xs">event</span>
-                                          <span>Due: {format(new Date(task.dueDate), "MMM d, yyyy")}</span>
-                                        </div>
-                                        
-                                        {assignee ? (
-                                          <div className="flex items-center gap-2">
-                                            <span className="material-icons text-xs">person</span>
-                                            <span>{assignee.name}</span>
-                                          </div>
-                                        ) : (
-                                          <div className="flex items-center gap-2">
-                                            <span className="material-icons text-xs">person_off</span>
-                                            <span>Unassigned</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </TabsContent>
                     </>
                   )}
                 </Tabs>
