@@ -1,5 +1,5 @@
 import React from "react";
-import dashboardLogo from "@/assets/dashboard-logo.svg";
+import dashboardLogo from "@/assets/dashboard-3d-logo.png";
 
 type HeaderProps = {
   sidebarOpen: boolean;

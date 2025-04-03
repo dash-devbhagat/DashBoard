@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import React from "react";
 import { cn } from "@/lib/utils";
-import dashboardLogo from "@/assets/dashboard-logo.svg";
+import dashboardLogo from "@/assets/dashboard-3d-logo.png";
 
 type SidebarProps = {
   open: boolean;
