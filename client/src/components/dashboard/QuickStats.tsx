@@ -44,7 +44,7 @@ const QuickStats: React.FC = () => {
       icon: "person_off",
       iconBg: "bg-red-100",
       iconColor: "text-danger",
-      trend: { value: "", direction: "none", text: "Team members with 0% allocation" },
+      trend: { value: "12%", direction: "down", text: "from last month" },
       colSpan: "col-span-1",
     },
     {
@@ -53,7 +53,7 @@ const QuickStats: React.FC = () => {
       icon: "person_check",
       iconBg: "bg-green-100",
       iconColor: "text-success",
-      trend: { value: "", direction: "none", text: "Team members with 100%+ allocation" },
+      trend: { value: "15%", direction: "up", text: "from last month" },
       colSpan: "col-span-1",
     },
   ];
