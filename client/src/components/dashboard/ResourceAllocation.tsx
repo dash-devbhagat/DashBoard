@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 
 type TeamMember = {
   id: number;
@@ -42,6 +43,9 @@ type ResourceAllocationProps = {
 };
 
 const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // Number of items to display per page
+
   const { data: teamMembers, isLoading: isLoadingTeam } = useQuery<TeamMember[]>({
     queryKey: ["/api/team-members"],
   });
@@ -103,6 +107,22 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
     });
   }, [teamMembers, allocations, projects]);
 
+  // Calculate total number of pages
+  const totalPages = Math.ceil((resourceData?.length || 0) / itemsPerPage);
+  
+  // Get current page of data
+  const currentData = resourceData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Handle page navigation
+  const handlePageChange = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -152,7 +172,7 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
               </tr>
             </thead>
             <tbody>
-              {resourceData.map((resource) => (
+              {currentData.map((resource) => (
                 <tr key={resource.id} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="py-3 pl-2">
                     <div className="flex items-center">
@@ -207,23 +227,45 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
           </table>
         </div>
         <div className="mt-5 flex justify-between items-center">
-          <Button variant="link" className="text-sm text-primary font-medium p-0">
-            View All Resources
-          </Button>
+          <Link href="/team">
+            <Button variant="link" className="text-sm text-primary font-medium p-0">
+              View All Resources
+            </Button>
+          </Link>
           <div className="flex space-x-1">
-            <Button variant="outline" size="icon" className="h-8 w-8 p-0">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-8 w-8 p-0"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
               <span className="material-icons text-sm">chevron_left</span>
             </Button>
-            <Button variant="default" size="icon" className="h-8 w-8 p-0 bg-primary text-white">
-              1
-            </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8 p-0">
-              2
-            </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8 p-0">
-              3
-            </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8 p-0">
+            
+            {/* Generate page buttons */}
+            {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+              const pageNumber = i + 1;
+              return (
+                <Button 
+                  key={pageNumber}
+                  variant={currentPage === pageNumber ? "default" : "outline"} 
+                  size="icon" 
+                  className={`h-8 w-8 p-0 ${currentPage === pageNumber ? 'bg-primary text-white' : ''}`}
+                  onClick={() => handlePageChange(pageNumber)}
+                >
+                  {pageNumber}
+                </Button>
+              );
+            })}
+            
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-8 w-8 p-0"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
               <span className="material-icons text-sm">chevron_right</span>
             </Button>
           </div>
