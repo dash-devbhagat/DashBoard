@@ -30,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
         <div className="flex items-center justify-between h-16 px-4 border-b border-slate-700/50">
           <div className="flex items-center">
             <img src={dashboardLogo} alt="Dashboard Logo" className="w-10 h-10" />
-            <span className="bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent text-2xl font-bold ml-2">Dashboard</span>
+            <span className="bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent text-2xl font-bold ml-2">DashBoard</span>
           </div>
           <button
             onClick={() => setOpen(false)}

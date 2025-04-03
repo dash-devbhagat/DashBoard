@@ -20,7 +20,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
           <div className="flex items-center">
             <img src={dashboardLogo} alt="Dashboard Logo" className="w-8 h-8 mr-2" />
             <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
-              Dashboard
+              DashBoard
             </h1>
           </div>
         </div>
