@@ -38,12 +38,32 @@ type Project = {
   color: string;
 };
 
+type ResourceData = {
+  id: number;
+  name: string;
+  role: string;
+  avatar: string;
+  project: string;
+  allocation: number;
+  status: { label: string; class: string };
+  allocations: {
+    projectId: number;
+    projectName: string;
+    percentage: number;
+  }[];
+};
+
+type SortField = "name" | "role" | "allocation" | "status";
+type SortOrder = "asc" | "desc";
+
 type ResourceAllocationProps = {
   onEdit?: (teamMemberId: number) => void;
 };
 
 const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const itemsPerPage = 5; // Number of items to display per page
 
   const { data: teamMembers, isLoading: isLoadingTeam } = useQuery<TeamMember[]>({
@@ -107,11 +127,51 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
     });
   }, [teamMembers, allocations, projects]);
 
+  // Handle sorting
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // Toggle sort order if clicking the same field
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // Set new sort field and default to ascending
+      setSortField(field);
+      setSortOrder("asc");
+    }
+    // Reset to first page when sorting changes
+    setCurrentPage(1);
+  };
+
+  // Get sorted data
+  const sortedData = React.useMemo(() => {
+    return [...resourceData].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortField) {
+        case "name":
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case "role":
+          comparison = a.role.localeCompare(b.role);
+          break;
+        case "allocation":
+          comparison = a.allocation - b.allocation;
+          break;
+        case "status":
+          comparison = a.status.label.localeCompare(b.status.label);
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+  }, [resourceData, sortField, sortOrder]);
+
   // Calculate total number of pages
-  const totalPages = Math.ceil((resourceData?.length || 0) / itemsPerPage);
+  const totalPages = Math.ceil((sortedData?.length || 0) / itemsPerPage);
   
   // Get current page of data
-  const currentData = resourceData.slice(
+  const currentData = sortedData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -121,6 +181,17 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
     if (page > 0 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  // Render sort indicator
+  const renderSortIndicator = (field: SortField) => {
+    if (sortField !== field) return null;
+    
+    return (
+      <span className="material-icons text-xs ml-1">
+        {sortOrder === "asc" ? "arrow_upward" : "arrow_downward"}
+      </span>
+    );
   };
 
   if (isLoading) {
@@ -164,11 +235,34 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
           <table className="w-full">
             <thead>
               <tr className="text-sm font-medium text-left text-slate-500 border-b border-slate-200">
-                <th className="pb-3 pl-2">Team Member</th>
+                <th 
+                  className="pb-3 pl-2 cursor-pointer hover:text-primary"
+                  onClick={() => handleSort("name")}
+                >
+                  <div className="flex items-center">
+                    Team Member
+                    {renderSortIndicator("name")}
+                  </div>
+                </th>
                 <th className="pb-3">Projects</th>
-                <th className="pb-3">Allocation</th>
-                <th className="pb-3">Status</th>
-                <th className="pb-3 pr-2">Actions</th>
+                <th 
+                  className="pb-3 cursor-pointer hover:text-primary"
+                  onClick={() => handleSort("allocation")}
+                >
+                  <div className="flex items-center">
+                    Allocation
+                    {renderSortIndicator("allocation")}
+                  </div>
+                </th>
+                <th 
+                  className="pb-3 cursor-pointer hover:text-primary"
+                  onClick={() => handleSort("status")}
+                >
+                  <div className="flex items-center">
+                    Status
+                    {renderSortIndicator("status")}
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -210,16 +304,6 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
                     <span className={`px-2 py-1 text-xs rounded-full ${resource.status.class}`}>
                       {resource.status.label}
                     </span>
-                  </td>
-                  <td className="py-3 pr-2 text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => onEdit && onEdit(resource.id)}
-                    >
-                      <span className="material-icons text-sm text-slate-400 hover:text-primary">edit</span>
-                    </Button>
                   </td>
                 </tr>
               ))}

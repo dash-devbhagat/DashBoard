@@ -1,19 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import QuickStats from "@/components/dashboard/QuickStats";
 import ResourceAllocation from "@/components/dashboard/ResourceAllocation";
 import TeamAvailability from "@/components/dashboard/TeamAvailability";
 import ProjectTimeline from "@/components/dashboard/ProjectTimeline";
-import AssignResourceDialog from "@/components/dialogs/AssignResourceDialog";
 
 const Dashboard: React.FC = () => {
-  const [assignResourceDialogOpen, setAssignResourceDialogOpen] = useState(false);
-  const [selectedTeamMemberId, setSelectedTeamMemberId] = useState<number | undefined>(undefined);
-
-  const handleEditResource = (teamMemberId: number) => {
-    setSelectedTeamMemberId(teamMemberId);
-    setAssignResourceDialogOpen(true);
-  };
-
   return (
     <>
       <QuickStats />
@@ -23,7 +14,7 @@ const Dashboard: React.FC = () => {
           <TeamAvailability />
         </div>
         <div className="lg:col-span-2">
-          <ResourceAllocation onEdit={handleEditResource} />
+          <ResourceAllocation />
         </div>
       </div>
 
@@ -32,13 +23,6 @@ const Dashboard: React.FC = () => {
           <ProjectTimeline />
         </div>
       </div>
-
-      {/* Dialogs */}
-      <AssignResourceDialog 
-        open={assignResourceDialogOpen}
-        onOpenChange={setAssignResourceDialogOpen}
-        teamMemberId={selectedTeamMemberId}
-      />
     </>
   );
 };
