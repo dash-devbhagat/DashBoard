@@ -64,11 +64,8 @@ const TeamAvailability: React.FC = () => {
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader className="border-b border-slate-200 px-5 py-4 flex flex-row items-center justify-between">
+      <CardHeader className="border-b border-slate-200 px-5 py-4">
         <CardTitle className="text-slate-800 text-lg font-semibold">Team Availability</CardTitle>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
-          <span className="material-icons text-slate-500">refresh</span>
-        </Button>
       </CardHeader>
       <CardContent className="p-5 flex-grow flex flex-col">
         <div className="mb-6">

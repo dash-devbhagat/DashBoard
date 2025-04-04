@@ -212,23 +212,8 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader className="border-b border-slate-200 px-5 py-4 flex flex-row items-center justify-between">
+      <CardHeader className="border-b border-slate-200 px-5 py-4">
         <CardTitle className="text-slate-800 text-lg font-semibold">Resource Allocation</CardTitle>
-        <div className="flex space-x-2">
-          <Select defaultValue="thisWeek">
-            <SelectTrigger className="text-sm border-slate-300 rounded h-9">
-              <SelectValue placeholder="Time Period" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="thisWeek">This Week</SelectItem>
-              <SelectItem value="nextWeek">Next Week</SelectItem>
-              <SelectItem value="thisMonth">This Month</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="ghost" size="icon" className="h-9 w-9">
-            <span className="material-icons text-slate-500">more_vert</span>
-          </Button>
-        </div>
       </CardHeader>
       <CardContent className="p-5 flex-grow flex flex-col">
         <div className="overflow-x-auto flex-grow">
