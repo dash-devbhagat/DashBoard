@@ -75,18 +75,7 @@ type Project = {
   color: string;
 };
 
-type Task = {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  status: string;
-  estimatedHours: number;
-  dueDate: string;
-  category: string;
-  projectId: number | null;
-  assigneeId: number | null;
-};
+// Task type has been removed
 
 // Form schema for team member
 const teamMemberFormSchema = z.object({
@@ -164,13 +153,8 @@ const Team: React.FC = () => {
     queryKey: ["/api/projects"],
   });
 
-  const { data: tasks, isLoading: isLoadingTasks } = useQuery<Task[]>({
-    queryKey: ["/api/tasks"],
-    enabled: isMemberDetailDialogOpen,
-  });
-
   const isLoading = isLoadingTeam || isLoadingAllocations || isLoadingProjects;
-  const isDetailLoading = isLoadingTasks;
+  const isDetailLoading = false;
 
   // Create member mutation
   const createMemberMutation = useMutation({
@@ -368,9 +352,7 @@ const Team: React.FC = () => {
     ) || [];
   };
 
-  const getMemberTasks = (memberId: number) => {
-    return tasks?.filter(task => task.assigneeId === memberId) || [];
-  };
+  // getMemberTasks function has been removed
 
   const getProjectName = (projectId: number) => {
     return projects?.find(p => p.id === projectId)?.name || "Unknown Project";
@@ -1410,7 +1392,7 @@ const Team: React.FC = () => {
                   <TabsList className="grid grid-cols-3 mb-4">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="allocations">Allocations</TabsTrigger>
-                    <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                    {/* Tasks tab removed */}
                   </TabsList>
                   
                   {isDetailLoading ? (
@@ -1691,76 +1673,7 @@ const Team: React.FC = () => {
                         </Card>
                       </TabsContent>
                       
-                      <TabsContent value="tasks" className="space-y-4">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-md">Assigned Tasks</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            {getMemberTasks(currentMember.id).length === 0 ? (
-                              <p className="text-slate-500 text-sm">No tasks assigned to this team member</p>
-                            ) : (
-                              <div className="space-y-4">
-                                {getMemberTasks(currentMember.id).map((task) => {
-                                  let statusClass = "bg-slate-100 text-slate-800";
-                                  if (task.status === "completed") {
-                                    statusClass = "bg-green-100 text-green-800";
-                                  } else if (task.status === "in-progress") {
-                                    statusClass = "bg-blue-100 text-blue-800";
-                                  }
-                                  
-                                  let priorityClass = "bg-slate-100 text-slate-800";
-                                  if (task.priority === "high") {
-                                    priorityClass = "bg-red-100 text-red-800";
-                                  } else if (task.priority === "medium") {
-                                    priorityClass = "bg-amber-100 text-amber-800";
-                                  }
-                                  
-                                  return (
-                                    <div key={task.id} className="p-3 border rounded-lg">
-                                      <div className="flex justify-between items-start mb-2">
-                                        <h4 className="font-medium">{task.title}</h4>
-                                        <div className="flex gap-2">
-                                          <Badge className={priorityClass}>{task.priority}</Badge>
-                                          <Badge className={statusClass}>{task.status}</Badge>
-                                        </div>
-                                      </div>
-                                      
-                                      <p className="text-sm text-slate-600 mb-3 line-clamp-2">
-                                        {task.description || "No description provided."}
-                                      </p>
-                                      
-                                      <div className="flex justify-between text-xs text-slate-500">
-                                        <div className="flex items-center gap-2">
-                                          <span className="material-icons text-xs">schedule</span>
-                                          <span>{task.estimatedHours} hours</span>
-                                        </div>
-                                        
-                                        <div className="flex items-center gap-2">
-                                          <span className="material-icons text-xs">event</span>
-                                          <span>Due: {format(new Date(task.dueDate), "MMM d, yyyy")}</span>
-                                        </div>
-                                        
-                                        {task.projectId ? (
-                                          <div className="flex items-center gap-2">
-                                            <span className="material-icons text-xs">folder</span>
-                                            <span>{getProjectName(task.projectId)}</span>
-                                          </div>
-                                        ) : (
-                                          <div className="flex items-center gap-2">
-                                            <span className="material-icons text-xs">folder_off</span>
-                                            <span>No Project</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      </TabsContent>
+                      {/* Tasks tab content removed */}
                     </>
                   )}
                 </Tabs>
