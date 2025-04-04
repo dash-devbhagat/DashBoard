@@ -32,16 +32,16 @@ const TeamAvailability: React.FC = () => {
 
   // Function to determine color based on utilization percentage
   const getUtilizationColor = (percentage: number) => {
-    if (percentage >= 100) return "bg-emerald-500";
-    if (percentage >= 75) return "bg-amber-500";
-    return "bg-red-500";
+    if (percentage >= 100) return "bg-emerald-500"; // Fully Allocated
+    if (percentage >= 75) return "bg-amber-500";    // Partially Allocated (75-99%)
+    return "bg-red-500";                            // Needs More Allocation (<75%)
   };
   
   // Function to get text color matching utilization
   const getUtilizationTextColor = (percentage: number) => {
-    if (percentage >= 100) return "text-emerald-600";
-    if (percentage >= 75) return "text-amber-600";
-    return "text-red-600";
+    if (percentage >= 100) return "text-emerald-600"; // Fully Allocated
+    if (percentage >= 75) return "text-amber-600";    // Partially Allocated (75-99%)
+    return "text-red-600";                            // Needs More Allocation (<75%)
   };
 
   if (isLoading) {
@@ -75,21 +75,21 @@ const TeamAvailability: React.FC = () => {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-emerald-500 mr-2"></div>
-              <span className="text-sm font-medium text-emerald-700">Fully Allocated</span>
+              <span className="text-sm font-medium text-emerald-700">Fully Allocated (≥100%)</span>
             </div>
             <span className="text-sm font-semibold bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full">{fullyAllocatedCount} team members</span>
           </div>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-amber-500 mr-2"></div>
-              <span className="text-sm font-medium text-amber-700">Partially Allocated</span>
+              <span className="text-sm font-medium text-amber-700">Partially Allocated (75-99%)</span>
             </div>
             <span className="text-sm font-semibold bg-amber-50 text-amber-700 px-2 py-1 rounded-full">{partialCount} team members</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-              <span className="text-sm font-medium text-red-700">Needs Allocation</span>
+              <span className="text-sm font-medium text-red-700">Needs Allocation (&lt;75%)</span>
             </div>
             <span className="text-sm font-semibold bg-red-50 text-red-700 px-2 py-1 rounded-full">{needsAllocationCount} team members</span>
           </div>

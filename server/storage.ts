@@ -241,12 +241,12 @@ export class MemStorage implements IStorage {
       totalUtilization += utilizationSum;
       
       // Track different allocation categories
-      if (utilizationSum === 0) {
-        zeroAllocationCount++;
-      } else if (utilizationSum >= 100) {
+      if (utilizationSum >= 100) {
         fullyAllocatedCount++;
-      } else if (utilizationSum >= 1) {
+      } else if (utilizationSum >= 75) {
         partiallyAllocatedCount++;
+      } else {
+        zeroAllocationCount++;
       }
     });
     
@@ -597,12 +597,12 @@ export class DatabaseStorage implements IStorage {
       totalUtilization += utilizationSum;
       
       // Track different allocation categories
-      if (utilizationSum === 0) {
-        zeroAllocationCount++;
-      } else if (utilizationSum >= 100) {
+      if (utilizationSum >= 100) {
         fullyAllocatedCount++;
-      } else if (utilizationSum >= 1) {
+      } else if (utilizationSum >= 75) {
         partiallyAllocatedCount++;
+      } else {
+        zeroAllocationCount++;
       }
     });
     
