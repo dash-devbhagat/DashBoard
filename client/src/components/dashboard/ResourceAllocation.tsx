@@ -80,11 +80,11 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
 
   const isLoading = isLoadingTeam || isLoadingAllocations || isLoadingProjects;
 
-  // Get allocation status from percentage
+  // Get allocation status from percentage using agreed upon thresholds
   const getAllocationStatus = (percentage: number) => {
-    if (percentage >= 100) return { label: "Fully Booked", class: "bg-red-100 text-red-800" };
-    if (percentage >= 50) return { label: "Partially Available", class: "bg-yellow-100 text-yellow-800" };
-    return { label: "Available", class: "bg-green-100 text-green-800" };
+    if (percentage >= 100) return { label: "Fully Allocated", class: "bg-emerald-100 text-emerald-800" };
+    if (percentage >= 75) return { label: "Partially Allocated", class: "bg-amber-100 text-amber-800" };
+    return { label: "Needs Allocation", class: "bg-red-100 text-red-800" };
   };
 
   // Get project name from projectId
@@ -294,7 +294,13 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
                   <td className="py-3">
                     <div className="w-full bg-slate-200 rounded-full h-2.5">
                       <div
-                        className="bg-primary h-2.5 rounded-full"
+                        className={`h-2.5 rounded-full ${
+                          resource.allocation >= 100 
+                            ? "bg-emerald-500" 
+                            : resource.allocation >= 75 
+                              ? "bg-amber-500" 
+                              : "bg-red-500"
+                        }`}
                         style={{ width: `${Math.min(100, resource.allocation)}%` }}
                       ></div>
                     </div>
