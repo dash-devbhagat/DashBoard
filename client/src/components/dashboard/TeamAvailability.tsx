@@ -59,8 +59,17 @@ const TeamAvailability: React.FC = () => {
 
   // Use accurate data directly from dashboard stats
   const fullyAllocatedCount = dashboardStats?.fullyAllocatedCount || 0;
+  
+  // Partially allocated is only those with 75-99% allocation
   const partialCount = dashboardStats?.partiallyAllocatedCount || 0;
-  const needsAllocationCount = dashboardStats?.zeroAllocationCount || 0;
+  
+  // "Needs allocation" should include all team members with <75% allocation
+  // This includes both zero allocation count and some of partially allocated
+  const lowAllocationTeamMembers = (utilizationData || [])
+    .filter(data => data.utilizationPercentage < 75)
+    .reduce((sum, data) => sum + data.memberCount, 0);
+  
+  const needsAllocationCount = lowAllocationTeamMembers;
 
   return (
     <Card className="h-full flex flex-col">
