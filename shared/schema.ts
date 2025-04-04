@@ -29,25 +29,6 @@ export const projects = pgTable("projects", {
   nameIdx: uniqueIndex("projects_name_idx").on(table.name), // Ensure project names are unique
 }));
 
-// Task Schema
-export const tasks = pgTable("tasks", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description"),
-  priority: text("priority").notNull().default("medium"), // low, medium, high
-  status: text("status").notNull().default("not-started"), // not-started, in-progress, completed
-  estimatedHours: integer("estimated_hours").notNull(),
-  dueDate: text("due_date").notNull(), // Keep as text to maintain compatibility
-  category: text("category").notNull(), // Frontend, Backend, UI/UX, QA, etc.
-  projectId: integer("project_id").references(() => projects.id, { onDelete: 'set null' }),
-  assigneeId: integer("assignee_id").references(() => teamMembers.id, { onDelete: 'set null' }),
-}, (table) => ({
-  projectIdIdx: index("tasks_project_id_idx").on(table.projectId),
-  assigneeIdIdx: index("tasks_assignee_id_idx").on(table.assigneeId),
-  statusIdx: index("tasks_status_idx").on(table.status), 
-  priorityIdx: index("tasks_priority_idx").on(table.priority)
-}));
-
 // Resource Allocation Schema
 export const allocations = pgTable("allocations", {
   id: serial("id").primaryKey(),
@@ -77,24 +58,11 @@ export const timelinePhases = pgTable("timeline_phases", {
 // Relations
 export const teamMembersRelations = relations(teamMembers, ({ many }) => ({
   allocations: many(allocations),
-  tasks: many(tasks, { relationName: "assignee" }),
 }));
 
 export const projectsRelations = relations(projects, ({ many }) => ({
-  tasks: many(tasks),
   allocations: many(allocations),
   timelinePhases: many(timelinePhases),
-}));
-
-export const tasksRelations = relations(tasks, ({ one }) => ({
-  project: one(projects, {
-    fields: [tasks.projectId],
-    references: [projects.id],
-  }),
-  assignee: one(teamMembers, {
-    fields: [tasks.assigneeId],
-    references: [teamMembers.id],
-  }),
 }));
 
 export const allocationsRelations = relations(allocations, ({ one }) => ({
@@ -188,48 +156,6 @@ export const insertProjectSchema = createInsertSchema(projects)
     }
   );
 
-// Enhanced validation for tasks
-export const insertTaskSchema = createInsertSchema(tasks)
-  .pick({
-    title: true,
-    description: true,
-    priority: true,
-    status: true,
-    estimatedHours: true,
-    dueDate: true,
-    category: true,
-    projectId: true,
-    assigneeId: true,
-  })
-  .extend({
-    title: z.string()
-      .min(3, "Task title must be at least 3 characters")
-      .max(100, "Task title cannot exceed 100 characters"),
-    description: z.string()
-      .max(500, "Description cannot exceed 500 characters")
-      .nullable()
-      .optional(),
-    priority: z.enum(["low", "medium", "high"], {
-      errorMap: () => ({ message: "Priority must be one of: low, medium, high" }),
-    }),
-    status: z.enum(["not-started", "in-progress", "completed"], {
-      errorMap: () => ({ message: "Status must be one of: not-started, in-progress, completed" }),
-    }),
-    estimatedHours: z.number()
-      .int("Estimated hours must be a whole number")
-      .min(0, "Estimated hours cannot be negative")
-      .max(1000, "Estimated hours cannot exceed 1000"),
-    dueDate: z.string()
-      .refine(val => /^\d{4}-\d{2}-\d{2}$/.test(val), {
-        message: "Due date must be in the format YYYY-MM-DD",
-      }),
-    category: z.string()
-      .min(2, "Category must be at least 2 characters")
-      .max(50, "Category cannot exceed 50 characters"),
-    projectId: z.number().int().positive().nullable().optional(),
-    assigneeId: z.number().int().positive().nullable().optional(),
-  });
-
 // Enhanced validation for allocations
 export const insertAllocationSchema = createInsertSchema(allocations)
   .pick({
@@ -307,9 +233,6 @@ export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 
-export type Task = typeof tasks.$inferSelect;
-export type InsertTask = z.infer<typeof insertTaskSchema>;
-
 export type Allocation = typeof allocations.$inferSelect;
 export type InsertAllocation = z.infer<typeof insertAllocationSchema>;
 
@@ -320,8 +243,6 @@ export type InsertTimelinePhase = z.infer<typeof insertTimelinePhaseSchema>;
 export type DashboardStats = {
   activeProjects: number;
   teamUtilizationAvg: number;
-  completedTasks: number;
-  unassignedTasks: number;
   zeroAllocationCount: number; // Count of team members with 0% allocation
   fullyAllocatedCount: number; // Count of team members with 100% or more allocation
 };

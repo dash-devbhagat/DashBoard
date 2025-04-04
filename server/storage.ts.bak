@@ -1,12 +1,11 @@
 import {
-  teamMembers, projects, allocations, timelinePhases,
+  teamMembers, projects, tasks, allocations, timelinePhases,
   type TeamMember, type InsertTeamMember,
   type Project, type InsertProject,
+  type Task, type InsertTask,
   type Allocation, type InsertAllocation,
   type TimelinePhase, type InsertTimelinePhase
 } from "@shared/schema";
-import { db } from "./db";
-import { eq, isNull, sql, count } from "drizzle-orm";
 
 export interface IStorage {
   // Team Members
@@ -22,6 +21,15 @@ export interface IStorage {
   createProject(project: InsertProject): Promise<Project>;
   updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined>;
   deleteProject(id: number): Promise<boolean>;
+
+  // Tasks
+  getTasks(): Promise<Task[]>;
+  getTask(id: number): Promise<Task | undefined>;
+  getTasksByProject(projectId: number): Promise<Task[]>;
+  getUnassignedTasks(): Promise<Task[]>;
+  createTask(task: InsertTask): Promise<Task>;
+  updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
+  deleteTask(id: number): Promise<boolean>;
 
   // Allocations
   getAllocations(): Promise<Allocation[]>;
@@ -47,8 +55,8 @@ export interface IStorage {
 export type DashboardStats = {
   activeProjects: number;
   teamUtilizationAvg: number;
-  zeroAllocationCount: number;
-  fullyAllocatedCount: number;
+  completedTasks: number;
+  unassignedTasks: number;
 };
 
 export type TeamUtilization = {
@@ -60,22 +68,26 @@ export type TeamUtilization = {
 export class MemStorage implements IStorage {
   private teamMembers: Map<number, TeamMember>;
   private projects: Map<number, Project>;
+  private tasks: Map<number, Task>;
   private allocations: Map<number, Allocation>;
   private timelinePhases: Map<number, TimelinePhase>;
   
   private teamMembersId: number;
   private projectsId: number;
+  private tasksId: number;
   private allocationsId: number;
   private timelinePhasesId: number;
 
   constructor() {
     this.teamMembers = new Map();
     this.projects = new Map();
+    this.tasks = new Map();
     this.allocations = new Map();
     this.timelinePhases = new Map();
 
     this.teamMembersId = 1;
     this.projectsId = 1;
+    this.tasksId = 1;
     this.allocationsId = 1;
     this.timelinePhasesId = 1;
 
@@ -140,7 +152,42 @@ export class MemStorage implements IStorage {
     return this.projects.delete(id);
   }
 
-  // Tasks section removed
+  // Tasks
+  async getTasks(): Promise<Task[]> {
+    return Array.from(this.tasks.values());
+  }
+
+  async getTask(id: number): Promise<Task | undefined> {
+    return this.tasks.get(id);
+  }
+
+  async getTasksByProject(projectId: number): Promise<Task[]> {
+    return Array.from(this.tasks.values()).filter(task => task.projectId === projectId);
+  }
+
+  async getUnassignedTasks(): Promise<Task[]> {
+    return Array.from(this.tasks.values()).filter(task => task.assigneeId === null || task.assigneeId === undefined);
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    const id = this.tasksId++;
+    const newTask = { ...task, id };
+    this.tasks.set(id, newTask);
+    return newTask;
+  }
+
+  async updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined> {
+    const existingTask = this.tasks.get(id);
+    if (!existingTask) return undefined;
+
+    const updatedTask = { ...existingTask, ...task };
+    this.tasks.set(id, updatedTask);
+    return updatedTask;
+  }
+
+  async deleteTask(id: number): Promise<boolean> {
+    return this.tasks.delete(id);
+  }
 
   // Allocations
   async getAllocations(): Promise<Allocation[]> {
@@ -252,9 +299,19 @@ export class MemStorage implements IStorage {
       ? Math.min(100, Math.round(totalUtilization / teamMembers.length)) 
       : 0;
 
+    const completedTasks = Array.from(this.tasks.values()).filter(
+      task => task.status === 'completed'
+    ).length;
+
+    const unassignedTasks = Array.from(this.tasks.values()).filter(
+      task => task.assigneeId === null || task.assigneeId === undefined
+    ).length;
+
     return {
       activeProjects,
       teamUtilizationAvg,
+      completedTasks,
+      unassignedTasks,
       zeroAllocationCount,
       fullyAllocatedCount
     };
@@ -396,7 +453,102 @@ export class MemStorage implements IStorage {
       this.allocations.set(id, { ...allocation, id });
     });
 
-    // Tasks section removed
+    // Seed tasks
+    const tasksData: InsertTask[] = [
+      { 
+        title: 'API Authentication Flow', 
+        description: 'Implement secure authentication flow for the API', 
+        priority: 'medium', 
+        status: 'unassigned', 
+        estimatedHours: 8, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3), 
+        category: 'Backend Development',
+        projectId: 3,
+        assigneeId: undefined
+      },
+      { 
+        title: 'Implement Analytics Dashboard', 
+        description: 'Create analytics dashboard with charts and filters', 
+        priority: 'high', 
+        status: 'unassigned', 
+        estimatedHours: 16, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), 
+        category: 'Frontend Development',
+        projectId: 2,
+        assigneeId: undefined
+      },
+      { 
+        title: 'User Onboarding Flow Testing', 
+        description: 'Test the user onboarding flow for bugs and usability issues', 
+        priority: 'low', 
+        status: 'unassigned', 
+        estimatedHours: 6, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5), 
+        category: 'QA',
+        projectId: 1,
+        assigneeId: undefined
+      },
+      { 
+        title: 'Optimize Database Queries', 
+        description: 'Improve performance of database queries for product listing', 
+        priority: 'medium', 
+        status: 'unassigned', 
+        estimatedHours: 12, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2), 
+        category: 'Backend Development',
+        projectId: 1,
+        assigneeId: undefined
+      },
+      { 
+        title: 'Design Login Screen', 
+        description: 'Create design for the new login screen', 
+        priority: 'medium', 
+        status: 'in-progress', 
+        estimatedHours: 6, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7), 
+        category: 'UI Design',
+        projectId: 4,
+        assigneeId: 1
+      },
+      { 
+        title: 'Implement Responsive Layout', 
+        description: 'Make the dashboard responsive for all device sizes', 
+        priority: 'high', 
+        status: 'in-progress', 
+        estimatedHours: 10, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 4), 
+        category: 'Frontend Development',
+        projectId: 2,
+        assigneeId: 2
+      },
+      { 
+        title: 'Setup CI/CD Pipeline', 
+        description: 'Configure CI/CD pipeline for automated testing and deployment', 
+        priority: 'high', 
+        status: 'completed', 
+        estimatedHours: 8, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1), 
+        category: 'DevOps',
+        projectId: 5,
+        assigneeId: 11
+      },
+      { 
+        title: 'Implement Search Feature', 
+        description: 'Add search functionality to the product listings', 
+        priority: 'medium', 
+        status: 'in-progress', 
+        estimatedHours: 12, 
+        dueDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 6), 
+        category: 'Frontend Development',
+        projectId: 1,
+        assigneeId: 15
+      }
+    ];
+
+    tasksData.forEach(task => {
+      const id = this.tasksId++;
+      this.tasks.set(id, { ...task, id });
+    });
   }
 }
 
@@ -473,7 +625,53 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
-  // Tasks section removed
+  // Tasks
+  async getTasks(): Promise<Task[]> {
+    const { db } = await import('./db');
+    return await db.select().from(tasks);
+  }
+
+  async getTask(id: number): Promise<Task | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.select().from(tasks).where(eq(tasks.id, id));
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async getTasksByProject(projectId: number): Promise<Task[]> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    return await db.select().from(tasks).where(eq(tasks.projectId, projectId));
+  }
+
+  async getUnassignedTasks(): Promise<Task[]> {
+    const { db } = await import('./db');
+    const { isNull } = await import('drizzle-orm');
+    return await db.select().from(tasks).where(isNull(tasks.assigneeId));
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    const { db } = await import('./db');
+    const result = await db.insert(tasks).values(task).returning();
+    return result[0];
+  }
+
+  async updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.update(tasks)
+      .set(task)
+      .where(eq(tasks.id, id))
+      .returning();
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async deleteTask(id: number): Promise<boolean> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.delete(tasks).where(eq(tasks.id, id)).returning();
+    return result.length > 0;
+  }
 
   // Allocations
   async getAllocations(): Promise<Allocation[]> {
@@ -604,10 +802,25 @@ export class DatabaseStorage implements IStorage {
       ? Math.min(100, Math.round(totalUtilization / allTeamMembers.length)) 
       : 0;
     
-    // Return simplified dashboard stats (removed task-related stats)
+    // Get completed tasks count
+    const completedTasksResult = await db
+      .select({ count: count() })
+      .from(tasks)
+      .where(eq(tasks.status, 'completed'));
+    const completedTasks = completedTasksResult[0].count;
+    
+    // Get unassigned tasks count
+    const unassignedTasksResult = await db
+      .select({ count: count() })
+      .from(tasks)
+      .where(isNull(tasks.assigneeId));
+    const unassignedTasks = unassignedTasksResult[0].count;
+    
     return {
       activeProjects,
       teamUtilizationAvg,
+      completedTasks,
+      unassignedTasks,
       zeroAllocationCount,
       fullyAllocatedCount
     };

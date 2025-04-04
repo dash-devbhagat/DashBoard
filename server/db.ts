@@ -47,7 +47,7 @@ export async function migrate() {
 
 // Export a function to seed the database with initial data
 export async function seed() {
-  const { teamMembers, projects, tasks, allocations, timelinePhases } = schema;
+  const { teamMembers, projects, allocations, timelinePhases } = schema;
   
   console.log('Seeding database with initial data...');
   
@@ -57,7 +57,6 @@ export async function seed() {
     try {
       await db.delete(timelinePhases);
       await db.delete(allocations);
-      await db.delete(tasks);
       await db.delete(projects);
       await db.delete(teamMembers);
     } catch (deleteError) {
@@ -144,104 +143,11 @@ export async function seed() {
     const insertedProjects = await db.select().from(projects);
     console.log(`Inserted ${insertedProjects.length} projects`);
     
-    // 3. Now we can insert tasks that reference these projects
-    console.log('Seeding tasks...');
-    
-    // First get the inserted team members to ensure we use valid IDs
+    // Get the inserted team members to ensure we use valid IDs for allocations
     const insertedTeamMembers = await db.select().from(teamMembers);
-    console.log(`Found ${insertedTeamMembers.length} team members for task assignment`);
+    console.log(`Found ${insertedTeamMembers.length} team members for allocation assignment`);
     
-    // Only proceed if we have team members to assign
-    if (insertedTeamMembers.length > 0) {
-      // Use the actual IDs from the database
-      const taskValues = [
-        { 
-          title: "UI Component Library", 
-          description: "Create a reusable component library for the e-commerce platform", 
-          priority: "high", 
-          status: "in-progress", 
-          estimatedHours: 40, 
-          dueDate: "2023-08-15", 
-          category: "frontend", 
-          projectId: 1, 
-          assigneeId: insertedTeamMembers[0]?.id || null // UI Designer
-        },
-        { 
-          title: "Database Schema Design", 
-          description: "Design the database schema for the new NoSQL structure", 
-          priority: "medium", 
-          status: "not-started", 
-          estimatedHours: 20, 
-          dueDate: "2023-11-15", 
-          category: "backend", 
-          projectId: 4, 
-          assigneeId: insertedTeamMembers[3]?.id || null // Backend Developer
-        },
-        { 
-          title: "API Authentication Flow", 
-          description: "Implement OAuth 2.0 for the API integration project", 
-          priority: "high", 
-          status: "not-started", 
-          estimatedHours: 15, 
-          dueDate: "2023-08-30", 
-          category: "backend", 
-          projectId: 2, 
-          assigneeId: null 
-        },
-        { 
-          title: "Mobile Navigation Design", 
-          description: "Design the navigation structure for the mobile app", 
-          priority: "medium", 
-          status: "in-progress", 
-          estimatedHours: 25, 
-          dueDate: "2023-09-15", 
-          category: "design", 
-          projectId: 3, 
-          assigneeId: insertedTeamMembers[2]?.id || null // UX Researcher
-        },
-        { 
-          title: "CI Pipeline Setup", 
-          description: "Configure Jenkins for continuous integration", 
-          priority: "low", 
-          status: "completed", 
-          estimatedHours: 30, 
-          dueDate: "2023-10-01", 
-          category: "devops", 
-          projectId: 5, 
-          assigneeId: insertedTeamMembers[5]?.id || null // Full Stack Developer
-        },
-        { 
-          title: "Payment Gateway Integration", 
-          description: "Integrate Stripe and PayPal payment gateways", 
-          priority: "high", 
-          status: "not-started", 
-          estimatedHours: 35, 
-          dueDate: "2023-09-30", 
-          category: "backend", 
-          projectId: 2, 
-          assigneeId: null 
-        },
-        { 
-          title: "User Testing Coordination", 
-          description: "Coordinate user testing sessions for the e-commerce redesign", 
-          priority: "medium", 
-          status: "not-started", 
-          estimatedHours: 20, 
-          dueDate: "2023-10-15", 
-          category: "ux", 
-          projectId: 1, 
-          assigneeId: null 
-        }
-      ];
-      
-      for (const task of taskValues) {
-        await db.insert(tasks).values(task).onConflictDoNothing();
-      }
-    } else {
-      console.warn('No team members found for task assignment, skipping task assignment');
-    }
-    
-    // 4. Insert allocations
+    // 3. Insert allocations
     console.log('Seeding allocations...');
     
     // Only proceed if we have team members for allocations
@@ -319,7 +225,7 @@ export async function seed() {
       console.warn('No team members found for allocations, skipping allocation assignment');
     }
     
-    // 5. Insert timeline phases
+    // 4. Insert timeline phases
     console.log('Seeding timeline phases...');
     const phaseValues = [
       { projectId: 1, name: "Planning", startWeek: 1, durationWeeks: 3, color: "#4361ee" },

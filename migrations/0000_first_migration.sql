@@ -18,20 +18,6 @@ CREATE TABLE IF NOT EXISTS "projects" (
   "color" text NOT NULL DEFAULT '#2563eb'
 );
 
--- Create tasks table
-CREATE TABLE IF NOT EXISTS "tasks" (
-  "id" SERIAL PRIMARY KEY,
-  "title" text NOT NULL,
-  "description" text,
-  "priority" text NOT NULL DEFAULT 'medium',
-  "status" text NOT NULL DEFAULT 'not-started',
-  "estimated_hours" integer NOT NULL,
-  "due_date" text NOT NULL,
-  "category" text NOT NULL,
-  "project_id" integer REFERENCES "projects"("id") ON DELETE SET NULL,
-  "assignee_id" integer REFERENCES "team_members"("id") ON DELETE SET NULL
-);
-
 -- Create allocations table
 CREATE TABLE IF NOT EXISTS "allocations" (
   "id" SERIAL PRIMARY KEY,
@@ -53,8 +39,6 @@ CREATE TABLE IF NOT EXISTS "timeline_phases" (
 );
 
 -- Create indexes for better query performance
-CREATE INDEX IF NOT EXISTS "tasks_project_id_idx" ON "tasks" ("project_id");
-CREATE INDEX IF NOT EXISTS "tasks_assignee_id_idx" ON "tasks" ("assignee_id");
 CREATE INDEX IF NOT EXISTS "allocations_team_member_id_idx" ON "allocations" ("team_member_id");
 CREATE INDEX IF NOT EXISTS "allocations_project_id_idx" ON "allocations" ("project_id");
 CREATE INDEX IF NOT EXISTS "timeline_phases_project_id_idx" ON "timeline_phases" ("project_id");

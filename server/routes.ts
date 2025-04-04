@@ -3,8 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
   insertTeamMemberSchema, 
-  insertProjectSchema, 
-  insertTaskSchema, 
+  insertProjectSchema,
   insertAllocationSchema,
   insertTimelinePhaseSchema
 } from "@shared/schema";
@@ -252,136 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tasks
-  app.get('/api/tasks', async (req: Request, res: Response) => {
-    try {
-      const projectId = req.query.projectId ? parseInt(req.query.projectId as string) : undefined;
-      let tasks;
-      
-      if (projectId) {
-        tasks = await storage.getTasksByProject(projectId);
-      } else {
-        tasks = await storage.getTasks();
-      }
-      
-      res.json(tasks);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch tasks" });
-    }
-  });
-
-  app.get('/api/tasks/unassigned', async (req: Request, res: Response) => {
-    try {
-      const tasks = await storage.getUnassignedTasks();
-      res.json(tasks);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch unassigned tasks" });
-    }
-  });
-
-  app.get('/api/tasks/:id', async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const task = await storage.getTask(id);
-      
-      if (!task) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      
-      res.json(task);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch task" });
-    }
-  });
-
-  app.post('/api/tasks', async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertTaskSchema.parse(req.body);
-      const newTask = await storage.createTask(validatedData);
-      res.status(201).json(newTask);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: fromZodError(error).message });
-      }
-      res.status(500).json({ message: "Failed to create task" });
-    }
-  });
-
-  app.patch('/api/tasks/:id', async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      
-      if (isNaN(id) || id <= 0) {
-        return res.status(400).json({ message: "Invalid task ID" });
-      }
-      
-      // Custom schema for task updates
-      const taskUpdateSchema = z.object({
-        title: z.string().min(3).max(100).optional(),
-        description: z.string().max(500).optional(),
-        priority: z.enum(["high", "medium", "low"]).optional(),
-        status: z.enum(["not-started", "in-progress", "completed"]).optional(),
-        estimatedHours: z.number().min(0).optional(),
-        dueDate: z.string().optional(),
-        category: z.string().optional(),
-        projectId: z.number().nullable().optional(),
-        assigneeId: z.number().nullable().optional(),
-      });
-      
-      // Enhanced validation with detailed error reporting
-      try {
-        const validatedData = taskUpdateSchema.parse(req.body);
-        
-        // Validate due date if provided
-        if (validatedData.dueDate) {
-          const dueDate = new Date(validatedData.dueDate);
-          
-          if (isNaN(dueDate.getTime())) {
-            return res.status(400).json({ message: "Invalid due date format" });
-          }
-        }
-        
-        const updatedTask = await storage.updateTask(id, validatedData);
-        
-        if (!updatedTask) {
-          return res.status(404).json({ message: "Task not found" });
-        }
-        
-        res.json(updatedTask);
-      } catch (validationError) {
-        if (validationError instanceof z.ZodError) {
-          // Format the error messages nicely
-          const formattedErrors = validationError.errors.map(err => ({
-            field: err.path.join('.'),
-            message: err.message
-          }));
-          return res.status(400).json({ 
-            message: "Validation failed", 
-            errors: formattedErrors 
-          });
-        }
-        throw validationError; // Re-throw if it's not a Zod error
-      }
-    } catch (error) {
-      console.error("Task update error:", error);
-      res.status(500).json({ message: "Failed to update task" });
-    }
-  });
-
-  app.delete('/api/tasks/:id', async (req: Request, res: Response) => {
-    try {
-      const id = parseInt(req.params.id);
-      const success = await storage.deleteTask(id);
-      
-      if (!success) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-      
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete task" });
-    }
-  });
+  // Tasks section removed
 
   // Allocations
   app.get('/api/allocations', async (req: Request, res: Response) => {
