@@ -176,6 +176,7 @@ const Team: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       setIsNewMemberDialogOpen(false);
       newMemberForm.reset();
     },
@@ -201,6 +202,7 @@ const Team: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       setIsEditMemberDialogOpen(false);
     },
   });
@@ -213,6 +215,7 @@ const Team: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       setIsEditMemberDialogOpen(false);
       setIsMemberDetailDialogOpen(false);
     },
@@ -238,6 +241,7 @@ const Team: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       setIsNewAllocationDialogOpen(false);
       newAllocationForm.reset();
     },
@@ -250,6 +254,7 @@ const Team: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
     },
   });
   
@@ -273,6 +278,7 @@ const Team: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       setIsEditAllocationDialogOpen(false);
       setCurrentAllocation(null);
     },

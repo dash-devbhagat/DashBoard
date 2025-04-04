@@ -358,6 +358,7 @@ const Projects: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
     }
   });
 
