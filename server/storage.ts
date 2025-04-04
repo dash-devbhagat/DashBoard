@@ -249,7 +249,7 @@ export class MemStorage implements IStorage {
       } else if (utilizationSum >= 75) {
         partiallyAllocatedCount++;
       } else {
-        zeroAllocationCount++;
+        if (utilizationSum === 0) { zeroAllocationCount++; } else { partiallyAllocatedCount++; }
       }
     });
     
@@ -644,7 +644,7 @@ export class DatabaseStorage implements IStorage {
       } else if (utilizationSum >= 75) {
         partiallyAllocatedCount++;
       } else {
-        zeroAllocationCount++;
+        if (utilizationSum === 0) { zeroAllocationCount++; } else { partiallyAllocatedCount++; }
       }
     });
     
