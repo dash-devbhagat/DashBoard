@@ -11,10 +11,23 @@ type TeamUtilization = {
   utilizationPercentage: number;
 };
 
+type DashboardStats = {
+  activeProjects: number;
+  teamUtilizationAvg: number;
+  zeroAllocationCount: number;
+  fullyAllocatedCount: number;
+};
+
 const TeamAvailability: React.FC = () => {
-  const { data: utilizationData, isLoading } = useQuery<TeamUtilization[]>({
+  const { data: utilizationData, isLoading: utilizationLoading } = useQuery<TeamUtilization[]>({
     queryKey: ["/api/dashboard/team-utilization"],
   });
+  
+  const { data: dashboardStats, isLoading: statsLoading } = useQuery<DashboardStats>({
+    queryKey: ["/api/dashboard/stats"],
+  });
+
+  const isLoading = utilizationLoading || statsLoading;
 
   // Function to determine color based on utilization percentage
   const getUtilizationColor = (percentage: number) => {
@@ -43,24 +56,16 @@ const TeamAvailability: React.FC = () => {
     );
   }
 
-  // Calculate availability stats - Fixed to correctly handle individual team members
+  // Calculate availability stats - using accurate data from dashboard stats
   const totalTeamMembers = utilizationData?.reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
   
-  // Calculate counts for each team member across all roles
-  let needsAllocationCount = 0;
-  let partialCount = 0;
-  let fullyAllocatedCount = 0;
+  // Get counts directly from dashboard stats
+  const fullyAllocatedCount = dashboardStats?.fullyAllocatedCount || 0;
+  const zeroAllocationCount = dashboardStats?.zeroAllocationCount || 0;
   
-  // Process each role group and add its member count to the appropriate category
-  utilizationData?.forEach(role => {
-    if (role.utilizationPercentage >= 100) {
-      fullyAllocatedCount += role.memberCount;
-    } else if (role.utilizationPercentage >= 75) {
-      partialCount += role.memberCount;
-    } else {
-      needsAllocationCount += role.memberCount;
-    }
-  });
+  // Calculate partial allocation count (team members who are neither at 0% nor at 100%+)
+  const partialCount = totalTeamMembers - fullyAllocatedCount - zeroAllocationCount;
+  const needsAllocationCount = zeroAllocationCount;
 
   return (
     <Card className="h-full flex flex-col">
