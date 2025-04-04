@@ -2,8 +2,16 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 
+type DashboardStats = {
+  activeProjects: number;
+  teamUtilizationAvg: number;
+  zeroAllocationCount: number;
+  partiallyAllocatedCount: number;
+  fullyAllocatedCount: number;
+};
+
 const QuickStats: React.FC = () => {
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
   });
 
@@ -18,6 +26,10 @@ const QuickStats: React.FC = () => {
       </div>
     );
   }
+
+  // Calculate the number of team members who need more allocation (under 75%)
+  // This is different from zeroAllocationCount which only counts those with exactly 0%
+  const needsMoreAllocation = stats?.partiallyAllocatedCount ?? 0;
 
   const statCards = [
     {
@@ -48,12 +60,12 @@ const QuickStats: React.FC = () => {
       colSpan: "col-span-1",
     },
     {
-      title: "Fully Allocated",
-      value: stats?.fullyAllocatedCount ?? 0,
-      icon: "person_check",
-      iconBg: "bg-green-100",
-      iconColor: "text-success",
-      trend: { value: "15%", direction: "up", text: "from last month" },
+      title: "Needs Allocation",
+      value: needsMoreAllocation,
+      icon: "warning",
+      iconBg: "bg-amber-100",
+      iconColor: "text-amber-600",
+      trend: { value: "3%", direction: "up", text: "from last month" },
       colSpan: "col-span-1",
     },
   ];

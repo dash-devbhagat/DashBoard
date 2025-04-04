@@ -59,8 +59,14 @@ const TeamAvailability: React.FC = () => {
 
   // Use accurate data directly from dashboard stats
   const fullyAllocatedCount = dashboardStats?.fullyAllocatedCount || 0;
-  const partialCount = dashboardStats?.partiallyAllocatedCount || 0;
-  const needsAllocationCount = dashboardStats?.zeroAllocationCount || 0;
+  const partiallyAllocatedCount = dashboardStats?.partiallyAllocatedCount || 0;
+  const zeroAllocationCount = dashboardStats?.zeroAllocationCount || 0;
+  
+  // For the display, we use different variables
+  const partialCount = partiallyAllocatedCount;
+  // We need to calculate members who are under 75% allocation
+  // First, let's get members between 1-74% allocation
+  const needsMoreAllocation = dashboardStats?.partiallyAllocatedCount || 0;
 
   return (
     <Card className="h-full flex flex-col">
@@ -83,12 +89,19 @@ const TeamAvailability: React.FC = () => {
             </div>
             <span className="text-sm font-semibold bg-amber-50 text-amber-700 px-2 py-1 rounded-full">{partialCount} team members</span>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
-              <span className="text-sm font-medium text-red-700">Needs Allocation (&lt;75%)</span>
+              <span className="text-sm font-medium text-red-700">Unallocated (0%)</span>
             </div>
-            <span className="text-sm font-semibold bg-red-50 text-red-700 px-2 py-1 rounded-full">{needsAllocationCount} team members</span>
+            <span className="text-sm font-semibold bg-red-50 text-red-700 px-2 py-1 rounded-full">{zeroAllocationCount} team members</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="w-3 h-3 rounded-full bg-amber-300 mr-2"></div>
+              <span className="text-sm font-medium text-amber-700">Needs Allocation (1-74%)</span>
+            </div>
+            <span className="text-sm font-semibold bg-amber-50 text-amber-700 px-2 py-1 rounded-full">{needsMoreAllocation} team members</span>
           </div>
         </div>
 
