@@ -146,36 +146,177 @@ export async function seed() {
     
     // 3. Now we can insert tasks that reference these projects
     console.log('Seeding tasks...');
-    const taskValues = [
-      { title: "UI Component Library", description: "Create a reusable component library for the e-commerce platform", priority: "high", status: "in-progress", estimatedHours: 40, dueDate: "2023-08-15", category: "frontend", projectId: 1, assigneeId: 1 },
-      { title: "Database Schema Design", description: "Design the database schema for the new NoSQL structure", priority: "medium", status: "not-started", estimatedHours: 20, dueDate: "2023-11-15", category: "backend", projectId: 4, assigneeId: 4 },
-      { title: "API Authentication Flow", description: "Implement OAuth 2.0 for the API integration project", priority: "high", status: "not-started", estimatedHours: 15, dueDate: "2023-08-30", category: "backend", projectId: 2, assigneeId: null },
-      { title: "Mobile Navigation Design", description: "Design the navigation structure for the mobile app", priority: "medium", status: "in-progress", estimatedHours: 25, dueDate: "2023-09-15", category: "design", projectId: 3, assigneeId: 3 },
-      { title: "CI Pipeline Setup", description: "Configure Jenkins for continuous integration", priority: "low", status: "completed", estimatedHours: 30, dueDate: "2023-10-01", category: "devops", projectId: 5, assigneeId: 6 },
-      { title: "Payment Gateway Integration", description: "Integrate Stripe and PayPal payment gateways", priority: "high", status: "not-started", estimatedHours: 35, dueDate: "2023-09-30", category: "backend", projectId: 2, assigneeId: null },
-      { title: "User Testing Coordination", description: "Coordinate user testing sessions for the e-commerce redesign", priority: "medium", status: "not-started", estimatedHours: 20, dueDate: "2023-10-15", category: "ux", projectId: 1, assigneeId: null }
-    ];
     
-    for (const task of taskValues) {
-      await db.insert(tasks).values(task).onConflictDoNothing();
+    // First get the inserted team members to ensure we use valid IDs
+    const insertedTeamMembers = await db.select().from(teamMembers);
+    console.log(`Found ${insertedTeamMembers.length} team members for task assignment`);
+    
+    // Only proceed if we have team members to assign
+    if (insertedTeamMembers.length > 0) {
+      // Use the actual IDs from the database
+      const taskValues = [
+        { 
+          title: "UI Component Library", 
+          description: "Create a reusable component library for the e-commerce platform", 
+          priority: "high", 
+          status: "in-progress", 
+          estimatedHours: 40, 
+          dueDate: "2023-08-15", 
+          category: "frontend", 
+          projectId: 1, 
+          assigneeId: insertedTeamMembers[0]?.id || null // UI Designer
+        },
+        { 
+          title: "Database Schema Design", 
+          description: "Design the database schema for the new NoSQL structure", 
+          priority: "medium", 
+          status: "not-started", 
+          estimatedHours: 20, 
+          dueDate: "2023-11-15", 
+          category: "backend", 
+          projectId: 4, 
+          assigneeId: insertedTeamMembers[3]?.id || null // Backend Developer
+        },
+        { 
+          title: "API Authentication Flow", 
+          description: "Implement OAuth 2.0 for the API integration project", 
+          priority: "high", 
+          status: "not-started", 
+          estimatedHours: 15, 
+          dueDate: "2023-08-30", 
+          category: "backend", 
+          projectId: 2, 
+          assigneeId: null 
+        },
+        { 
+          title: "Mobile Navigation Design", 
+          description: "Design the navigation structure for the mobile app", 
+          priority: "medium", 
+          status: "in-progress", 
+          estimatedHours: 25, 
+          dueDate: "2023-09-15", 
+          category: "design", 
+          projectId: 3, 
+          assigneeId: insertedTeamMembers[2]?.id || null // UX Researcher
+        },
+        { 
+          title: "CI Pipeline Setup", 
+          description: "Configure Jenkins for continuous integration", 
+          priority: "low", 
+          status: "completed", 
+          estimatedHours: 30, 
+          dueDate: "2023-10-01", 
+          category: "devops", 
+          projectId: 5, 
+          assigneeId: insertedTeamMembers[5]?.id || null // Full Stack Developer
+        },
+        { 
+          title: "Payment Gateway Integration", 
+          description: "Integrate Stripe and PayPal payment gateways", 
+          priority: "high", 
+          status: "not-started", 
+          estimatedHours: 35, 
+          dueDate: "2023-09-30", 
+          category: "backend", 
+          projectId: 2, 
+          assigneeId: null 
+        },
+        { 
+          title: "User Testing Coordination", 
+          description: "Coordinate user testing sessions for the e-commerce redesign", 
+          priority: "medium", 
+          status: "not-started", 
+          estimatedHours: 20, 
+          dueDate: "2023-10-15", 
+          category: "ux", 
+          projectId: 1, 
+          assigneeId: null 
+        }
+      ];
+      
+      for (const task of taskValues) {
+        await db.insert(tasks).values(task).onConflictDoNothing();
+      }
+    } else {
+      console.warn('No team members found for task assignment, skipping task assignment');
     }
     
     // 4. Insert allocations
     console.log('Seeding allocations...');
-    const allocationValues = [
-      { teamMemberId: 1, projectId: 1, percentage: 60, startDate: "2023-06-01", endDate: "2023-09-30" },
-      { teamMemberId: 2, projectId: 2, percentage: 80, startDate: "2023-07-15", endDate: "2023-10-30" },
-      { teamMemberId: 3, projectId: 3, percentage: 40, startDate: "2023-08-01", endDate: "2023-12-31" },
-      { teamMemberId: 4, projectId: 4, percentage: 60, startDate: "2023-11-01", endDate: "2024-01-31" },
-      { teamMemberId: 5, projectId: 1, percentage: 30, startDate: "2023-06-01", endDate: "2023-12-15" },
-      { teamMemberId: 5, projectId: 3, percentage: 40, startDate: "2023-08-01", endDate: "2024-01-31" },
-      { teamMemberId: 6, projectId: 5, percentage: 70, startDate: "2023-09-01", endDate: "2023-12-31" },
-      { teamMemberId: 7, projectId: 1, percentage: 45, startDate: "2023-07-01", endDate: "2023-10-31" },
-      { teamMemberId: 8, projectId: 2, percentage: 75, startDate: "2023-08-01", endDate: "2023-10-30" }
-    ];
     
-    for (const allocation of allocationValues) {
-      await db.insert(allocations).values(allocation).onConflictDoNothing();
+    // Only proceed if we have team members for allocations
+    if (insertedTeamMembers.length > 0) {
+      const allocationValues = [
+        { 
+          teamMemberId: insertedTeamMembers[0]?.id, 
+          projectId: 1, 
+          percentage: 60, 
+          startDate: "2023-06-01", 
+          endDate: "2023-09-30" 
+        },
+        { 
+          teamMemberId: insertedTeamMembers[1]?.id, 
+          projectId: 2, 
+          percentage: 80, 
+          startDate: "2023-07-15", 
+          endDate: "2023-10-30" 
+        },
+        { 
+          teamMemberId: insertedTeamMembers[2]?.id, 
+          projectId: 3, 
+          percentage: 40, 
+          startDate: "2023-08-01", 
+          endDate: "2023-12-31" 
+        },
+        { 
+          teamMemberId: insertedTeamMembers[3]?.id, 
+          projectId: 4, 
+          percentage: 60, 
+          startDate: "2023-11-01", 
+          endDate: "2024-01-31" 
+        },
+        { 
+          teamMemberId: insertedTeamMembers[4]?.id, 
+          projectId: 1, 
+          percentage: 30, 
+          startDate: "2023-06-01", 
+          endDate: "2023-12-15" 
+        },
+        { 
+          teamMemberId: insertedTeamMembers[4]?.id, 
+          projectId: 3, 
+          percentage: 40, 
+          startDate: "2023-08-01", 
+          endDate: "2024-01-31" 
+        },
+        { 
+          teamMemberId: insertedTeamMembers[5]?.id, 
+          projectId: 5, 
+          percentage: 70, 
+          startDate: "2023-09-01", 
+          endDate: "2023-12-31" 
+        },
+        { 
+          teamMemberId: insertedTeamMembers[6]?.id, 
+          projectId: 1, 
+          percentage: 45, 
+          startDate: "2023-07-01", 
+          endDate: "2023-10-31" 
+        },
+        { 
+          teamMemberId: insertedTeamMembers[7]?.id || insertedTeamMembers[0]?.id, 
+          projectId: 2, 
+          percentage: 75, 
+          startDate: "2023-08-01", 
+          endDate: "2023-10-30" 
+        }
+      ].filter(allocation => allocation.teamMemberId !== undefined);
+      
+      for (const allocation of allocationValues) {
+        await db.insert(allocations).values(allocation).onConflictDoNothing();
+      }
+    } else {
+      console.warn('No team members found for allocations, skipping allocation assignment');
     }
     
     // 5. Insert timeline phases
