@@ -300,14 +300,33 @@ const Team: React.FC = () => {
     },
   });
 
+  // Helper function to get today's date in YYYY-MM-DD format without timezone issues
+  const getTodayFormatted = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  // Helper function to get a date in the future in YYYY-MM-DD format
+  const getFutureDateFormatted = (daysFromNow: number) => {
+    const future = new Date();
+    future.setDate(future.getDate() + daysFromNow);
+    const year = future.getFullYear();
+    const month = String(future.getMonth() + 1).padStart(2, '0');
+    const day = String(future.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // New allocation form
   const newAllocationForm = useForm<AllocationFormValues>({
     resolver: zodResolver(allocationFormSchema),
     defaultValues: {
       projectId: 0,
       percentage: 25,
-      startDate: new Date().toISOString().split("T")[0],
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      startDate: getTodayFormatted(),
+      endDate: getFutureDateFormatted(30),
     },
   });
   
@@ -317,8 +336,8 @@ const Team: React.FC = () => {
     defaultValues: {
       projectId: 0,
       percentage: 25,
-      startDate: new Date().toISOString().split("T")[0],
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      startDate: getTodayFormatted(),
+      endDate: getFutureDateFormatted(30),
     },
   });
 
@@ -499,8 +518,8 @@ const Team: React.FC = () => {
     newAllocationForm.reset({
       projectId: 0,
       percentage: 25,
-      startDate: new Date().toISOString().split("T")[0],
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+      startDate: getTodayFormatted(),
+      endDate: getFutureDateFormatted(30),
     });
     setIsNewAllocationDialogOpen(true);
   };
