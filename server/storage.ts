@@ -48,6 +48,7 @@ export type DashboardStats = {
   activeProjects: number;
   teamUtilizationAvg: number;
   zeroAllocationCount: number;
+  partiallyAllocatedCount: number;
   fullyAllocatedCount: number;
 };
 
@@ -225,6 +226,7 @@ export class MemStorage implements IStorage {
     
     // Team member allocation stats
     let zeroAllocationCount = 0;
+    let partiallyAllocatedCount = 0;
     let fullyAllocatedCount = 0;
     
     teamMembers.forEach(member => {
@@ -238,13 +240,13 @@ export class MemStorage implements IStorage {
       
       totalUtilization += utilizationSum;
       
-      // Track zero allocation and fully allocated members
+      // Track different allocation categories
       if (utilizationSum === 0) {
         zeroAllocationCount++;
-      }
-      
-      if (utilizationSum >= 100) {
+      } else if (utilizationSum >= 100) {
         fullyAllocatedCount++;
+      } else if (utilizationSum >= 1) {
+        partiallyAllocatedCount++;
       }
     });
     
@@ -252,10 +254,13 @@ export class MemStorage implements IStorage {
       ? Math.min(100, Math.round(totalUtilization / teamMembers.length)) 
       : 0;
 
+    // partiallyAllocatedCount is now calculated directly in the loop above
+    
     return {
       activeProjects,
       teamUtilizationAvg,
       zeroAllocationCount,
+      partiallyAllocatedCount,
       fullyAllocatedCount
     };
   }
@@ -576,6 +581,7 @@ export class DatabaseStorage implements IStorage {
     
     let totalUtilization = 0;
     let zeroAllocationCount = 0;
+    let partiallyAllocatedCount = 0;
     let fullyAllocatedCount = 0;
     
     // Calculate allocation statistics for each team member
@@ -590,13 +596,13 @@ export class DatabaseStorage implements IStorage {
       
       totalUtilization += utilizationSum;
       
-      // Track zero allocation and fully allocated members
+      // Track different allocation categories
       if (utilizationSum === 0) {
         zeroAllocationCount++;
-      }
-      
-      if (utilizationSum >= 100) {
+      } else if (utilizationSum >= 100) {
         fullyAllocatedCount++;
+      } else if (utilizationSum >= 1) {
+        partiallyAllocatedCount++;
       }
     });
     
@@ -604,11 +610,12 @@ export class DatabaseStorage implements IStorage {
       ? Math.min(100, Math.round(totalUtilization / allTeamMembers.length)) 
       : 0;
     
-    // Return simplified dashboard stats (removed task-related stats)
+    // Return detailed dashboard stats
     return {
       activeProjects,
       teamUtilizationAvg,
       zeroAllocationCount,
+      partiallyAllocatedCount,
       fullyAllocatedCount
     };
   }

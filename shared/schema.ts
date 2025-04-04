@@ -244,6 +244,7 @@ export type DashboardStats = {
   activeProjects: number;
   teamUtilizationAvg: number;
   zeroAllocationCount: number; // Count of team members with 0% allocation
+  partiallyAllocatedCount: number; // Count of team members with 1-99% allocation
   fullyAllocatedCount: number; // Count of team members with 100% or more allocation
 };
 

@@ -15,6 +15,7 @@ type DashboardStats = {
   activeProjects: number;
   teamUtilizationAvg: number;
   zeroAllocationCount: number;
+  partiallyAllocatedCount: number;
   fullyAllocatedCount: number;
 };
 
@@ -56,16 +57,10 @@ const TeamAvailability: React.FC = () => {
     );
   }
 
-  // Calculate availability stats - using accurate data from dashboard stats
-  const totalTeamMembers = utilizationData?.reduce((acc, curr) => acc + curr.memberCount, 0) || 0;
-  
-  // Get counts directly from dashboard stats
+  // Use accurate data directly from dashboard stats
   const fullyAllocatedCount = dashboardStats?.fullyAllocatedCount || 0;
-  const zeroAllocationCount = dashboardStats?.zeroAllocationCount || 0;
-  
-  // Calculate partial allocation count (team members who are neither at 0% nor at 100%+)
-  const partialCount = totalTeamMembers - fullyAllocatedCount - zeroAllocationCount;
-  const needsAllocationCount = zeroAllocationCount;
+  const partialCount = dashboardStats?.partiallyAllocatedCount || 0;
+  const needsAllocationCount = dashboardStats?.zeroAllocationCount || 0;
 
   return (
     <Card className="h-full flex flex-col">
