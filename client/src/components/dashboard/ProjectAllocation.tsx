@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
+import { ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type TeamMember = {
   id: number;
@@ -45,7 +47,13 @@ type ProjectAllocationData = {
   }[];
 };
 
+type SortField = 'name' | 'totalMembers' | 'status';
+type SortDirection = 'asc' | 'desc';
+
 const ProjectAllocation: React.FC = () => {
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+
   const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
   });
@@ -59,6 +67,30 @@ const ProjectAllocation: React.FC = () => {
   });
 
   const isLoading = projectsLoading || teamMembersLoading || allocationsLoading;
+  
+  // Handle sort click
+  const handleSort = (field: SortField) => {
+    if (field === sortField) {
+      // Toggle direction if clicking the same field
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // New field, set to ascending by default
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+  
+  // Get sort icon
+  const getSortIcon = (field: SortField) => {
+    if (field !== sortField) {
+      return <ArrowUpDown className="ml-1 h-4 w-4" />;
+    }
+    return sortDirection === 'asc' ? (
+      <ChevronUp className="ml-1 h-4 w-4" />
+    ) : (
+      <ChevronDown className="ml-1 h-4 w-4" />
+    );
+  };
 
   // Get status badge class
   const getStatusBadge = (status: string) => {
@@ -78,7 +110,8 @@ const ProjectAllocation: React.FC = () => {
   const projectAllocations: ProjectAllocationData[] = React.useMemo(() => {
     if (!projects || !teamMembers || !allocations) return [];
 
-    return projects.map(project => {
+    // First map the data
+    const mappedData = projects.map(project => {
       // Get all allocations for this project
       const projectAllocations = allocations.filter(a => a.projectId === project.id);
       
@@ -112,7 +145,25 @@ const ProjectAllocation: React.FC = () => {
         members
       };
     });
-  }, [projects, teamMembers, allocations]);
+    
+    // Then sort the data based on current sort field and direction
+    return [...mappedData].sort((a, b) => {
+      if (sortField === 'name') {
+        return sortDirection === 'asc' 
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      } else if (sortField === 'totalMembers') {
+        return sortDirection === 'asc'
+          ? a.totalMembers - b.totalMembers
+          : b.totalMembers - a.totalMembers;
+      } else if (sortField === 'status') {
+        return sortDirection === 'asc'
+          ? a.status.localeCompare(b.status)
+          : b.status.localeCompare(a.status);
+      }
+      return 0;
+    });
+  }, [projects, teamMembers, allocations, sortField, sortDirection]);
 
   if (isLoading) {
     return (
@@ -137,10 +188,37 @@ const ProjectAllocation: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="text-sm font-medium text-left text-slate-500 border-b border-slate-200">
-                <th className="pb-3 pl-2">Project</th>
-                <th className="pb-3">Total Members</th>
+                <th className="pb-3 pl-2">
+                  <Button
+                    variant="ghost"
+                    className="p-0 font-medium text-slate-500 hover:text-slate-900 flex items-center"
+                    onClick={() => handleSort('name')}
+                  >
+                    Project
+                    {getSortIcon('name')}
+                  </Button>
+                </th>
+                <th className="pb-3">
+                  <Button
+                    variant="ghost"
+                    className="p-0 font-medium text-slate-500 hover:text-slate-900 flex items-center"
+                    onClick={() => handleSort('totalMembers')}
+                  >
+                    Total Members
+                    {getSortIcon('totalMembers')}
+                  </Button>
+                </th>
                 <th className="pb-3">Team Members</th>
-                <th className="pb-3">Status</th>
+                <th className="pb-3">
+                  <Button
+                    variant="ghost"
+                    className="p-0 font-medium text-slate-500 hover:text-slate-900 flex items-center"
+                    onClick={() => handleSort('status')}
+                  >
+                    Status
+                    {getSortIcon('status')}
+                  </Button>
+                </th>
               </tr>
             </thead>
             <tbody>
