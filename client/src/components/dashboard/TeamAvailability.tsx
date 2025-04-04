@@ -57,14 +57,23 @@ const TeamAvailability: React.FC = () => {
     );
   }
 
-  // Use accurate data directly from dashboard stats
-  const fullyAllocatedCount = dashboardStats?.fullyAllocatedCount || 0;
+  // Calculate all counts from team utilization data to ensure consistency
+  
+  // Fully allocated is those with ≥100% allocation
+  const fullyAllocatedMembers = (utilizationData || [])
+    .filter(data => data.utilizationPercentage >= 100)
+    .reduce((sum, data) => sum + data.memberCount, 0);
+  
+  const fullyAllocatedCount = fullyAllocatedMembers;
   
   // Partially allocated is only those with 75-99% allocation
-  const partialCount = dashboardStats?.partiallyAllocatedCount || 0;
+  const partiallyAllocatedMembers = (utilizationData || [])
+    .filter(data => data.utilizationPercentage >= 75 && data.utilizationPercentage < 100)
+    .reduce((sum, data) => sum + data.memberCount, 0);
+  
+  const partialCount = partiallyAllocatedMembers;
   
   // "Needs allocation" should include all team members with <75% allocation
-  // This includes both zero allocation count and some of partially allocated
   const lowAllocationTeamMembers = (utilizationData || [])
     .filter(data => data.utilizationPercentage < 75)
     .reduce((sum, data) => sum + data.memberCount, 0);
