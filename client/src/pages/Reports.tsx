@@ -38,6 +38,19 @@ type TeamMember = {
   role: string;
   avatar: string;
   availability: number;
+  skills: string[] | null;
+};
+
+type TeamPerformance = {
+  month: string;
+  completion: number; // percent of completion rate
+  efficiency: number; // efficiency rate in percent
+};
+
+type CategoryHours = {
+  category: string;
+  estimated: number;
+  actual: number;
 };
 
 type Task = {
@@ -86,7 +99,15 @@ const Reports: React.FC = () => {
     queryKey: ["/api/projects"],
   });
 
-  const isLoading = statsLoading || utilizationLoading || membersLoading || tasksLoading || projectsLoading;
+  const { data: teamPerformance, isLoading: performanceLoading } = useQuery<TeamPerformance[]>({
+    queryKey: ["/api/dashboard/team-performance"],
+  });
+
+  const { data: categoryHours, isLoading: hoursLoading } = useQuery<CategoryHours[]>({
+    queryKey: ["/api/dashboard/category-hours"],
+  });
+
+  const isLoading = statsLoading || utilizationLoading || membersLoading || tasksLoading || projectsLoading || performanceLoading || hoursLoading;
 
   // Prepare utilization by role chart data
   const utilizationByRoleData = React.useMemo(() => {
@@ -159,15 +180,10 @@ const Reports: React.FC = () => {
     }));
   }, [tasks]);
 
-  // Prepare mock team performance data (would normally come from API)
-  const teamPerformanceData = [
-    { month: 'Jan', completion: 85, efficiency: 78 },
-    { month: 'Feb', completion: 88, efficiency: 80 },
-    { month: 'Mar', completion: 82, efficiency: 75 },
-    { month: 'Apr', completion: 90, efficiency: 85 },
-    { month: 'May', completion: 93, efficiency: 87 },
-    { month: 'Jun', completion: 91, efficiency: 85 }
-  ];
+  // Prepare team performance data from API
+  const teamPerformanceData = React.useMemo(() => {
+    return teamPerformance || [];
+  }, [teamPerformance]);
 
   // Color schemes for charts
   const COLORS = ['#2563eb', '#4f46e5', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
@@ -513,12 +529,7 @@ const Reports: React.FC = () => {
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={[
-                        { category: 'Frontend', estimated: 120, actual: 140 },
-                        { category: 'Backend', estimated: 150, actual: 130 },
-                        { category: 'UI/UX', estimated: 80, actual: 85 },
-                        { category: 'QA', estimated: 70, actual: 60 }
-                      ]}
+                      data={categoryHours}
                       margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />

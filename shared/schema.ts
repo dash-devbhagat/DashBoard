@@ -253,3 +253,15 @@ export type TeamUtilization = {
   memberCount: number;
   utilizationPercentage: number;
 };
+
+export type TeamPerformance = {
+  month: string;
+  completion: number; // percent of completion rate
+  efficiency: number; // efficiency rate in percent
+};
+
+export type CategoryHours = {
+  category: string;
+  estimated: number;
+  actual: number;
+};

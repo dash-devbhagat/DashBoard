@@ -512,6 +512,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/dashboard/team-performance', async (req: Request, res: Response) => {
+    try {
+      const performance = await storage.getTeamPerformance();
+      res.json(performance);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch team performance data" });
+    }
+  });
+
+  app.get('/api/dashboard/category-hours', async (req: Request, res: Response) => {
+    try {
+      const hours = await storage.getCategoryHours();
+      res.json(hours);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch category hours data" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

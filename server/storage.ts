@@ -3,7 +3,8 @@ import {
   type TeamMember, type InsertTeamMember,
   type Project, type InsertProject,
   type Allocation, type InsertAllocation,
-  type TimelinePhase, type InsertTimelinePhase
+  type TimelinePhase, type InsertTimelinePhase,
+  type TeamPerformance, type CategoryHours
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, isNull, sql, count } from "drizzle-orm";
@@ -42,6 +43,8 @@ export interface IStorage {
   // Dashboard Stats
   getDashboardStats(): Promise<DashboardStats>;
   getTeamUtilization(): Promise<TeamUtilization[]>;
+  getTeamPerformance(): Promise<TeamPerformance[]>;
+  getCategoryHours(): Promise<CategoryHours[]>;
 }
 
 export type DashboardStats = {
@@ -293,6 +296,45 @@ export class MemStorage implements IStorage {
       memberCount: data.count,
       utilizationPercentage: Math.round(data.utilization / data.count)
     }));
+  }
+
+  async getTeamPerformance(): Promise<TeamPerformance[]> {
+    // Generate last 6 months of performance data
+    const today = new Date();
+    const months: string[] = [];
+    
+    for (let i = 5; i >= 0; i--) {
+      const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthName = month.toLocaleString('default', { month: 'short' });
+      months.push(monthName);
+    }
+    
+    // Generate improvement trend data with some fluctuation
+    const baseCompletion = 65;
+    const baseEfficiency = 70;
+    
+    return months.map((month, index) => {
+      // Add some randomness but with an overall positive trend
+      const trend = index * 3;
+      const randomVariance = Math.floor(Math.random() * 10) - 5;
+      
+      return {
+        month,
+        completion: Math.min(98, Math.max(60, baseCompletion + trend + randomVariance)),
+        efficiency: Math.min(98, Math.max(65, baseEfficiency + trend + randomVariance))
+      };
+    });
+  }
+  
+  async getCategoryHours(): Promise<CategoryHours[]> {
+    // Generate data for estimated vs actual hours by project category
+    return [
+      { category: 'Frontend', estimated: 450, actual: 480 },
+      { category: 'Backend', estimated: 320, actual: 310 },
+      { category: 'Design', estimated: 280, actual: 305 },
+      { category: 'QA', estimated: 190, actual: 210 },
+      { category: 'DevOps', estimated: 150, actual: 120 }
+    ];
   }
 
   // Seed initial data
@@ -655,6 +697,45 @@ export class DatabaseStorage implements IStorage {
       memberCount: data.count,
       utilizationPercentage: Math.round(data.utilization / data.count)
     }));
+  }
+
+  async getTeamPerformance(): Promise<TeamPerformance[]> {
+    // Generate last 6 months of performance data for database storage
+    const today = new Date();
+    const months: string[] = [];
+    
+    for (let i = 5; i >= 0; i--) {
+      const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthName = month.toLocaleString('default', { month: 'short' });
+      months.push(monthName);
+    }
+    
+    // Generate improvement trend data with some fluctuation
+    const baseCompletion = 65;
+    const baseEfficiency = 70;
+    
+    return months.map((month, index) => {
+      // Add some randomness but with an overall positive trend
+      const trend = index * 3;
+      const randomVariance = Math.floor(Math.random() * 10) - 5;
+      
+      return {
+        month,
+        completion: Math.min(98, Math.max(60, baseCompletion + trend + randomVariance)),
+        efficiency: Math.min(98, Math.max(65, baseEfficiency + trend + randomVariance))
+      };
+    });
+  }
+  
+  async getCategoryHours(): Promise<CategoryHours[]> {
+    // Generate data for estimated vs actual hours by project category
+    return [
+      { category: 'Frontend', estimated: 450, actual: 480 },
+      { category: 'Backend', estimated: 320, actual: 310 },
+      { category: 'Design', estimated: 280, actual: 305 },
+      { category: 'QA', estimated: 190, actual: 210 },
+      { category: 'DevOps', estimated: 150, actual: 120 }
+    ];
   }
 }
 
