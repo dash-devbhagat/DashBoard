@@ -246,10 +246,9 @@ export class MemStorage implements IStorage {
       // Track different allocation categories
       if (utilizationSum >= 100) {
         fullyAllocatedCount++;
-      } else if (utilizationSum > 0) {
+      } else if (utilizationSum >= 75) {
         partiallyAllocatedCount++;
       } else {
-        // Only count team members with 0% allocation
         zeroAllocationCount++;
       }
     });
@@ -642,10 +641,9 @@ export class DatabaseStorage implements IStorage {
       // Track different allocation categories
       if (utilizationSum >= 100) {
         fullyAllocatedCount++;
-      } else if (utilizationSum > 0) {
+      } else if (utilizationSum >= 75) {
         partiallyAllocatedCount++;
       } else {
-        // Only count team members with 0% allocation
         zeroAllocationCount++;
       }
     });

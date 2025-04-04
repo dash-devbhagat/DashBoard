@@ -3,8 +3,7 @@ import {
   type TeamMember, type InsertTeamMember,
   type Project, type InsertProject,
   type Allocation, type InsertAllocation,
-  type TimelinePhase, type InsertTimelinePhase,
-  type TeamPerformance, type CategoryHours
+  type TimelinePhase, type InsertTimelinePhase
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, isNull, sql, count } from "drizzle-orm";
@@ -43,15 +42,12 @@ export interface IStorage {
   // Dashboard Stats
   getDashboardStats(): Promise<DashboardStats>;
   getTeamUtilization(): Promise<TeamUtilization[]>;
-  getTeamPerformance(): Promise<TeamPerformance[]>;
-  getCategoryHours(): Promise<CategoryHours[]>;
 }
 
 export type DashboardStats = {
   activeProjects: number;
   teamUtilizationAvg: number;
   zeroAllocationCount: number;
-  partiallyAllocatedCount: number;
   fullyAllocatedCount: number;
 };
 
@@ -144,8 +140,6 @@ export class MemStorage implements IStorage {
     return this.projects.delete(id);
   }
 
-  // Tasks section removed
-
   // Allocations
   async getAllocations(): Promise<Allocation[]> {
     return Array.from(this.allocations.values());
@@ -229,7 +223,6 @@ export class MemStorage implements IStorage {
     
     // Team member allocation stats
     let zeroAllocationCount = 0;
-    let partiallyAllocatedCount = 0;
     let fullyAllocatedCount = 0;
     
     teamMembers.forEach(member => {
@@ -243,13 +236,13 @@ export class MemStorage implements IStorage {
       
       totalUtilization += utilizationSum;
       
-      // Track different allocation categories
+      // Track zero allocation and fully allocated members
+      if (utilizationSum === 0) {
+        zeroAllocationCount++;
+      }
+      
       if (utilizationSum >= 100) {
         fullyAllocatedCount++;
-      } else if (utilizationSum > 0) {
-        partiallyAllocatedCount++;
-      } else {
-        zeroAllocationCount++;
       }
     });
     
@@ -257,13 +250,10 @@ export class MemStorage implements IStorage {
       ? Math.min(100, Math.round(totalUtilization / teamMembers.length)) 
       : 0;
 
-    // partiallyAllocatedCount is now calculated directly in the loop above
-    
     return {
       activeProjects,
       teamUtilizationAvg,
       zeroAllocationCount,
-      partiallyAllocatedCount,
       fullyAllocatedCount
     };
   }
@@ -296,45 +286,6 @@ export class MemStorage implements IStorage {
       memberCount: data.count,
       utilizationPercentage: Math.round(data.utilization / data.count)
     }));
-  }
-
-  async getTeamPerformance(): Promise<TeamPerformance[]> {
-    // Generate last 6 months of performance data
-    const today = new Date();
-    const months: string[] = [];
-    
-    for (let i = 5; i >= 0; i--) {
-      const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const monthName = month.toLocaleString('default', { month: 'short' });
-      months.push(monthName);
-    }
-    
-    // Generate improvement trend data with some fluctuation
-    const baseCompletion = 65;
-    const baseEfficiency = 70;
-    
-    return months.map((month, index) => {
-      // Add some randomness but with an overall positive trend
-      const trend = index * 3;
-      const randomVariance = Math.floor(Math.random() * 10) - 5;
-      
-      return {
-        month,
-        completion: Math.min(98, Math.max(60, baseCompletion + trend + randomVariance)),
-        efficiency: Math.min(98, Math.max(65, baseEfficiency + trend + randomVariance))
-      };
-    });
-  }
-  
-  async getCategoryHours(): Promise<CategoryHours[]> {
-    // Generate data for estimated vs actual hours by project category
-    return [
-      { category: 'Frontend', estimated: 450, actual: 480 },
-      { category: 'Backend', estimated: 320, actual: 310 },
-      { category: 'Design', estimated: 280, actual: 305 },
-      { category: 'QA', estimated: 190, actual: 210 },
-      { category: 'DevOps', estimated: 150, actual: 120 }
-    ];
   }
 
   // Seed initial data
@@ -371,40 +322,40 @@ export class MemStorage implements IStorage {
       { 
         name: 'E-commerce Redesign',
         status: 'active',
-        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30),
-        endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate()),
+        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30).toISOString().split('T')[0],
+        endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate()).toISOString().split('T')[0],
         description: 'Redesign the e-commerce platform to improve user experience and conversion rates',
         color: '#2563eb'
       },
       { 
         name: 'CRM Dashboard',
         status: 'active',
-        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 15),
-        endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 15),
+        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 15).toISOString().split('T')[0],
+        endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 15).toISOString().split('T')[0],
         description: 'Develop a comprehensive CRM dashboard for sales team',
         color: '#4f46e5'
       },
       { 
         name: 'API Integration',
         status: 'active',
-        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 5),
-        endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 25),
+        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 5).toISOString().split('T')[0],
+        endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 25).toISOString().split('T')[0],
         description: 'Integrate third-party APIs for payment processing and shipping',
         color: '#22c55e'
       },
       { 
         name: 'Mobile App Redesign',
         status: 'active',
-        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 20),
-        endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate() + 10),
+        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 20).toISOString().split('T')[0],
+        endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate() + 10).toISOString().split('T')[0],
         description: 'Redesign the mobile app interface and improve performance',
         color: '#eab308'
       },
       { 
         name: 'Testing Automation',
         status: 'active',
-        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5),
-        endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 5),
+        startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5).toISOString().split('T')[0],
+        endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 5).toISOString().split('T')[0],
         description: 'Implement automated testing framework for CI/CD pipeline',
         color: '#ef4444'
       }
@@ -417,277 +368,305 @@ export class MemStorage implements IStorage {
 
     // Seed timeline phases
     const timelinePhasesData: InsertTimelinePhase[] = [
-      { projectId: 1, name: 'Planning', startWeek: 1, durationWeeks: 3, color: '#bfdbfe' },
-      { projectId: 2, name: 'Design', startWeek: 3, durationWeeks: 4, color: '#c7d2fe' },
-      { projectId: 3, name: 'Development', startWeek: 0, durationWeeks: 2, color: '#bbf7d0' },
-      { projectId: 4, name: 'Testing', startWeek: 2, durationWeeks: 5, color: '#fef08a' },
-      { projectId: 5, name: 'Deployment', startWeek: 6, durationWeeks: 3, color: '#fecaca' }
+      { projectId: 1, name: 'Planning', startWeek: 1, durationWeeks: 2, color: '#0ea5e9' },
+      { projectId: 1, name: 'Design', startWeek: 3, durationWeeks: 4, color: '#8b5cf6' },
+      { projectId: 1, name: 'Development', startWeek: 7, durationWeeks: 6, color: '#22c55e' },
+      { projectId: 1, name: 'Testing', startWeek: 13, durationWeeks: 2, color: '#f59e0b' },
+      { projectId: 1, name: 'Deployment', startWeek: 15, durationWeeks: 1, color: '#ef4444' },
+      
+      { projectId: 2, name: 'Planning', startWeek: 1, durationWeeks: 1, color: '#0ea5e9' },
+      { projectId: 2, name: 'Design', startWeek: 2, durationWeeks: 3, color: '#8b5cf6' },
+      { projectId: 2, name: 'Development', startWeek: 5, durationWeeks: 4, color: '#22c55e' },
+      { projectId: 2, name: 'Testing', startWeek: 9, durationWeeks: 1, color: '#f59e0b' },
+      { projectId: 2, name: 'Deployment', startWeek: 10, durationWeeks: 1, color: '#ef4444' },
+      
+      { projectId: 3, name: 'Planning', startWeek: 1, durationWeeks: 1, color: '#0ea5e9' },
+      { projectId: 3, name: 'Development', startWeek: 2, durationWeeks: 3, color: '#22c55e' },
+      { projectId: 3, name: 'Testing', startWeek: 5, durationWeeks: 1, color: '#f59e0b' },
+      
+      { projectId: 4, name: 'Research', startWeek: 1, durationWeeks: 2, color: '#0ea5e9' },
+      { projectId: 4, name: 'Design', startWeek: 3, durationWeeks: 4, color: '#8b5cf6' },
+      { projectId: 4, name: 'Development', startWeek: 7, durationWeeks: 6, color: '#22c55e' },
+      { projectId: 4, name: 'Testing', startWeek: 13, durationWeeks: 3, color: '#f59e0b' },
+      
+      { projectId: 5, name: 'Research', startWeek: 1, durationWeeks: 1, color: '#0ea5e9' },
+      { projectId: 5, name: 'Development', startWeek: 2, durationWeeks: 3, color: '#22c55e' },
+      { projectId: 5, name: 'Testing', startWeek: 5, durationWeeks: 1, color: '#f59e0b' }
     ];
-
+    
     timelinePhasesData.forEach(phase => {
       const id = this.timelinePhasesId++;
       this.timelinePhases.set(id, { ...phase, id });
     });
-
+    
     // Seed allocations
     const allocationsData: InsertAllocation[] = [
-      { teamMemberId: 1, projectId: 1, percentage: 75, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30), endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate()) },
-      { teamMemberId: 2, projectId: 2, percentage: 100, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 15), endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 15) },
-      { teamMemberId: 3, projectId: 3, percentage: 50, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 5), endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 25) },
-      { teamMemberId: 4, projectId: 4, percentage: 80, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 20), endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate() + 10) },
-      { teamMemberId: 5, projectId: 5, percentage: 30, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5), endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 5) }
-    ];
+      // UI Designers
+      { teamMemberId: 1, projectId: 1, percentage: 50, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate()).toISOString().split('T')[0] },
+      { teamMemberId: 1, projectId: 4, percentage: 25, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 20).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate()).toISOString().split('T')[0] },
+      { teamMemberId: 6, projectId: 4, percentage: 60, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 20).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate() + 10).toISOString().split('T')[0] },
+      { teamMemberId: 13, projectId: 1, percentage: 45, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate()).toISOString().split('T')[0] },
 
+      // Frontend Developers
+      { teamMemberId: 2, projectId: 1, percentage: 40, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 15).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 15).toISOString().split('T')[0] },
+      { teamMemberId: 2, projectId: 4, percentage: 60, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 20).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate() + 10).toISOString().split('T')[0] },
+      { teamMemberId: 7, projectId: 2, percentage: 90, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 15).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 15).toISOString().split('T')[0] },
+      { teamMemberId: 8, projectId: 1, percentage: 65, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate()).toISOString().split('T')[0] },
+      { teamMemberId: 14, projectId: 4, percentage: 25, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 20).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate() + 10).toISOString().split('T')[0] },
+      { teamMemberId: 15, projectId: 2, percentage: 85, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 15).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 15).toISOString().split('T')[0] },
+      
+      // Backend Developers
+      { teamMemberId: 3, projectId: 2, percentage: 50, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 15).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 15).toISOString().split('T')[0] },
+      { teamMemberId: 9, projectId: 3, percentage: 100, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 5).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 25).toISOString().split('T')[0] },
+      { teamMemberId: 16, projectId: 3, percentage: 15, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 5).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 25).toISOString().split('T')[0] },
+      
+      // UX Researchers
+      { teamMemberId: 4, projectId: 4, percentage: 80, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 20).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate() + 10).toISOString().split('T')[0] },
+      { teamMemberId: 17, projectId: 1, percentage: 75, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 2, now.getDate()).toISOString().split('T')[0] },
+      
+      // QA Engineers
+      { teamMemberId: 5, projectId: 5, percentage: 30, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 5).toISOString().split('T')[0] },
+      { teamMemberId: 10, projectId: 3, percentage: 40, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 5).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 25).toISOString().split('T')[0] },
+      
+      // DevOps Engineers
+      { teamMemberId: 11, projectId: 5, percentage: 70, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 5).toISOString().split('T')[0] },
+      { teamMemberId: 12, projectId: 5, percentage: 55, startDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5).toISOString().split('T')[0], endDate: new Date(now.getFullYear(), now.getMonth() + 1, now.getDate() + 5).toISOString().split('T')[0] }
+    ];
+    
     allocationsData.forEach(allocation => {
       const id = this.allocationsId++;
       this.allocations.set(id, { ...allocation, id });
     });
-
-    // Tasks section removed
   }
 }
 
 export class DatabaseStorage implements IStorage {
   // Team Members
   async getTeamMembers(): Promise<TeamMember[]> {
-    const { db } = await import('./db');
     return await db.select().from(teamMembers);
   }
 
   async getTeamMember(id: number): Promise<TeamMember | undefined> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!id) return undefined;
+    
     const result = await db.select().from(teamMembers).where(eq(teamMembers.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
 
   async createTeamMember(teamMember: InsertTeamMember): Promise<TeamMember> {
-    const { db } = await import('./db');
     const result = await db.insert(teamMembers).values(teamMember).returning();
     return result[0];
   }
 
   async updateTeamMember(id: number, teamMember: Partial<InsertTeamMember>): Promise<TeamMember | undefined> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!id) return undefined;
+    
     const result = await db.update(teamMembers)
       .set(teamMember)
       .where(eq(teamMembers.id, id))
       .returning();
+    
     return result.length > 0 ? result[0] : undefined;
   }
 
   async deleteTeamMember(id: number): Promise<boolean> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!id) return false;
+    
     const result = await db.delete(teamMembers).where(eq(teamMembers.id, id)).returning();
     return result.length > 0;
   }
 
   // Projects
   async getProjects(): Promise<Project[]> {
-    const { db } = await import('./db');
     return await db.select().from(projects);
   }
 
   async getProject(id: number): Promise<Project | undefined> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!id) return undefined;
+    
     const result = await db.select().from(projects).where(eq(projects.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    const { db } = await import('./db');
     const result = await db.insert(projects).values(project).returning();
     return result[0];
   }
 
   async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!id) return undefined;
+    
     const result = await db.update(projects)
       .set(project)
       .where(eq(projects.id, id))
       .returning();
+    
     return result.length > 0 ? result[0] : undefined;
   }
 
   async deleteProject(id: number): Promise<boolean> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!id) return false;
+    
     const result = await db.delete(projects).where(eq(projects.id, id)).returning();
     return result.length > 0;
   }
 
-  // Tasks section removed
-
   // Allocations
   async getAllocations(): Promise<Allocation[]> {
-    const { db } = await import('./db');
     return await db.select().from(allocations);
   }
 
   async getAllocation(id: number): Promise<Allocation | undefined> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!id) return undefined;
+    
     const result = await db.select().from(allocations).where(eq(allocations.id, id));
     return result.length > 0 ? result[0] : undefined;
   }
 
   async getAllocationsByTeamMember(teamMemberId: number): Promise<Allocation[]> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!teamMemberId) return [];
+    
     return await db.select().from(allocations).where(eq(allocations.teamMemberId, teamMemberId));
   }
 
   async getAllocationsByProject(projectId: number): Promise<Allocation[]> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!projectId) return [];
+    
     return await db.select().from(allocations).where(eq(allocations.projectId, projectId));
   }
 
   async createAllocation(allocation: InsertAllocation): Promise<Allocation> {
-    const { db } = await import('./db');
     const result = await db.insert(allocations).values(allocation).returning();
     return result[0];
   }
 
   async updateAllocation(id: number, allocation: Partial<InsertAllocation>): Promise<Allocation | undefined> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!id) return undefined;
+    
     const result = await db.update(allocations)
       .set(allocation)
       .where(eq(allocations.id, id))
       .returning();
+    
     return result.length > 0 ? result[0] : undefined;
   }
 
   async deleteAllocation(id: number): Promise<boolean> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!id) return false;
+    
     const result = await db.delete(allocations).where(eq(allocations.id, id)).returning();
     return result.length > 0;
   }
 
   // Timeline Phases
   async getTimelinePhases(): Promise<TimelinePhase[]> {
-    const { db } = await import('./db');
     return await db.select().from(timelinePhases);
   }
 
   async getTimelinePhasesByProject(projectId: number): Promise<TimelinePhase[]> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!projectId) return [];
+    
     return await db.select().from(timelinePhases).where(eq(timelinePhases.projectId, projectId));
   }
 
   async createTimelinePhase(phase: InsertTimelinePhase): Promise<TimelinePhase> {
-    const { db } = await import('./db');
     const result = await db.insert(timelinePhases).values(phase).returning();
     return result[0];
   }
 
   async updateTimelinePhase(id: number, phase: Partial<InsertTimelinePhase>): Promise<TimelinePhase | undefined> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!id) return undefined;
+    
     const result = await db.update(timelinePhases)
       .set(phase)
       .where(eq(timelinePhases.id, id))
       .returning();
+    
     return result.length > 0 ? result[0] : undefined;
   }
 
   async deleteTimelinePhase(id: number): Promise<boolean> {
-    const { db } = await import('./db');
-    const { eq } = await import('drizzle-orm');
+    if (!id) return false;
+    
     const result = await db.delete(timelinePhases).where(eq(timelinePhases.id, id)).returning();
     return result.length > 0;
   }
 
   // Dashboard Stats
   async getDashboardStats(): Promise<DashboardStats> {
-    const { db } = await import('./db');
-    const { eq, isNull, count, and, sql } = await import('drizzle-orm');
-    
     // Get active projects count
     const activeProjectsResult = await db
-      .select({ count: count() })
+      .select({ count: sql<number>`count(*)` })
       .from(projects)
       .where(eq(projects.status, 'active'));
     const activeProjects = activeProjectsResult[0].count;
     
-    // Get team utilization average and allocation statistics
-    const allAllocations = await db.select().from(allocations);
-    const allTeamMembers = await db.select().from(teamMembers);
+    // Get team utilization average
+    const teamMembersResult = await db.select().from(teamMembers);
+    if (teamMembersResult.length === 0) {
+      return {
+        activeProjects,
+        teamUtilizationAvg: 0,
+        zeroAllocationCount: 0,
+        fullyAllocatedCount: 0
+      };
+    }
     
+    const allocationsResult = await db.select().from(allocations);
     let totalUtilization = 0;
     let zeroAllocationCount = 0;
-    let partiallyAllocatedCount = 0;
     let fullyAllocatedCount = 0;
     
-    // Calculate allocation statistics for each team member
-    allTeamMembers.forEach(member => {
-      const memberAllocations = allAllocations.filter(
-        allocation => allocation.teamMemberId === member.id
-      );
-      const utilizationSum = memberAllocations.reduce(
-        (sum, allocation) => sum + allocation.percentage, 
-        0
-      );
+    // Calculate each team member's allocation
+    teamMembersResult.forEach(member => {
+      const memberAllocations = allocationsResult.filter(a => a.teamMemberId === member.id);
+      const memberUtilization = memberAllocations.reduce((sum, a) => sum + a.percentage, 0);
       
-      totalUtilization += utilizationSum;
+      totalUtilization += memberUtilization;
       
-      // Track different allocation categories
-      if (utilizationSum >= 100) {
-        fullyAllocatedCount++;
-      } else if (utilizationSum > 0) {
-        partiallyAllocatedCount++;
-      } else {
+      if (memberUtilization === 0) {
         zeroAllocationCount++;
+      }
+      
+      if (memberUtilization >= 100) {
+        fullyAllocatedCount++;
       }
     });
     
-    const teamUtilizationAvg = allTeamMembers.length > 0 
-      ? Math.min(100, Math.round(totalUtilization / allTeamMembers.length)) 
-      : 0;
+    const teamUtilizationAvg = Math.min(100, Math.round(totalUtilization / teamMembersResult.length));
     
-    // Return detailed dashboard stats
     return {
       activeProjects,
       teamUtilizationAvg,
       zeroAllocationCount,
-      partiallyAllocatedCount,
       fullyAllocatedCount
     };
   }
 
   async getTeamUtilization(): Promise<TeamUtilization[]> {
-    const { db } = await import('./db');
-    const { eq, sql } = await import('drizzle-orm');
+    // Get all team members
+    const teamMembersResult = await db.select().from(teamMembers);
+    if (teamMembersResult.length === 0) {
+      return [];
+    }
     
-    // Get all team members and allocations
-    const allTeamMembers = await db.select().from(teamMembers);
-    const allAllocations = await db.select().from(allocations);
+    // Get all allocations
+    const allocationsResult = await db.select().from(allocations);
     
-    // Group team members by role
+    // Group by role
     const roleMap = new Map<string, { count: number, utilization: number }>();
     
-    allTeamMembers.forEach(member => {
+    teamMembersResult.forEach(member => {
       if (!roleMap.has(member.role)) {
         roleMap.set(member.role, { count: 0, utilization: 0 });
       }
+      
       const roleData = roleMap.get(member.role)!;
       roleData.count++;
       
       // Calculate utilization for this member
-      const memberAllocations = allAllocations.filter(
-        allocation => allocation.teamMemberId === member.id
-      );
-      const utilizationSum = memberAllocations.reduce(
-        (sum, allocation) => sum + allocation.percentage, 
-        0
-      );
+      const memberAllocations = allocationsResult.filter(a => a.teamMemberId === member.id);
+      const utilizationSum = memberAllocations.reduce((sum, a) => sum + a.percentage, 0);
       roleData.utilization += Math.min(100, utilizationSum);
     });
     
@@ -698,46 +677,6 @@ export class DatabaseStorage implements IStorage {
       utilizationPercentage: Math.round(data.utilization / data.count)
     }));
   }
-
-  async getTeamPerformance(): Promise<TeamPerformance[]> {
-    // Generate last 6 months of performance data for database storage
-    const today = new Date();
-    const months: string[] = [];
-    
-    for (let i = 5; i >= 0; i--) {
-      const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const monthName = month.toLocaleString('default', { month: 'short' });
-      months.push(monthName);
-    }
-    
-    // Generate improvement trend data with some fluctuation
-    const baseCompletion = 65;
-    const baseEfficiency = 70;
-    
-    return months.map((month, index) => {
-      // Add some randomness but with an overall positive trend
-      const trend = index * 3;
-      const randomVariance = Math.floor(Math.random() * 10) - 5;
-      
-      return {
-        month,
-        completion: Math.min(98, Math.max(60, baseCompletion + trend + randomVariance)),
-        efficiency: Math.min(98, Math.max(65, baseEfficiency + trend + randomVariance))
-      };
-    });
-  }
-  
-  async getCategoryHours(): Promise<CategoryHours[]> {
-    // Generate data for estimated vs actual hours by project category
-    return [
-      { category: 'Frontend', estimated: 450, actual: 480 },
-      { category: 'Backend', estimated: 320, actual: 310 },
-      { category: 'Design', estimated: 280, actual: 305 },
-      { category: 'QA', estimated: 190, actual: 210 },
-      { category: 'DevOps', estimated: 150, actual: 120 }
-    ];
-  }
 }
 
-// Use DatabaseStorage instead of MemStorage
 export const storage = new DatabaseStorage();
