@@ -557,6 +557,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Added endpoint for fetching project statuses by week for the cumulative report
+  app.get('/api/project-statuses/by-week', async (req: Request, res: Response) => {
+    try {
+      const weekEndDate = req.query.weekEndDate as string;
+      
+      if (!weekEndDate) {
+        return res.status(400).json({ message: "Week end date is required" });
+      }
+      
+      const statuses = await storage.getProjectStatusesByWeek(weekEndDate);
+      res.json(statuses);
+    } catch (error) {
+      console.error('Error fetching project statuses by week:', error);
+      res.status(500).json({ message: "Failed to fetch project statuses by week" });
+    }
+  });
+  
   app.post('/api/project-statuses', async (req: Request, res: Response) => {
     try {
       // Validate the request body against our schema

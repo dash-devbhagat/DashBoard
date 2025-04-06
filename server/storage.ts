@@ -45,6 +45,7 @@ export interface IStorage {
   getProjectStatuses(): Promise<ProjectStatus[]>;
   getProjectStatusesByProject(projectId: number): Promise<ProjectStatus[]>;
   getProjectStatusByWeek(projectId: number, weekEndDate: string): Promise<ProjectStatus | undefined>;
+  getProjectStatusesByWeek(weekEndDate: string): Promise<ProjectStatus[]>;
   createProjectStatus(status: InsertProjectStatus): Promise<ProjectStatus>;
   updateProjectStatus(id: number, status: Partial<InsertProjectStatus>): Promise<ProjectStatus | undefined>;
   deleteProjectStatus(id: number): Promise<boolean>;
@@ -363,6 +364,11 @@ export class MemStorage implements IStorage {
   async getProjectStatusByWeek(projectId: number, weekEndDate: string): Promise<ProjectStatus | undefined> {
     return Array.from(this.projectStatuses.values())
       .find(status => status.projectId === projectId && status.weekEndDate === weekEndDate);
+  }
+  
+  async getProjectStatusesByWeek(weekEndDate: string): Promise<ProjectStatus[]> {
+    return Array.from(this.projectStatuses.values())
+      .filter(status => status.weekEndDate === weekEndDate);
   }
   
   async createProjectStatus(status: InsertProjectStatus): Promise<ProjectStatus> {
@@ -865,6 +871,31 @@ export class DatabaseStorage implements IStorage {
       )
     );
     return result[0];
+  }
+
+  async getProjectStatusesByWeek(weekEndDate: string): Promise<ProjectStatus[]> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    return await db.select({
+      id: projectStatus.id,
+      projectId: projectStatus.projectId,
+      weekEndDate: projectStatus.weekEndDate,
+      contractHours: projectStatus.contractHours,
+      workedHours: projectStatus.workedHours,
+      scheduleStatus: projectStatus.scheduleStatus,
+      qualityStatus: projectStatus.qualityStatus,
+      resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+      clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
+      scheduleStatusReason: projectStatus.scheduleStatusReason,
+      qualityStatusReason: projectStatus.qualityStatusReason,
+      resourceUtilizationStatusReason: projectStatus.resourceUtilizationStatusReason,
+      clientSatisfactionStatusReason: projectStatus.clientSatisfactionStatusReason,
+      risks: projectStatus.risks,
+      accomplishments: projectStatus.accomplishments,
+      nextSteps: projectStatus.nextSteps,
+      actionItems: projectStatus.actionItems,
+      actionItemOwner: projectStatus.actionItemOwner,
+    }).from(projectStatus).where(eq(projectStatus.weekEndDate, weekEndDate));
   }
   
   async createProjectStatus(status: InsertProjectStatus): Promise<ProjectStatus> {

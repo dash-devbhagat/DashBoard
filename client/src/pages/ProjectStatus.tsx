@@ -12,6 +12,7 @@ import { formatDate } from '@/lib/utils';
 import { apiRequest } from '@/lib/queryClient';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 
 // Helper function to get week options (previous 12 weeks ending on Friday)
 const getWeekOptions = (): { value: string; label: string }[] => {
@@ -115,6 +116,15 @@ export default function ProjectStatusPage() {
       }
     },
     enabled: !!selectedProject,
+  });
+  
+  // Fetch cumulative project statuses for the selected week
+  const {
+    data: cumulativeStatuses,
+    isLoading: isLoadingCumulative
+  } = useQuery({
+    queryKey: ['/api/project-statuses/by-week', weekEndDate],
+    queryFn: () => apiRequest<ProjectStatus[]>(`/api/project-statuses/by-week?weekEndDate=${weekEndDate}`),
   });
   
   // Get the selected project details
@@ -734,15 +744,115 @@ export default function ProjectStatusPage() {
                   </Select>
                 </div>
                 
-                <div className="bg-muted/50 p-8 rounded-lg text-center">
-                  <h3 className="text-lg font-medium mb-2">Cumulative Status Report</h3>
-                  <p className="text-muted-foreground mb-4">
-                    This view will show a consolidated report of project statuses for the selected week.
-                  </p>
-                  <p className="text-sm">
-                    Future enhancement: Summary statistics and aggregated status indicators across all projects.
-                  </p>
-                </div>
+                {isLoadingCumulative ? (
+                  <div className="text-center py-8">
+                    <p>Loading project statuses...</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                      <Card className="bg-green-50 border-green-100">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">Green Status</CardTitle>
+                          <CardDescription>Projects on track</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold text-green-600">
+                            {cumulativeStatuses?.filter(status => status.scheduleStatus === 'green').length || 0}
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-amber-50 border-amber-100">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">Amber Status</CardTitle>
+                          <CardDescription>Projects at risk</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold text-amber-600">
+                            {cumulativeStatuses?.filter(status => status.scheduleStatus === 'amber').length || 0}
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card className="bg-red-50 border-red-100">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg">Red Status</CardTitle>
+                          <CardDescription>Projects with issues</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-3xl font-bold text-red-600">
+                            {cumulativeStatuses?.filter(status => status.scheduleStatus === 'red').length || 0}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Project Status Summary</CardTitle>
+                        <CardDescription>
+                          All project statuses for the week ending {formatDate(new Date(weekEndDate))}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {cumulativeStatuses?.length === 0 ? (
+                          <div className="text-center py-6 text-muted-foreground">
+                            No project status reports found for this week.
+                          </div>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Project</TableHead>
+                                <TableHead>Schedule</TableHead>
+                                <TableHead>Quality</TableHead>
+                                <TableHead>Resources</TableHead>
+                                <TableHead>Client Satisfaction</TableHead>
+                                <TableHead>Contract Hours</TableHead>
+                                <TableHead>Worked Hours</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {cumulativeStatuses?.map((status) => {
+                                const project = projects?.find(p => p.id === status.projectId);
+                                return (
+                                  <TableRow key={status.id}>
+                                    <TableCell className="font-medium">
+                                      {project?.name || `Project #${status.projectId}`}
+                                    </TableCell>
+                                    <TableCell>
+                                      <StatusBadge status={status.scheduleStatus} />
+                                    </TableCell>
+                                    <TableCell>
+                                      <StatusBadge status={status.qualityStatus} />
+                                    </TableCell>
+                                    <TableCell>
+                                      <StatusBadge status={status.resourceUtilizationStatus} />
+                                    </TableCell>
+                                    <TableCell>
+                                      <StatusBadge status={status.clientSatisfactionStatus} />
+                                    </TableCell>
+                                    <TableCell>
+                                      {status.contractHours !== null 
+                                        ? status.contractHours 
+                                        : '-'}
+                                    </TableCell>
+                                    <TableCell>
+                                      {status.workedHours !== null 
+                                        ? status.workedHours 
+                                        : '-'}
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              })}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </div>
             </TabsContent>
           </CardContent>
