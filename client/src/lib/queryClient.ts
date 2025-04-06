@@ -17,9 +17,21 @@ export async function apiRequest<T = any>(
       ...(options?.headers || {}),
       ...(options?.body ? { "Content-Type": "application/json" } : {})
     },
-    body: options?.body ? JSON.stringify(options.body) : undefined,
     credentials: "include",
   };
+  
+  // Handle body correctly to avoid double JSON stringification
+  if (options?.body) {
+    // If it's already a string and looks like JSON, use it directly
+    if (typeof options.body === 'string' && 
+        options.body.trim().startsWith('{') && 
+        options.body.trim().endsWith('}')) {
+      fetchOptions.body = options.body;
+    } else {
+      // Otherwise stringify it
+      fetchOptions.body = JSON.stringify(options.body);
+    }
+  }
 
   const res = await fetch(url, fetchOptions);
   await throwIfResNotOk(res);

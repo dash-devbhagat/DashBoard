@@ -742,7 +742,7 @@ const Projects: React.FC = () => {
             });
           }
         }}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Project</DialogTitle>
           </DialogHeader>
@@ -763,7 +763,7 @@ const Projects: React.FC = () => {
                 )}
               />
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={newProjectForm.control}
                   name="startDate"
@@ -863,7 +863,7 @@ const Projects: React.FC = () => {
                 )}
               />
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={newProjectForm.control}
                   name="category"
@@ -893,7 +893,7 @@ const Projects: React.FC = () => {
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={newProjectForm.control}
                   name="projectOwner"
@@ -923,7 +923,7 @@ const Projects: React.FC = () => {
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={newProjectForm.control}
                   name="deliveryManager"
@@ -992,7 +992,7 @@ const Projects: React.FC = () => {
             editProjectForm.reset();
           }
         }}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Project</DialogTitle>
           </DialogHeader>
@@ -1013,7 +1013,7 @@ const Projects: React.FC = () => {
                 )}
               />
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={editProjectForm.control}
                   name="startDate"
@@ -1113,7 +1113,7 @@ const Projects: React.FC = () => {
                 )}
               />
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={editProjectForm.control}
                   name="category"
@@ -1143,7 +1143,7 @@ const Projects: React.FC = () => {
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={editProjectForm.control}
                   name="projectOwner"
@@ -1173,7 +1173,7 @@ const Projects: React.FC = () => {
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={editProjectForm.control}
                   name="deliveryManager"
@@ -1316,7 +1316,7 @@ const Projects: React.FC = () => {
                             <CardTitle className="text-md">Project Details</CardTitle>
                           </CardHeader>
                           <CardContent>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div>
                                 <h4 className="text-sm font-medium text-slate-500">Category</h4>
                                 <p className="mt-1">{currentProject.category || "Not specified"}</p>
@@ -1360,7 +1360,7 @@ const Projects: React.FC = () => {
                                   );
                                   
                                   return (
-                                    <div key={member.id} className="flex items-center justify-between">
+                                    <div key={member.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 pb-2 sm:pb-0">
                                       <div className="flex items-center gap-3">
                                         <img 
                                           src={member.avatar} 
