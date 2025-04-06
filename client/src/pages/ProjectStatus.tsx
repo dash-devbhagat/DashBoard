@@ -88,6 +88,7 @@ export default function ProjectStatusPage() {
   const [projectStatus, setProjectStatus] = useState<Partial<ProjectStatus> | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [activeTab, setActiveTab] = useState<string>("byProject");
   
   // Fetch all projects
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
@@ -295,7 +296,7 @@ export default function ProjectStatusPage() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold tracking-tight">Project Status</h1>
         <div className="flex gap-2">
-          {isEditing ? (
+          {activeTab === "byProject" && isEditing ? (
             <>
               <Button 
                 variant="outline" 
@@ -312,12 +313,12 @@ export default function ProjectStatusPage() {
               <Button onClick={handleSave}>Save</Button>
             </>
           ) : (
-            statusData && <Button onClick={() => setIsEditing(true)}>Edit</Button>
+            activeTab === "byProject" && statusData && <Button onClick={() => setIsEditing(true)}>Edit</Button>
           )}
         </div>
       </div>
       
-      {isEditing && hasValidationErrors && (
+      {activeTab === "byProject" && isEditing && hasValidationErrors && (
         <Alert className="bg-red-50 border-red-200">
           <AlertDescription className="text-red-800">
             <h3 className="font-semibold mb-1">Please fix the following errors:</h3>
@@ -330,7 +331,11 @@ export default function ProjectStatusPage() {
         </Alert>
       )}
       
-      <Tabs defaultValue="byProject" className="w-full">
+      <Tabs 
+        defaultValue="byProject" 
+        className="w-full"
+        onValueChange={(value) => setActiveTab(value)}
+      >
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
