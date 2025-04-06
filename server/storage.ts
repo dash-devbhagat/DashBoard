@@ -799,11 +799,27 @@ export class DatabaseStorage implements IStorage {
       id: projectStatus.id,
       projectId: projectStatus.projectId,
       weekEndDate: projectStatus.weekEndDate,
+      
+      // Delivery Updates
       contractHours: projectStatus.contractHours,
       workedHours: projectStatus.workedHours,
       scheduleStatus: projectStatus.scheduleStatus,
       qualityStatus: projectStatus.qualityStatus,
       resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+      rightTeamStatus: projectStatus.rightTeamStatus,
+      deliveryComments: projectStatus.deliveryComments,
+      
+      // Account Manager Updates
+      amStatus: projectStatus.amStatus,
+      amComments: projectStatus.amComments,
+      governanceStatus: projectStatus.governanceStatus,
+      lastGovernanceMeetingDate: projectStatus.lastGovernanceMeetingDate,
+      lastInvoiceDate: projectStatus.lastInvoiceDate,
+      lastReceivableDate: projectStatus.lastReceivableDate,
+      nextInvoiceDate: projectStatus.nextInvoiceDate,
+      invoiceStatus: projectStatus.invoiceStatus,
+      
+      // Other Updates
       clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
       scheduleStatusReason: projectStatus.scheduleStatusReason,
       qualityStatusReason: projectStatus.qualityStatusReason,
@@ -824,11 +840,27 @@ export class DatabaseStorage implements IStorage {
       id: projectStatus.id,
       projectId: projectStatus.projectId,
       weekEndDate: projectStatus.weekEndDate,
+      
+      // Delivery Updates
       contractHours: projectStatus.contractHours,
       workedHours: projectStatus.workedHours,
       scheduleStatus: projectStatus.scheduleStatus,
       qualityStatus: projectStatus.qualityStatus,
       resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+      rightTeamStatus: projectStatus.rightTeamStatus,
+      deliveryComments: projectStatus.deliveryComments,
+      
+      // Account Manager Updates
+      amStatus: projectStatus.amStatus,
+      amComments: projectStatus.amComments,
+      governanceStatus: projectStatus.governanceStatus,
+      lastGovernanceMeetingDate: projectStatus.lastGovernanceMeetingDate,
+      lastInvoiceDate: projectStatus.lastInvoiceDate,
+      lastReceivableDate: projectStatus.lastReceivableDate,
+      nextInvoiceDate: projectStatus.nextInvoiceDate,
+      invoiceStatus: projectStatus.invoiceStatus,
+      
+      // Other Updates
       clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
       scheduleStatusReason: projectStatus.scheduleStatusReason,
       qualityStatusReason: projectStatus.qualityStatusReason,
@@ -849,11 +881,27 @@ export class DatabaseStorage implements IStorage {
       id: projectStatus.id,
       projectId: projectStatus.projectId,
       weekEndDate: projectStatus.weekEndDate,
+      
+      // Delivery Updates
       contractHours: projectStatus.contractHours,
       workedHours: projectStatus.workedHours,
       scheduleStatus: projectStatus.scheduleStatus,
       qualityStatus: projectStatus.qualityStatus,
       resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+      rightTeamStatus: projectStatus.rightTeamStatus,
+      deliveryComments: projectStatus.deliveryComments,
+      
+      // Account Manager Updates
+      amStatus: projectStatus.amStatus,
+      amComments: projectStatus.amComments,
+      governanceStatus: projectStatus.governanceStatus,
+      lastGovernanceMeetingDate: projectStatus.lastGovernanceMeetingDate,
+      lastInvoiceDate: projectStatus.lastInvoiceDate,
+      lastReceivableDate: projectStatus.lastReceivableDate,
+      nextInvoiceDate: projectStatus.nextInvoiceDate,
+      invoiceStatus: projectStatus.invoiceStatus,
+      
+      // Other Updates
       clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
       scheduleStatusReason: projectStatus.scheduleStatusReason,
       qualityStatusReason: projectStatus.qualityStatusReason,
@@ -880,11 +928,27 @@ export class DatabaseStorage implements IStorage {
       id: projectStatus.id,
       projectId: projectStatus.projectId,
       weekEndDate: projectStatus.weekEndDate,
+      
+      // Delivery Updates
       contractHours: projectStatus.contractHours,
       workedHours: projectStatus.workedHours,
       scheduleStatus: projectStatus.scheduleStatus,
       qualityStatus: projectStatus.qualityStatus,
       resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+      rightTeamStatus: projectStatus.rightTeamStatus,
+      deliveryComments: projectStatus.deliveryComments,
+      
+      // Account Manager Updates
+      amStatus: projectStatus.amStatus,
+      amComments: projectStatus.amComments,
+      governanceStatus: projectStatus.governanceStatus,
+      lastGovernanceMeetingDate: projectStatus.lastGovernanceMeetingDate,
+      lastInvoiceDate: projectStatus.lastInvoiceDate,
+      lastReceivableDate: projectStatus.lastReceivableDate,
+      nextInvoiceDate: projectStatus.nextInvoiceDate,
+      invoiceStatus: projectStatus.invoiceStatus,
+      
+      // Other Updates
       clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
       scheduleStatusReason: projectStatus.scheduleStatusReason,
       qualityStatusReason: projectStatus.qualityStatusReason,
@@ -904,11 +968,27 @@ export class DatabaseStorage implements IStorage {
       id: projectStatus.id,
       projectId: projectStatus.projectId,
       weekEndDate: projectStatus.weekEndDate,
+      
+      // Delivery Updates
       contractHours: projectStatus.contractHours,
       workedHours: projectStatus.workedHours,
       scheduleStatus: projectStatus.scheduleStatus,
       qualityStatus: projectStatus.qualityStatus,
       resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+      rightTeamStatus: projectStatus.rightTeamStatus,
+      deliveryComments: projectStatus.deliveryComments,
+      
+      // Account Manager Updates
+      amStatus: projectStatus.amStatus,
+      amComments: projectStatus.amComments,
+      governanceStatus: projectStatus.governanceStatus,
+      lastGovernanceMeetingDate: projectStatus.lastGovernanceMeetingDate,
+      lastInvoiceDate: projectStatus.lastInvoiceDate,
+      lastReceivableDate: projectStatus.lastReceivableDate,
+      nextInvoiceDate: projectStatus.nextInvoiceDate,
+      invoiceStatus: projectStatus.invoiceStatus,
+      
+      // Other Updates
       clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
       scheduleStatusReason: projectStatus.scheduleStatusReason,
       qualityStatusReason: projectStatus.qualityStatusReason,
@@ -933,11 +1013,27 @@ export class DatabaseStorage implements IStorage {
         id: projectStatus.id,
         projectId: projectStatus.projectId,
         weekEndDate: projectStatus.weekEndDate,
+        
+        // Delivery Updates
         contractHours: projectStatus.contractHours,
         workedHours: projectStatus.workedHours,
         scheduleStatus: projectStatus.scheduleStatus,
         qualityStatus: projectStatus.qualityStatus,
         resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+        rightTeamStatus: projectStatus.rightTeamStatus,
+        deliveryComments: projectStatus.deliveryComments,
+        
+        // Account Manager Updates
+        amStatus: projectStatus.amStatus,
+        amComments: projectStatus.amComments,
+        governanceStatus: projectStatus.governanceStatus,
+        lastGovernanceMeetingDate: projectStatus.lastGovernanceMeetingDate,
+        lastInvoiceDate: projectStatus.lastInvoiceDate,
+        lastReceivableDate: projectStatus.lastReceivableDate,
+        nextInvoiceDate: projectStatus.nextInvoiceDate,
+        invoiceStatus: projectStatus.invoiceStatus,
+        
+        // Other Updates
         clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
         scheduleStatusReason: projectStatus.scheduleStatusReason,
         qualityStatusReason: projectStatus.qualityStatusReason,
