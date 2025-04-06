@@ -37,12 +37,10 @@ const getWeekOptions = (): { value: string; label: string }[] => {
   
   // Generate options for the last 12 weeks
   for (let i = 0; i < 12; i++) {
-    const endDate = new Date(friday);
-    const startDate = new Date(friday);
-    startDate.setDate(endDate.getDate() - 6); // Saturday (6 days before Friday)
+    const weekEndDateStr = friday.toISOString().split('T')[0];
     
-    const weekEndDateStr = endDate.toISOString().split('T')[0];
-    const weekRangeDisplay = `${formatDate(startDate)} to ${formatDate(endDate)}`;
+    // Use the same function to get consistent week range display
+    const weekRangeDisplay = getWeekRangeDisplayFromEndDate(weekEndDateStr);
     
     options.push({
       value: weekEndDateStr,
