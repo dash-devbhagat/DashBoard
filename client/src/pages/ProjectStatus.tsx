@@ -1217,7 +1217,16 @@ export default function ProjectStatusPage() {
                                   return (
                                     <TableRow key={status.id} className="hover:bg-gray-50">
                                       <TableCell className="font-medium">
-                                        {project?.name || `Project #${status.projectId}`}
+                                        <Button 
+                                          variant="link" 
+                                          className="p-0 h-auto font-medium text-primary hover:underline"
+                                          onClick={() => {
+                                            setSelectedProject(status.projectId);
+                                            setActiveTab("byProject");
+                                          }}
+                                        >
+                                          {project?.name || `Project #${status.projectId}`}
+                                        </Button>
                                       </TableCell>
                                       
                                       {/* Delivery Status Values */}
