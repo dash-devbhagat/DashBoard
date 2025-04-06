@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -148,6 +148,9 @@ export default function ProjectStatusPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState<string>("byProject");
+  
+  // Ref for the tabs component to control it programmatically
+  const tabsRef = React.useRef<HTMLDivElement>(null);
   
   // Fetch all projects
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
@@ -350,6 +353,17 @@ export default function ProjectStatusPage() {
   // Check if there are any validation errors
   const hasValidationErrors = Object.keys(validationErrors).length > 0;
   
+  // Helper function to switch to the project tab and load a specific project
+  const switchToProjectTab = (projectId: number) => {
+    setSelectedProject(projectId);
+    setActiveTab("byProject");
+    // Find the TabsTrigger element and click it programmatically
+    const byProjectTab = document.querySelector('[data-state="inactive"][value="byProject"]') as HTMLButtonElement;
+    if (byProjectTab) {
+      byProjectTab.click();
+    }
+  };
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -391,9 +405,11 @@ export default function ProjectStatusPage() {
       )}
       
       <Tabs 
+        ref={tabsRef}
         defaultValue="byProject" 
         className="w-full"
         onValueChange={(value) => setActiveTab(value)}
+        value={activeTab}
       >
         <Card>
           <CardHeader>
@@ -1220,10 +1236,7 @@ export default function ProjectStatusPage() {
                                         <Button 
                                           variant="link" 
                                           className="p-0 h-auto font-medium text-primary hover:underline"
-                                          onClick={() => {
-                                            setSelectedProject(status.projectId);
-                                            setActiveTab("byProject");
-                                          }}
+                                          onClick={() => switchToProjectTab(status.projectId)}
                                         >
                                           {project?.name || `Project #${status.projectId}`}
                                         </Button>
