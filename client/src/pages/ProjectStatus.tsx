@@ -16,9 +16,12 @@ import { Badge } from '@/components/ui/badge';
 
 // Helper function to get the week range display (Saturday to Friday) from a Friday end date
 const getWeekRangeDisplayFromEndDate = (endDateStr: string): string => {
+  // The endDateStr is Friday's date (e.g., Apr 4, 2025)
   const endDate = new Date(endDateStr);
+  
+  // To get Saturday's date (Mar 29), go back 6 days from Friday
   const startDate = new Date(endDate);
-  startDate.setDate(endDate.getDate() - 6); // Saturday (6 days before Friday)
+  startDate.setDate(endDate.getDate() - 6); // Saturday is 6 days before Friday
   
   return `${formatDate(startDate)} to ${formatDate(endDate)}`;
 };
