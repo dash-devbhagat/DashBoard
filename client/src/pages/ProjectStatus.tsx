@@ -14,6 +14,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 
+// Helper function to get the week range display (Saturday to Friday) from a Friday end date
+const getWeekRangeDisplayFromEndDate = (endDateStr: string): string => {
+  const endDate = new Date(endDateStr);
+  const startDate = new Date(endDate);
+  startDate.setDate(endDate.getDate() - 6); // Saturday (6 days before Friday)
+  
+  return `${formatDate(startDate)} to ${formatDate(endDate)}`;
+};
+
 // Helper function to get week options (previous 12 weeks ending on Friday)
 const getWeekOptions = (): { value: string; label: string }[] => {
   const options = [];
@@ -1099,7 +1108,7 @@ export default function ProjectStatusPage() {
                       <CardHeader>
                         <CardTitle>Project Status Summary</CardTitle>
                         <CardDescription>
-                          All project statuses for the week ending {formatDate(new Date(weekEndDate))}
+                          All project statuses for the week: {getWeekRangeDisplayFromEndDate(weekEndDate)}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
