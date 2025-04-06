@@ -293,21 +293,39 @@ export const projectStatus = pgTable("project_status", {
   id: serial("id").primaryKey(),
   projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: 'cascade' }),
   weekEndDate: text("week_end_date").notNull(), // Friday date of the week
+  
+  // Delivery Updates
   contractHours: integer("contract_hours"), // Number of contract hours
   workedHours: integer("worked_hours"), // Number of hours worked
   scheduleStatus: text("schedule_status"), // green, amber, red
   qualityStatus: text("quality_status"), // green, amber, red
   resourceUtilizationStatus: text("resource_utilization_status"), // green, amber, red
-  clientSatisfactionStatus: text("client_satisfaction_status"), // green, amber, red
-  scheduleStatusReason: text("schedule_status_reason"), // Reason for schedule status
-  qualityStatusReason: text("quality_status_reason"), // Reason for quality status
-  resourceUtilizationStatusReason: text("resource_utilization_status_reason"), // Reason for resource utilization status
-  clientSatisfactionStatusReason: text("client_satisfaction_status_reason"), // Reason for client satisfaction status
+  rightTeamStatus: text("right_team_status"), // green, amber, red - "Right Team in Place"
+  deliveryComments: text("delivery_comments"), // Combined delivery comments
+  
+  // Account Manager Updates
+  amStatus: text("am_status"), // green, amber, red
+  amComments: text("am_comments"), // Account manager comments
+  governanceStatus: text("governance_status"), // green, amber, red
+  lastGovernanceMeetingDate: text("last_governance_meeting_date"), // Date of last governance meeting
+  lastInvoiceDate: text("last_invoice_date"), // Date of last invoice
+  lastReceivableDate: text("last_receivable_date"), // Date of last receivable
+  nextInvoiceDate: text("next_invoice_date"), // Date of next invoice
+  invoiceStatus: text("invoice_status"), // green, amber, red
+  
+  // Other Updates (retaining compatibility)
   risks: text("risks"), // Project risks
-  accomplishments: text("accomplishments"), // Weekly accomplishments
-  nextSteps: text("next_steps"), // Next steps for upcoming week
-  actionItems: text("action_items"),
-  actionItemOwner: text("action_item_owner"),
+  actionItems: text("action_items"), // Key action items/help required
+  actionItemOwner: text("action_item_owner"), // Owner of action item
+  
+  // Legacy fields to maintain backwards compatibility
+  scheduleStatusReason: text("schedule_status_reason"), 
+  qualityStatusReason: text("quality_status_reason"), 
+  resourceUtilizationStatusReason: text("resource_utilization_status_reason"), 
+  clientSatisfactionStatus: text("client_satisfaction_status"), 
+  clientSatisfactionStatusReason: text("client_satisfaction_status_reason"),
+  accomplishments: text("accomplishments"),
+  nextSteps: text("next_steps"),
 }, (table) => ({
   projectIdIdx: index("project_status_project_id_idx").on(table.projectId),
   weekEndDateIdx: index("project_status_week_end_date_idx").on(table.weekEndDate),
@@ -335,21 +353,39 @@ export const insertProjectStatusSchema = createInsertSchema(projectStatus)
   .pick({
     projectId: true,
     weekEndDate: true,
+    
+    // Delivery Updates
     contractHours: true,
     workedHours: true,
     scheduleStatus: true,
     qualityStatus: true,
     resourceUtilizationStatus: true,
+    rightTeamStatus: true,
+    deliveryComments: true,
+    
+    // Account Manager Updates
+    amStatus: true,
+    amComments: true,
+    governanceStatus: true,
+    lastGovernanceMeetingDate: true,
+    lastInvoiceDate: true,
+    lastReceivableDate: true,
+    nextInvoiceDate: true,
+    invoiceStatus: true,
+    
+    // Other Updates
+    risks: true,
+    actionItems: true,
+    actionItemOwner: true,
+    
+    // Legacy fields (for backward compatibility)
     clientSatisfactionStatus: true,
     scheduleStatusReason: true,
     qualityStatusReason: true,
     resourceUtilizationStatusReason: true,
     clientSatisfactionStatusReason: true,
-    risks: true,
     accomplishments: true,
     nextSteps: true,
-    actionItems: true,
-    actionItemOwner: true,
   })
   .extend({
     projectId: z.number()
@@ -359,21 +395,59 @@ export const insertProjectStatusSchema = createInsertSchema(projectStatus)
       .refine(val => /^\d{4}-\d{2}-\d{2}$/.test(val), {
         message: "Week end date must be in the format YYYY-MM-DD",
       }),
+      
+    // Delivery Updates validation
     contractHours: z.number().int().nullable().optional(),
     workedHours: z.number().int().nullable().optional(),
     scheduleStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
     qualityStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
     resourceUtilizationStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    rightTeamStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    deliveryComments: z.string().max(2000, "Delivery comments cannot exceed 2000 characters").nullable().optional(),
+    
+    // Account Manager Updates validation
+    amStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    amComments: z.string().max(2000, "AM comments cannot exceed 2000 characters").nullable().optional(),
+    governanceStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    lastGovernanceMeetingDate: z.string()
+      .refine(val => !val || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+        message: "Last governance meeting date must be in the format YYYY-MM-DD",
+      })
+      .nullable()
+      .optional(),
+    lastInvoiceDate: z.string()
+      .refine(val => !val || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+        message: "Last invoice date must be in the format YYYY-MM-DD",
+      })
+      .nullable()
+      .optional(),
+    lastReceivableDate: z.string()
+      .refine(val => !val || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+        message: "Last receivable date must be in the format YYYY-MM-DD",
+      })
+      .nullable()
+      .optional(),
+    nextInvoiceDate: z.string()
+      .refine(val => !val || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+        message: "Next invoice date must be in the format YYYY-MM-DD",
+      })
+      .nullable()
+      .optional(),
+    invoiceStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    
+    // Other Updates validation
+    risks: z.string().max(1000, "Risks cannot exceed 1000 characters").nullable().optional(),
+    actionItems: z.string().max(1000, "Action items cannot exceed 1000 characters").nullable().optional(),
+    actionItemOwner: z.string().max(100, "Owner name cannot exceed 100 characters").nullable().optional(),
+    
+    // Legacy fields validation (for backward compatibility)
     clientSatisfactionStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
     scheduleStatusReason: z.string().max(1000, "Reason cannot exceed 1000 characters").nullable().optional(),
     qualityStatusReason: z.string().max(1000, "Reason cannot exceed 1000 characters").nullable().optional(),
     resourceUtilizationStatusReason: z.string().max(1000, "Reason cannot exceed 1000 characters").nullable().optional(),
     clientSatisfactionStatusReason: z.string().max(1000, "Reason cannot exceed 1000 characters").nullable().optional(),
-    risks: z.string().max(1000, "Risks cannot exceed 1000 characters").nullable().optional(),
     accomplishments: z.string().max(1000, "Accomplishments cannot exceed 1000 characters").nullable().optional(),
     nextSteps: z.string().max(1000, "Next steps cannot exceed 1000 characters").nullable().optional(),
-    actionItems: z.string().max(1000, "Action items cannot exceed 1000 characters").nullable().optional(),
-    actionItemOwner: z.string().max(100, "Owner name cannot exceed 100 characters").nullable().optional(),
   });
 
 // Types

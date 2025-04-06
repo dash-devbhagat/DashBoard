@@ -143,21 +143,39 @@ export default function ProjectStatusPage() {
       setProjectStatus({
         projectId: selectedProject,
         weekEndDate: weekEndDate,
+        
+        // Delivery Updates
         contractHours: null,
         workedHours: null,
         scheduleStatus: null,
         qualityStatus: null,
         resourceUtilizationStatus: null,
+        rightTeamStatus: null,
+        deliveryComments: null,
+        
+        // Account Manager Updates
+        amStatus: null,
+        amComments: null,
+        governanceStatus: null,
+        lastGovernanceMeetingDate: null,
+        lastInvoiceDate: null,
+        lastReceivableDate: null,
+        nextInvoiceDate: null,
+        invoiceStatus: null,
+        
+        // Other Updates
+        risks: null,
+        actionItems: null,
+        actionItemOwner: null,
+        
+        // Legacy fields for compatibility
         clientSatisfactionStatus: null,
         scheduleStatusReason: null,
         qualityStatusReason: null,
         resourceUtilizationStatusReason: null,
         clientSatisfactionStatusReason: null,
-        risks: null,
         accomplishments: null,
-        nextSteps: null,
-        actionItems: null,
-        actionItemOwner: null
+        nextSteps: null
       });
       setIsEditing(true);
     }
@@ -421,24 +439,66 @@ export default function ProjectStatusPage() {
                 </TableBody>
               </Table>
               
-              {/* Status Indicators */}
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead colSpan={3} className="font-bold text-lg">
-                      Status Indicators
-                    </TableHead>
-                  </TableRow>
-                  <TableRow>
-                    <TableHead>Measure</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Reason</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">Schedule</TableCell>
-                    <TableCell>
+              {/* Delivery Updates Section */}
+              <Card className="mb-6 border-t-4 border-t-blue-600">
+                <CardHeader>
+                  <CardTitle className="text-xl text-blue-700">Delivery Updates</CardTitle>
+                  <CardDescription>Information related to project delivery</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Hours */}
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Contract Hours
+                      </label>
+                      {isEditing ? (
+                        <>
+                          <Input
+                            type="number"
+                            value={projectStatus?.contractHours || ''}
+                            onChange={(e) => handleChange('contractHours', e.target.value ? Number(e.target.value) : null)}
+                            placeholder="Enter contract hours"
+                            className={validationErrors.contractHours ? 'border-red-500' : ''}
+                          />
+                          <FieldError fieldName="contractHours" />
+                        </>
+                      ) : (
+                        <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
+                          {projectStatus?.contractHours ?? '-'}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Worked Hours
+                      </label>
+                      {isEditing ? (
+                        <>
+                          <Input
+                            type="number"
+                            value={projectStatus?.workedHours || ''}
+                            onChange={(e) => handleChange('workedHours', e.target.value ? Number(e.target.value) : null)}
+                            placeholder="Enter worked hours"
+                            className={validationErrors.workedHours ? 'border-red-500' : ''}
+                          />
+                          <FieldError fieldName="workedHours" />
+                        </>
+                      ) : (
+                        <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
+                          {projectStatus?.workedHours ?? '-'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Delivery Status Indicators */}
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Schedule Status
+                      </label>
                       {isEditing ? (
                         <Select
                           value={projectStatus?.scheduleStatus || ''}
@@ -456,24 +516,12 @@ export default function ProjectStatusPage() {
                       ) : (
                         <StatusBadge status={projectStatus?.scheduleStatus || null} />
                       )}
-                    </TableCell>
-                    <TableCell>
-                      {isEditing ? (
-                        <Textarea
-                          value={projectStatus?.scheduleStatusReason || ''}
-                          onChange={(e) => handleChange('scheduleStatusReason', e.target.value || null)}
-                          placeholder="Reason for status"
-                          className="min-h-[60px]"
-                        />
-                      ) : (
-                        projectStatus?.scheduleStatusReason || '-'
-                      )}
-                    </TableCell>
-                  </TableRow>
-                  
-                  <TableRow>
-                    <TableCell className="font-medium">Quality</TableCell>
-                    <TableCell>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Quality Status
+                      </label>
                       {isEditing ? (
                         <Select
                           value={projectStatus?.qualityStatus || ''}
@@ -491,24 +539,12 @@ export default function ProjectStatusPage() {
                       ) : (
                         <StatusBadge status={projectStatus?.qualityStatus || null} />
                       )}
-                    </TableCell>
-                    <TableCell>
-                      {isEditing ? (
-                        <Textarea
-                          value={projectStatus?.qualityStatusReason || ''}
-                          onChange={(e) => handleChange('qualityStatusReason', e.target.value || null)}
-                          placeholder="Reason for status"
-                          className="min-h-[60px]"
-                        />
-                      ) : (
-                        projectStatus?.qualityStatusReason || '-'
-                      )}
-                    </TableCell>
-                  </TableRow>
-                  
-                  <TableRow>
-                    <TableCell className="font-medium">Resource Utilization</TableCell>
-                    <TableCell>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Resource Utilization Status
+                      </label>
                       {isEditing ? (
                         <Select
                           value={projectStatus?.resourceUtilizationStatus || ''}
@@ -526,28 +562,16 @@ export default function ProjectStatusPage() {
                       ) : (
                         <StatusBadge status={projectStatus?.resourceUtilizationStatus || null} />
                       )}
-                    </TableCell>
-                    <TableCell>
-                      {isEditing ? (
-                        <Textarea
-                          value={projectStatus?.resourceUtilizationStatusReason || ''}
-                          onChange={(e) => handleChange('resourceUtilizationStatusReason', e.target.value || null)}
-                          placeholder="Reason for status"
-                          className="min-h-[60px]"
-                        />
-                      ) : (
-                        projectStatus?.resourceUtilizationStatusReason || '-'
-                      )}
-                    </TableCell>
-                  </TableRow>
-                  
-                  <TableRow>
-                    <TableCell className="font-medium">Client Satisfaction</TableCell>
-                    <TableCell>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Right Team in Place
+                      </label>
                       {isEditing ? (
                         <Select
-                          value={projectStatus?.clientSatisfactionStatus || ''}
-                          onValueChange={(value) => handleChange('clientSatisfactionStatus', value || null)}
+                          value={projectStatus?.rightTeamStatus || ''}
+                          onValueChange={(value) => handleChange('rightTeamStatus', value || null)}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select status" />
@@ -559,166 +583,285 @@ export default function ProjectStatusPage() {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <StatusBadge status={projectStatus?.clientSatisfactionStatus || null} />
+                        <StatusBadge status={projectStatus?.rightTeamStatus || null} />
                       )}
-                    </TableCell>
-                    <TableCell>
+                    </div>
+                  </div>
+                  
+                  {/* Delivery Comments */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Delivery Comments
+                    </label>
+                    {isEditing ? (
+                      <Textarea
+                        value={projectStatus?.deliveryComments || ''}
+                        onChange={(e) => handleChange('deliveryComments', e.target.value || null)}
+                        placeholder="Enter delivery comments"
+                        className="min-h-[100px]"
+                      />
+                    ) : (
+                      <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
+                        {projectStatus?.deliveryComments || '-'}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Account Manager Updates Section */}
+              <Card className="mb-6 border-t-4 border-t-emerald-600">
+                <CardHeader>
+                  <CardTitle className="text-xl text-emerald-700">Account Manager Updates</CardTitle>
+                  <CardDescription>Information related to account management</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* AM Status and Governance */}
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        AM Status
+                      </label>
                       {isEditing ? (
-                        <Textarea
-                          value={projectStatus?.clientSatisfactionStatusReason || ''}
-                          onChange={(e) => handleChange('clientSatisfactionStatusReason', e.target.value || null)}
-                          placeholder="Reason for status"
-                          className="min-h-[60px]"
+                        <Select
+                          value={projectStatus?.amStatus || ''}
+                          onValueChange={(value) => handleChange('amStatus', value || null)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="green">Green</SelectItem>
+                            <SelectItem value="amber">Amber</SelectItem>
+                            <SelectItem value="red">Red</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <StatusBadge status={projectStatus?.amStatus || null} />
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Governance Status
+                      </label>
+                      {isEditing ? (
+                        <Select
+                          value={projectStatus?.governanceStatus || ''}
+                          onValueChange={(value) => handleChange('governanceStatus', value || null)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="green">Green</SelectItem>
+                            <SelectItem value="amber">Amber</SelectItem>
+                            <SelectItem value="red">Red</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <StatusBadge status={projectStatus?.governanceStatus || null} />
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Last Governance Meeting Date
+                      </label>
+                      {isEditing ? (
+                        <Input
+                          type="date"
+                          value={projectStatus?.lastGovernanceMeetingDate || ''}
+                          onChange={(e) => handleChange('lastGovernanceMeetingDate', e.target.value || null)}
                         />
                       ) : (
-                        projectStatus?.clientSatisfactionStatusReason || '-'
+                        <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
+                          {projectStatus?.lastGovernanceMeetingDate || '-'}
+                        </div>
                       )}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Invoice Status
+                      </label>
+                      {isEditing ? (
+                        <Select
+                          value={projectStatus?.invoiceStatus || ''}
+                          onValueChange={(value) => handleChange('invoiceStatus', value || null)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="green">Green</SelectItem>
+                            <SelectItem value="amber">Amber</SelectItem>
+                            <SelectItem value="red">Red</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <StatusBadge status={projectStatus?.invoiceStatus || null} />
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Invoice Dates */}
+                  <div className="grid gap-6 md:grid-cols-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Last Invoice Date
+                      </label>
+                      {isEditing ? (
+                        <Input
+                          type="date"
+                          value={projectStatus?.lastInvoiceDate || ''}
+                          onChange={(e) => handleChange('lastInvoiceDate', e.target.value || null)}
+                        />
+                      ) : (
+                        <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
+                          {projectStatus?.lastInvoiceDate || '-'}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Last Receivable Date
+                      </label>
+                      {isEditing ? (
+                        <Input
+                          type="date"
+                          value={projectStatus?.lastReceivableDate || ''}
+                          onChange={(e) => handleChange('lastReceivableDate', e.target.value || null)}
+                        />
+                      ) : (
+                        <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
+                          {projectStatus?.lastReceivableDate || '-'}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Next Invoice Date
+                      </label>
+                      {isEditing ? (
+                        <Input
+                          type="date"
+                          value={projectStatus?.nextInvoiceDate || ''}
+                          onChange={(e) => handleChange('nextInvoiceDate', e.target.value || null)}
+                        />
+                      ) : (
+                        <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
+                          {projectStatus?.nextInvoiceDate || '-'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* AM Comments */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      AM Comments
+                    </label>
+                    {isEditing ? (
+                      <Textarea
+                        value={projectStatus?.amComments || ''}
+                        onChange={(e) => handleChange('amComments', e.target.value || null)}
+                        placeholder="Enter account manager comments"
+                        className="min-h-[100px]"
+                      />
+                    ) : (
+                      <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
+                        {projectStatus?.amComments || '-'}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
               
-              {/* Hours */}
-              <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Contract Hours
-                  </label>
-                  {isEditing ? (
-                    <>
-                      <Input
-                        type="number"
-                        value={projectStatus?.contractHours || ''}
-                        onChange={(e) => handleChange('contractHours', e.target.value ? Number(e.target.value) : null)}
-                        placeholder="Enter contract hours"
-                        className={validationErrors.contractHours ? 'border-red-500' : ''}
+              {/* Other Updates Section */}
+              <Card className="mb-6 border-t-4 border-t-purple-600">
+                <CardHeader>
+                  <CardTitle className="text-xl text-purple-700">Other Updates</CardTitle>
+                  <CardDescription>Additional project information</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Risks */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Risks/Dependencies
+                    </label>
+                    {isEditing ? (
+                      <Textarea
+                        value={projectStatus?.risks || ''}
+                        onChange={(e) => handleChange('risks', e.target.value || null)}
+                        placeholder="Enter project risks and dependencies"
+                        className="min-h-[100px]"
                       />
-                      <FieldError fieldName="contractHours" />
-                    </>
-                  ) : (
-                    <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
-                      {projectStatus?.contractHours ?? '-'}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Worked Hours
-                  </label>
-                  {isEditing ? (
-                    <>
-                      <Input
-                        type="number"
-                        value={projectStatus?.workedHours || ''}
-                        onChange={(e) => handleChange('workedHours', e.target.value ? Number(e.target.value) : null)}
-                        placeholder="Enter worked hours"
-                        className={validationErrors.workedHours ? 'border-red-500' : ''}
+                    ) : (
+                      <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
+                        {projectStatus?.risks || '-'}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Action Items */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Key Action Items/Help Required
+                    </label>
+                    {isEditing ? (
+                      <Textarea
+                        value={projectStatus?.actionItems || ''}
+                        onChange={(e) => handleChange('actionItems', e.target.value || null)}
+                        placeholder="Enter action items or help required"
+                        className="min-h-[100px]"
                       />
-                      <FieldError fieldName="workedHours" />
-                    </>
-                  ) : (
-                    <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
-                      {projectStatus?.workedHours ?? '-'}
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Narrative fields */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Accomplishments
-                  </label>
-                  {isEditing ? (
-                    <Textarea
-                      value={projectStatus?.accomplishments || ''}
-                      onChange={(e) => handleChange('accomplishments', e.target.value || null)}
-                      placeholder="Key accomplishments for this week"
-                      className="min-h-[120px]"
-                    />
-                  ) : (
-                    <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
-                      {projectStatus?.accomplishments || '-'}
-                    </div>
-                  )}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Next Steps
-                  </label>
-                  {isEditing ? (
-                    <Textarea
-                      value={projectStatus?.nextSteps || ''}
-                      onChange={(e) => handleChange('nextSteps', e.target.value || null)}
-                      placeholder="Planned activities for next week"
-                      className="min-h-[120px]"
-                    />
-                  ) : (
-                    <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
-                      {projectStatus?.nextSteps || '-'}
-                    </div>
-                  )}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Risks
-                  </label>
-                  {isEditing ? (
-                    <Textarea
-                      value={projectStatus?.risks || ''}
-                      onChange={(e) => handleChange('risks', e.target.value || null)}
-                      placeholder="Current risks and mitigation plans"
-                      className="min-h-[120px]"
-                    />
-                  ) : (
-                    <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
-                      {projectStatus?.risks || '-'}
-                    </div>
-                  )}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Action Items
-                  </label>
-                  {isEditing ? (
-                    <Textarea
-                      value={projectStatus?.actionItems || ''}
-                      onChange={(e) => handleChange('actionItems', e.target.value || null)}
-                      placeholder="Action items to be addressed"
-                      className="min-h-[120px]"
-                    />
-                  ) : (
-                    <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
-                      {projectStatus?.actionItems || '-'}
-                    </div>
-                  )}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Action Item Owner
-                  </label>
-                  {isEditing ? (
-                    <>
-                      <Input
-                        value={projectStatus?.actionItemOwner || ''}
-                        onChange={(e) => handleChange('actionItemOwner', e.target.value || null)}
-                        placeholder="Name of person responsible for action items"
-                        className={validationErrors.actionItemOwner ? 'border-red-500' : ''}
+                    ) : (
+                      <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
+                        {projectStatus?.actionItems || '-'}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Action Item Owner */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Owner of Action Item
+                    </label>
+                    {isEditing ? (
+                      <>
+                        <Input
+                          value={projectStatus?.actionItemOwner || ''}
+                          onChange={(e) => handleChange('actionItemOwner', e.target.value || null)}
+                          placeholder="Name of person responsible for action items"
+                          className={validationErrors.actionItemOwner ? 'border-red-500' : ''}
+                        />
+                        <FieldError fieldName="actionItemOwner" />
+                      </>
+                    ) : (
+                      <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
+                        {projectStatus?.actionItemOwner || '-'}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Legacy Fields (Hidden but preserved for backwards compatibility) */}
+                  {isEditing && (
+                    <div className="hidden">
+                      <Textarea
+                        value={projectStatus?.accomplishments || ''}
+                        onChange={(e) => handleChange('accomplishments', e.target.value || null)}
                       />
-                      <FieldError fieldName="actionItemOwner" />
-                    </>
-                  ) : (
-                    <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
-                      {projectStatus?.actionItemOwner || '-'}
+                      <Textarea
+                        value={projectStatus?.nextSteps || ''}
+                        onChange={(e) => handleChange('nextSteps', e.target.value || null)}
+                      />
                     </div>
                   )}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           ) : (
             <div className="text-center py-8">
@@ -756,39 +899,192 @@ export default function ProjectStatusPage() {
                   </div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                      <Card className="bg-green-50 border-green-100">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg">Green Status</CardTitle>
-                          <CardDescription>Projects on track</CardDescription>
+                    {/* Status Summary Cards */}
+                    <div className="space-y-6 mb-6">
+                      {/* Delivery Status */}
+                      <Card>
+                        <CardHeader className="pb-2 border-b">
+                          <CardTitle className="text-lg text-blue-700">Delivery Status</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                          <div className="text-3xl font-bold text-green-600">
-                            {cumulativeStatuses?.filter(status => status.scheduleStatus === 'green').length || 0}
+                        <CardContent className="pt-4">
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div className="bg-gray-50 p-4 rounded-lg border">
+                              <h4 className="text-sm font-medium mb-2">Schedule</h4>
+                              <div className="flex gap-3">
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.scheduleStatus === 'green').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.scheduleStatus === 'amber').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.scheduleStatus === 'red').length || 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-gray-50 p-4 rounded-lg border">
+                              <h4 className="text-sm font-medium mb-2">Quality</h4>
+                              <div className="flex gap-3">
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.qualityStatus === 'green').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.qualityStatus === 'amber').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.qualityStatus === 'red').length || 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-gray-50 p-4 rounded-lg border">
+                              <h4 className="text-sm font-medium mb-2">Resource Utilization</h4>
+                              <div className="flex gap-3">
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.resourceUtilizationStatus === 'green').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.resourceUtilizationStatus === 'amber').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.resourceUtilizationStatus === 'red').length || 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-gray-50 p-4 rounded-lg border">
+                              <h4 className="text-sm font-medium mb-2">Right Team</h4>
+                              <div className="flex gap-3">
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.rightTeamStatus === 'green').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.rightTeamStatus === 'amber').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.rightTeamStatus === 'red').length || 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
                       
-                      <Card className="bg-amber-50 border-amber-100">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg">Amber Status</CardTitle>
-                          <CardDescription>Projects at risk</CardDescription>
+                      {/* Account Management Status */}
+                      <Card>
+                        <CardHeader className="pb-2 border-b">
+                          <CardTitle className="text-lg text-emerald-700">Account Management Status</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                          <div className="text-3xl font-bold text-amber-600">
-                            {cumulativeStatuses?.filter(status => status.scheduleStatus === 'amber').length || 0}
-                          </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card className="bg-red-50 border-red-100">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg">Red Status</CardTitle>
-                          <CardDescription>Projects with issues</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-3xl font-bold text-red-600">
-                            {cumulativeStatuses?.filter(status => status.scheduleStatus === 'red').length || 0}
+                        <CardContent className="pt-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="bg-gray-50 p-4 rounded-lg border">
+                              <h4 className="text-sm font-medium mb-2">AM Status</h4>
+                              <div className="flex gap-3">
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.amStatus === 'green').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.amStatus === 'amber').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.amStatus === 'red').length || 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-gray-50 p-4 rounded-lg border">
+                              <h4 className="text-sm font-medium mb-2">Governance Status</h4>
+                              <div className="flex gap-3">
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.governanceStatus === 'green').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.governanceStatus === 'amber').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.governanceStatus === 'red').length || 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="bg-gray-50 p-4 rounded-lg border">
+                              <h4 className="text-sm font-medium mb-2">Invoice Status</h4>
+                              <div className="flex gap-3">
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.invoiceStatus === 'green').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.invoiceStatus === 'amber').length || 0}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                  <span className="text-sm font-medium">
+                                    {cumulativeStatuses?.filter(status => status.invoiceStatus === 'red').length || 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -810,23 +1106,38 @@ export default function ProjectStatusPage() {
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Project</TableHead>
-                                <TableHead>Schedule</TableHead>
-                                <TableHead>Quality</TableHead>
-                                <TableHead>Resources</TableHead>
-                                <TableHead>Client Satisfaction</TableHead>
-                                <TableHead>Contract Hours</TableHead>
-                                <TableHead>Worked Hours</TableHead>
+                                <TableHead className="w-[180px]">Project</TableHead>
+                                {/* Delivery Status Headers */}
+                                <TableHead colSpan={4} className="text-center text-blue-700 bg-blue-50 border-b border-blue-100">
+                                  Delivery Status
+                                </TableHead>
+                                {/* Account Management Headers */}
+                                <TableHead colSpan={3} className="text-center text-emerald-700 bg-emerald-50 border-b border-emerald-100">
+                                  Account Management
+                                </TableHead>
+                              </TableRow>
+                              <TableRow>
+                                <TableHead></TableHead>
+                                {/* Delivery Status Subheaders */}
+                                <TableHead className="bg-blue-50">Schedule</TableHead>
+                                <TableHead className="bg-blue-50">Quality</TableHead>
+                                <TableHead className="bg-blue-50">Resources</TableHead>
+                                <TableHead className="bg-blue-50">Right Team</TableHead>
+                                {/* Account Management Subheaders */}
+                                <TableHead className="bg-emerald-50">AM Status</TableHead>
+                                <TableHead className="bg-emerald-50">Governance</TableHead>
+                                <TableHead className="bg-emerald-50">Invoice</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {cumulativeStatuses?.map((status) => {
                                 const project = projects?.find(p => p.id === status.projectId);
                                 return (
-                                  <TableRow key={status.id}>
+                                  <TableRow key={status.id} className="hover:bg-gray-50">
                                     <TableCell className="font-medium">
                                       {project?.name || `Project #${status.projectId}`}
                                     </TableCell>
+                                    {/* Delivery Status Values */}
                                     <TableCell>
                                       <StatusBadge status={status.scheduleStatus} />
                                     </TableCell>
@@ -837,17 +1148,17 @@ export default function ProjectStatusPage() {
                                       <StatusBadge status={status.resourceUtilizationStatus} />
                                     </TableCell>
                                     <TableCell>
-                                      <StatusBadge status={status.clientSatisfactionStatus} />
+                                      <StatusBadge status={status.rightTeamStatus} />
+                                    </TableCell>
+                                    {/* Account Management Values */}
+                                    <TableCell>
+                                      <StatusBadge status={status.amStatus} />
                                     </TableCell>
                                     <TableCell>
-                                      {status.contractHours !== null 
-                                        ? status.contractHours 
-                                        : '-'}
+                                      <StatusBadge status={status.governanceStatus} />
                                     </TableCell>
                                     <TableCell>
-                                      {status.workedHours !== null 
-                                        ? status.workedHours 
-                                        : '-'}
+                                      <StatusBadge status={status.invoiceStatus} />
                                     </TableCell>
                                   </TableRow>
                                 );
