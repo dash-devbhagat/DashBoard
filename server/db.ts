@@ -66,14 +66,14 @@ export async function seed() {
     // 1. First insert team members
     console.log('Seeding team members...');
     await db.insert(teamMembers).values([
-      { name: "Sarah Johnson", role: "UI Designer", avatar: "https://randomuser.me/api/portraits/women/44.jpg", availability: 60 },
-      { name: "Michael Chen", role: "Full Stack Developer", avatar: "https://randomuser.me/api/portraits/men/32.jpg", availability: 20 },
-      { name: "Emily Wilson", role: "UX Researcher", avatar: "https://randomuser.me/api/portraits/women/68.jpg", availability: 85 },
-      { name: "Daniel Brown", role: "Backend Developer", avatar: "https://randomuser.me/api/portraits/men/75.jpg", availability: 40 },
-      { name: "Olivia Taylor", role: "Project Manager", avatar: "https://randomuser.me/api/portraits/women/24.jpg", availability: 30 },
-      { name: "James Anderson", role: "Full Stack Developer", avatar: "https://randomuser.me/api/portraits/men/41.jpg", availability: 70 },
-      { name: "Sophia Martinez", role: "UI Designer", avatar: "https://randomuser.me/api/portraits/women/32.jpg", availability: 55 },
-      { name: "Ethan Wilson", role: "Backend Developer", avatar: "https://randomuser.me/api/portraits/men/54.jpg", availability: 25 }
+      { name: "Sarah Johnson", role: "UI Designer", avatar: "https://randomuser.me/api/portraits/women/44.jpg", availability: 60, skills: ["UI Design", "Wireframing", "Figma"] },
+      { name: "Michael Chen", role: "Full Stack Developer", avatar: "https://randomuser.me/api/portraits/men/32.jpg", availability: 20, skills: ["JavaScript", "React", "Node.js", "PostgreSQL"] },
+      { name: "Emily Wilson", role: "UX Researcher", avatar: "https://randomuser.me/api/portraits/women/68.jpg", availability: 85, skills: ["User Testing", "Interviews", "Prototyping"] },
+      { name: "Daniel Brown", role: "Backend Developer", avatar: "https://randomuser.me/api/portraits/men/75.jpg", availability: 40, skills: ["Java", "Spring", "MySQL", "AWS"] },
+      { name: "Olivia Taylor", role: "Project Manager", avatar: "https://randomuser.me/api/portraits/women/24.jpg", availability: 30, skills: ["Agile", "Scrum", "Jira", "Budgeting"] },
+      { name: "James Anderson", role: "Full Stack Developer", avatar: "https://randomuser.me/api/portraits/men/41.jpg", availability: 70, skills: ["TypeScript", "React", "Express", "MongoDB"] },
+      { name: "Sophia Martinez", role: "UI Designer", avatar: "https://randomuser.me/api/portraits/women/32.jpg", availability: 55, skills: ["Adobe XD", "Sketch", "UI Animation"] },
+      { name: "Ethan Wilson", role: "Backend Developer", avatar: "https://randomuser.me/api/portraits/men/54.jpg", availability: 25, skills: ["Python", "Django", "PostgreSQL", "Docker"] }
     ]).onConflictDoNothing();
     
     // 2. Then insert projects

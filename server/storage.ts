@@ -395,23 +395,23 @@ export class MemStorage implements IStorage {
   private seedData() {
     // Seed team members
     const teamMembers: InsertTeamMember[] = [
-      { name: 'Sarah Johnson', role: 'UI Designer', avatar: 'https://randomuser.me/api/portraits/women/44.jpg', availability: 25 },
-      { name: 'Michael Chen', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', availability: 0 },
-      { name: 'David Kim', role: 'Backend Developer', avatar: 'https://randomuser.me/api/portraits/men/68.jpg', availability: 50 },
-      { name: 'Emily Rodriguez', role: 'UX Researcher', avatar: 'https://randomuser.me/api/portraits/women/17.jpg', availability: 20 },
-      { name: 'Alex Morgan', role: 'QA Engineer', avatar: 'https://randomuser.me/api/portraits/men/75.jpg', availability: 70 },
-      { name: 'Jessica Lee', role: 'UI Designer', avatar: 'https://randomuser.me/api/portraits/women/33.jpg', availability: 40 },
-      { name: 'Robert Johnson', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/men/91.jpg', availability: 10 },
-      { name: 'Lisa Wang', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/women/23.jpg', availability: 35 },
-      { name: 'Mark Wilson', role: 'Backend Developer', avatar: 'https://randomuser.me/api/portraits/men/41.jpg', availability: 0 },
-      { name: 'Anna Martinez', role: 'QA Engineer', avatar: 'https://randomuser.me/api/portraits/women/37.jpg', availability: 60 },
-      { name: 'James Taylor', role: 'DevOps Engineer', avatar: 'https://randomuser.me/api/portraits/men/22.jpg', availability: 30 },
-      { name: 'Kevin Zhou', role: 'DevOps Engineer', avatar: 'https://randomuser.me/api/portraits/men/18.jpg', availability: 45 },
-      { name: 'Sophia Davis', role: 'UI Designer', avatar: 'https://randomuser.me/api/portraits/women/19.jpg', availability: 55 },
-      { name: 'Ryan Thomas', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/men/54.jpg', availability: 75 },
-      { name: 'Olivia Wilson', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/women/26.jpg', availability: 15 },
-      { name: 'Daniel Martinez', role: 'Backend Developer', avatar: 'https://randomuser.me/api/portraits/men/39.jpg', availability: 85 },
-      { name: 'Emma Johnson', role: 'UX Researcher', avatar: 'https://randomuser.me/api/portraits/women/63.jpg', availability: 25 }
+      { name: 'Sarah Johnson', role: 'UI Designer', avatar: 'https://randomuser.me/api/portraits/women/44.jpg', availability: 25, skills: ["UI Design", "Figma", "Wireframing"] },
+      { name: 'Michael Chen', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', availability: 0, skills: ["React", "JavaScript", "CSS", "Tailwind"] },
+      { name: 'David Kim', role: 'Backend Developer', avatar: 'https://randomuser.me/api/portraits/men/68.jpg', availability: 50, skills: ["Node.js", "Express", "PostgreSQL", "REST APIs"] },
+      { name: 'Emily Rodriguez', role: 'UX Researcher', avatar: 'https://randomuser.me/api/portraits/women/17.jpg', availability: 20, skills: ["User Testing", "Prototyping", "A/B Testing", "Interviews"] },
+      { name: 'Alex Morgan', role: 'QA Engineer', avatar: 'https://randomuser.me/api/portraits/men/75.jpg', availability: 70, skills: ["Automated Testing", "Selenium", "Jest", "QA Processes"] },
+      { name: 'Jessica Lee', role: 'UI Designer', avatar: 'https://randomuser.me/api/portraits/women/33.jpg', availability: 40, skills: ["Adobe XD", "Sketch", "Illustrator", "Design Systems"] },
+      { name: 'Robert Johnson', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/men/91.jpg', availability: 10, skills: ["Vue.js", "TypeScript", "SCSS", "Webpack"] },
+      { name: 'Lisa Wang', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/women/23.jpg', availability: 35, skills: ["Angular", "Material UI", "Bootstrap", "RxJS"] },
+      { name: 'Mark Wilson', role: 'Backend Developer', avatar: 'https://randomuser.me/api/portraits/men/41.jpg', availability: 0, skills: ["Python", "Django", "Flask", "AWS"] },
+      { name: 'Anna Martinez', role: 'QA Engineer', avatar: 'https://randomuser.me/api/portraits/women/37.jpg', availability: 60, skills: ["Manual Testing", "Test Planning", "Cypress", "Bug Tracking"] },
+      { name: 'James Taylor', role: 'DevOps Engineer', avatar: 'https://randomuser.me/api/portraits/men/22.jpg', availability: 30, skills: ["Docker", "Kubernetes", "Jenkins", "AWS"] },
+      { name: 'Kevin Zhou', role: 'DevOps Engineer', avatar: 'https://randomuser.me/api/portraits/men/18.jpg', availability: 45, skills: ["CI/CD", "Terraform", "Azure", "Linux"] },
+      { name: 'Sophia Davis', role: 'UI Designer', avatar: 'https://randomuser.me/api/portraits/women/19.jpg', availability: 55, skills: ["UI Animation", "Prototyping", "Design Systems", "Typography"] },
+      { name: 'Ryan Thomas', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/men/54.jpg', availability: 75, skills: ["Next.js", "React Native", "GraphQL", "Accessibility"] },
+      { name: 'Olivia Wilson', role: 'Frontend Developer', avatar: 'https://randomuser.me/api/portraits/women/26.jpg', availability: 15, skills: ["React", "Redux", "JavaScript", "CSS"] },
+      { name: 'Daniel Martinez', role: 'Backend Developer', avatar: 'https://randomuser.me/api/portraits/men/39.jpg', availability: 85, skills: ["Java", "Spring Boot", "Microservices", "MongoDB"] },
+      { name: 'Emma Johnson', role: 'UX Researcher', avatar: 'https://randomuser.me/api/portraits/women/63.jpg', availability: 25, skills: ["User Interviews", "Usability Testing", "Data Analysis", "Information Architecture"] }
     ];
 
     teamMembers.forEach(member => {

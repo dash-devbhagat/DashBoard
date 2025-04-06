@@ -4,8 +4,12 @@ CREATE TABLE IF NOT EXISTS "team_members" (
   "name" text NOT NULL,
   "role" text NOT NULL,
   "avatar" text,
-  "availability" integer NOT NULL DEFAULT 100
+  "availability" integer NOT NULL DEFAULT 100,
+  "skills" text[] DEFAULT '{}'::text[]
 );
+
+-- Create unique index on team member names
+CREATE UNIQUE INDEX IF NOT EXISTS "team_members_name_idx" ON "team_members" ("name");
 
 -- Create projects table
 CREATE TABLE IF NOT EXISTS "projects" (

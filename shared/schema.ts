@@ -13,6 +13,7 @@ export const teamMembers = pgTable("team_members", {
   skills: text("skills").array(), // Array of skills
 }, (table) => ({
   roleIdx: index("team_members_role_idx").on(table.role), // Helpful for filtering by role
+  nameIdx: uniqueIndex("team_members_name_idx").on(table.name), // Ensure team member names are unique
 }));
 
 // Project Schema
