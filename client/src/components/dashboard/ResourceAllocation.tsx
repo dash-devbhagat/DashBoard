@@ -318,21 +318,96 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
               <span className="material-icons text-sm">chevron_left</span>
             </Button>
             
-            {/* Generate page buttons */}
-            {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-              const pageNumber = i + 1;
-              return (
-                <Button 
-                  key={pageNumber}
-                  variant={currentPage === pageNumber ? "default" : "outline"} 
-                  size="icon" 
-                  className={`h-8 w-8 p-0 ${currentPage === pageNumber ? 'bg-primary text-white' : ''}`}
-                  onClick={() => handlePageChange(pageNumber)}
-                >
-                  {pageNumber}
-                </Button>
-              );
-            })}
+            {/* Generate page buttons with proper navigation */}
+            {(() => {
+              const pageButtons = [];
+              let startPage: number;
+              let endPage: number;
+              
+              // Logic to show appropriate page numbers with ellipsis when needed
+              if (totalPages <= 5) {
+                // If 5 or fewer pages, show all
+                startPage = 1;
+                endPage = totalPages;
+              } else {
+                // More complex logic for more pages
+                if (currentPage <= 3) {
+                  // Near the start
+                  startPage = 1;
+                  endPage = 5;
+                } else if (currentPage + 2 >= totalPages) {
+                  // Near the end
+                  startPage = Math.max(1, totalPages - 4);
+                  endPage = totalPages;
+                } else {
+                  // Somewhere in the middle
+                  startPage = currentPage - 2;
+                  endPage = currentPage + 2;
+                }
+              }
+              
+              // First page
+              if (startPage > 1) {
+                pageButtons.push(
+                  <Button 
+                    key={1}
+                    variant={currentPage === 1 ? "default" : "outline"} 
+                    size="icon" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => handlePageChange(1)}
+                  >
+                    1
+                  </Button>
+                );
+                
+                // Ellipsis if there's a gap
+                if (startPage > 2) {
+                  pageButtons.push(
+                    <span key="ellipsis1" className="px-1 py-2">...</span>
+                  );
+                }
+              }
+              
+              // Page numbers
+              for (let i = startPage; i <= endPage; i++) {
+                if (i === 1 || i === totalPages) continue; // Skip first and last as they're handled separately
+                pageButtons.push(
+                  <Button 
+                    key={i}
+                    variant={currentPage === i ? "default" : "outline"} 
+                    size="icon" 
+                    className={`h-8 w-8 p-0 ${currentPage === i ? 'bg-primary text-white' : ''}`}
+                    onClick={() => handlePageChange(i)}
+                  >
+                    {i}
+                  </Button>
+                );
+              }
+              
+              // Last page
+              if (endPage < totalPages) {
+                // Ellipsis if there's a gap
+                if (endPage < totalPages - 1) {
+                  pageButtons.push(
+                    <span key="ellipsis2" className="px-1 py-2">...</span>
+                  );
+                }
+                
+                pageButtons.push(
+                  <Button 
+                    key={totalPages}
+                    variant={currentPage === totalPages ? "default" : "outline"} 
+                    size="icon" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => handlePageChange(totalPages)}
+                  >
+                    {totalPages}
+                  </Button>
+                );
+              }
+              
+              return pageButtons;
+            })()}
             
             <Button 
               variant="outline" 
