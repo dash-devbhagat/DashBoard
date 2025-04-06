@@ -11,6 +11,7 @@ import { Project, ProjectStatus, insertProjectStatusSchema } from '@shared/schem
 import { formatDate } from '@/lib/utils';
 import { apiRequest } from '@/lib/queryClient';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Helper function to get week options (previous 12 weeks ending on Friday)
 const getWeekOptions = (): { value: string; label: string }[] => {
@@ -295,14 +296,24 @@ export default function ProjectStatusPage() {
         </Alert>
       )}
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Weekly Status Report</CardTitle>
-          <CardDescription>
-            View and update project status for the selected week
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <Tabs defaultValue="byProject" className="w-full">
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>Project Status Reports</CardTitle>
+                <CardDescription>
+                  View and update project status reports
+                </CardDescription>
+              </div>
+              <TabsList>
+                <TabsTrigger value="byProject">By Project</TabsTrigger>
+                <TabsTrigger value="cumulative">Cumulative Report</TabsTrigger>
+              </TabsList>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <TabsContent value="byProject">
           <div className="grid gap-6 mb-6 md:grid-cols-3">
             <div>
               <label className="block text-sm font-medium mb-2">
@@ -698,8 +709,45 @@ export default function ProjectStatusPage() {
               <p className="text-muted-foreground">Select a project to view status</p>
             </div>
           )}
-        </CardContent>
-      </Card>
+            </TabsContent>
+            
+            <TabsContent value="cumulative">
+              <div className="space-y-6">
+                <div className="mb-6">
+                  <label className="block text-sm font-medium mb-2">
+                    Week Range
+                  </label>
+                  <Select
+                    value={weekEndDate}
+                    onValueChange={(value) => setWeekEndDate(value)}
+                  >
+                    <SelectTrigger className="w-full md:w-[300px]">
+                      <SelectValue placeholder="Select week range" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getWeekOptions().map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="bg-muted/50 p-8 rounded-lg text-center">
+                  <h3 className="text-lg font-medium mb-2">Cumulative Status Report</h3>
+                  <p className="text-muted-foreground mb-4">
+                    This view will show a consolidated report of project statuses for the selected week.
+                  </p>
+                  <p className="text-sm">
+                    Future enhancement: Summary statistics and aggregated status indicators across all projects.
+                  </p>
+                </div>
+              </div>
+            </TabsContent>
+          </CardContent>
+        </Card>
+      </Tabs>
     </div>
   );
 }
