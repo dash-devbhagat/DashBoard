@@ -55,6 +55,12 @@ type Project = {
   endDate: string;
   description: string;
   color: string;
+  category?: string | null;
+  projectPhase?: string | null;
+  projectOwner?: string | null;
+  accountManager?: string | null;
+  deliveryManager?: string | null;
+  contractStatus?: string | null;
 };
 
 type TeamMember = {
@@ -123,6 +129,12 @@ const projectFormSchema = z.object({
     .refine(val => /^#[0-9A-Fa-f]{6}$/.test(val), {
       message: "Color must be a valid hex code (e.g., #2563eb)",
     }),
+  category: z.string().max(50, { message: "Category cannot exceed 50 characters" }).optional(),
+  projectPhase: z.string().max(50, { message: "Project phase cannot exceed 50 characters" }).optional(),
+  projectOwner: z.string().max(100, { message: "Project owner name cannot exceed 100 characters" }).optional(),
+  accountManager: z.string().max(100, { message: "Account manager name cannot exceed 100 characters" }).optional(),
+  deliveryManager: z.string().max(100, { message: "Delivery manager name cannot exceed 100 characters" }).optional(),
+  contractStatus: z.string().max(50, { message: "Contract status cannot exceed 50 characters" }).optional(),
   teamAllocations: z.array(z.object({
     teamMemberId: z.number().int().positive("Team member must be selected"),
     percentage: z.number().min(1, "Allocation must be at least 1%").max(100, "Allocation cannot exceed 100%"),
@@ -212,7 +224,7 @@ const Projects: React.FC = () => {
       
       return apiRequest<Project>("/api/projects", { 
         method: "POST", 
-        body: projectToCreate
+        body: JSON.stringify(projectToCreate)
       });
     },
     onSuccess: () => {
@@ -235,7 +247,7 @@ const Projects: React.FC = () => {
       
       return apiRequest<Project>(`/api/projects/${projectData.id}`, { 
         method: "PATCH", 
-        body: projectToUpdate
+        body: JSON.stringify(projectToUpdate)
       });
     },
     onSuccess: () => {
@@ -267,6 +279,12 @@ const Projects: React.FC = () => {
       endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
       description: "",
       color: projectColors[0],
+      category: "",
+      projectPhase: "",
+      projectOwner: "",
+      accountManager: "",
+      deliveryManager: "",
+      contractStatus: "",
     },
   });
 
@@ -280,6 +298,12 @@ const Projects: React.FC = () => {
       endDate: "",
       description: "",
       color: "",
+      category: "",
+      projectPhase: "",
+      projectOwner: "",
+      accountManager: "",
+      deliveryManager: "",
+      contractStatus: "",
     },
   });
 
@@ -352,7 +376,7 @@ const Projects: React.FC = () => {
       
       return apiRequest<Allocation>("/api/allocations", { 
         method: "POST", 
-        body: allocationData
+        body: JSON.stringify(allocationData)
       });
     },
     onSuccess: () => {
@@ -454,6 +478,12 @@ const Projects: React.FC = () => {
       endDate: project.endDate,
       description: project.description || "",
       color: project.color,
+      category: project.category || "",
+      projectPhase: project.projectPhase || "",
+      projectOwner: project.projectOwner || "",
+      accountManager: project.accountManager || "",
+      deliveryManager: project.deliveryManager || "",
+      contractStatus: project.contractStatus || "",
       teamAllocations: teamAllocs.length > 0 ? teamAllocs : undefined
     });
     
@@ -703,6 +733,12 @@ const Projects: React.FC = () => {
               endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
               description: "",
               color: projectColors[0],
+              category: "",
+              projectPhase: "",
+              projectOwner: "",
+              accountManager: "",
+              deliveryManager: "",
+              contractStatus: "",
             });
           }
         }}>
@@ -826,6 +862,96 @@ const Projects: React.FC = () => {
                   </FormItem>
                 )}
               />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={newProjectForm.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Web, Mobile, Infrastructure" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={newProjectForm.control}
+                  name="projectPhase"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Phase</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Discovery, Development" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={newProjectForm.control}
+                  name="projectOwner"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Owner</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Name of project owner" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={newProjectForm.control}
+                  name="accountManager"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Account Manager</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Name of account manager" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={newProjectForm.control}
+                  name="deliveryManager"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Delivery Manager</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Name of delivery manager" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={newProjectForm.control}
+                  name="contractStatus"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contract Status</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Signed, Pending, Renewed" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               
               <div className="pt-2 pb-2">
                 <div className="border-t border-slate-200 my-4" />
@@ -987,6 +1113,96 @@ const Projects: React.FC = () => {
                 )}
               />
               
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={editProjectForm.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Web, Mobile, Infrastructure" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={editProjectForm.control}
+                  name="projectPhase"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Phase</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Discovery, Development" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={editProjectForm.control}
+                  name="projectOwner"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Owner</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Name of project owner" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={editProjectForm.control}
+                  name="accountManager"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Account Manager</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Name of account manager" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={editProjectForm.control}
+                  name="deliveryManager"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Delivery Manager</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Name of delivery manager" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={editProjectForm.control}
+                  name="contractStatus"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contract Status</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Signed, Pending, Renewed" {...field} value={field.value || ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
               <div className="pt-2 pb-2">
                 <div className="border-t border-slate-200 my-4" />
                 <ResourceAllocationInput 
@@ -1091,6 +1307,41 @@ const Projects: React.FC = () => {
                             <p className="text-slate-600">
                               {currentProject.description || "No description provided."}
                             </p>
+                          </CardContent>
+                        </Card>
+                        
+                        {/* Additional Project Details */}
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-md">Project Details</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <h4 className="text-sm font-medium text-slate-500">Category</h4>
+                                <p className="mt-1">{currentProject.category || "Not specified"}</p>
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-medium text-slate-500">Project Phase</h4>
+                                <p className="mt-1">{currentProject.projectPhase || "Not specified"}</p>
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-medium text-slate-500">Project Owner</h4>
+                                <p className="mt-1">{currentProject.projectOwner || "Not specified"}</p>
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-medium text-slate-500">Account Manager</h4>
+                                <p className="mt-1">{currentProject.accountManager || "Not specified"}</p>
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-medium text-slate-500">Delivery Manager</h4>
+                                <p className="mt-1">{currentProject.deliveryManager || "Not specified"}</p>
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-medium text-slate-500">Contract Status</h4>
+                                <p className="mt-1">{currentProject.contractStatus || "Not specified"}</p>
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
                         

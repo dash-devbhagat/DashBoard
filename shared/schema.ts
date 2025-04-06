@@ -24,9 +24,16 @@ export const projects = pgTable("projects", {
   endDate: text("end_date").notNull(),
   description: text("description"),
   color: text("color").notNull().default("#2563eb"), // Project color for UI
+  category: text("category"), // Project category (e.g., Web, Mobile, Infrastructure)
+  projectPhase: text("project_phase"), // Current phase (e.g., Discovery, Development, Testing)
+  projectOwner: text("project_owner"), // Name of the project owner
+  accountManager: text("account_manager"), // Name of the account manager
+  deliveryManager: text("delivery_manager"), // Name of the delivery manager
+  contractStatus: text("contract_status"), // Status of the contract (e.g., Signed, Pending, Renewed)
 }, (table) => ({
   statusIdx: index("projects_status_idx").on(table.status), // Helpful for filtering by status
   nameIdx: uniqueIndex("projects_name_idx").on(table.name), // Ensure project names are unique
+  categoryIdx: index("projects_category_idx").on(table.category), // Helpful for filtering by category
 }));
 
 // Resource Allocation Schema
@@ -119,6 +126,12 @@ export const insertProjectSchema = createInsertSchema(projects)
     endDate: true,
     description: true,
     color: true,
+    category: true,
+    projectPhase: true,
+    projectOwner: true,
+    accountManager: true,
+    deliveryManager: true,
+    contractStatus: true,
   })
   .extend({
     name: z.string()
@@ -143,6 +156,12 @@ export const insertProjectSchema = createInsertSchema(projects)
       .refine(val => /^#[0-9A-Fa-f]{6}$/.test(val), {
         message: "Color must be a valid hex code (e.g., #2563eb)",
       }),
+    category: z.string().max(50, "Category cannot exceed 50 characters").nullable().optional(),
+    projectPhase: z.string().max(50, "Project phase cannot exceed 50 characters").nullable().optional(),
+    projectOwner: z.string().max(100, "Project owner name cannot exceed 100 characters").nullable().optional(),
+    accountManager: z.string().max(100, "Account manager name cannot exceed 100 characters").nullable().optional(),
+    deliveryManager: z.string().max(100, "Delivery manager name cannot exceed 100 characters").nullable().optional(),
+    contractStatus: z.string().max(50, "Contract status cannot exceed 50 characters").nullable().optional(),
   })
   .refine(
     data => {
