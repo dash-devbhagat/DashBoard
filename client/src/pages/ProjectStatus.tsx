@@ -11,7 +11,40 @@ import { Project, ProjectStatus } from '@shared/schema';
 import { formatDate } from '@/lib/utils';
 import { apiRequest } from '@/lib/queryClient';
 
-// Helper function to get the previous week's end date (Friday)
+// Helper function to get week options (previous 12 weeks ending on Friday)
+const getWeekOptions = (): { value: string; label: string }[] => {
+  const options = [];
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
+  
+  // Calculate days to subtract to get to the most recent Friday
+  const daysToSubtract = dayOfWeek === 6 ? 1 : dayOfWeek + 2;
+  
+  let friday = new Date(now);
+  friday.setDate(now.getDate() - daysToSubtract);
+  
+  // Generate options for the last 12 weeks
+  for (let i = 0; i < 12; i++) {
+    const endDate = new Date(friday);
+    const startDate = new Date(friday);
+    startDate.setDate(endDate.getDate() - 6); // Saturday (6 days before Friday)
+    
+    const weekEndDateStr = endDate.toISOString().split('T')[0];
+    const weekRangeDisplay = `${formatDate(startDate)} to ${formatDate(endDate)}`;
+    
+    options.push({
+      value: weekEndDateStr,
+      label: weekRangeDisplay
+    });
+    
+    // Move to previous week
+    friday.setDate(friday.getDate() - 7);
+  }
+  
+  return options;
+};
+
+// Helper function to get the most recent Friday (last week's end date)
 const getPreviousWeekEndDate = (): string => {
   const now = new Date();
   const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
@@ -24,15 +57,6 @@ const getPreviousWeekEndDate = (): string => {
   
   // Format as YYYY-MM-DD
   return lastFriday.toISOString().split('T')[0];
-};
-
-// Helper function to get the week range for display (Saturday to Friday)
-const getWeekRangeDisplay = (weekEndDate: string): string => {
-  const endDate = new Date(weekEndDate);
-  const startDate = new Date(weekEndDate);
-  startDate.setDate(endDate.getDate() - 6); // Saturday (6 days before Friday)
-  
-  return `${formatDate(startDate)} to ${formatDate(endDate)}`;
 };
 
 // Color badges for status indicators
@@ -228,25 +252,26 @@ export default function ProjectStatusPage() {
               </Select>
             </div>
             
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Week Ending (Friday)
-              </label>
-              <Input
-                type="date"
-                value={weekEndDate}
-                onChange={(e) => setWeekEndDate(e.target.value)}
-                disabled={isLoadingStatus}
-              />
-            </div>
-            
-            <div>
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-2">
                 Week Range
               </label>
-              <div className="h-10 px-3 py-2 rounded-md border border-input bg-background text-sm">
-                {weekEndDate ? getWeekRangeDisplay(weekEndDate) : ''}
-              </div>
+              <Select
+                value={weekEndDate}
+                onValueChange={(value) => setWeekEndDate(value)}
+                disabled={isLoadingStatus}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select week range" />
+                </SelectTrigger>
+                <SelectContent>
+                  {getWeekOptions().map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           
