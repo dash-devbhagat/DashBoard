@@ -121,7 +121,8 @@ export default function ProjectStatusPage() {
   // Fetch cumulative project statuses for the selected week
   const {
     data: cumulativeStatuses,
-    isLoading: isLoadingCumulative
+    isLoading: isLoadingCumulative,
+    refetch: refetchCumulativeStatuses
   } = useQuery({
     queryKey: ['/api/project-statuses/by-week', weekEndDate],
     queryFn: () => apiRequest<ProjectStatus[]>(`/api/project-statuses/by-week?weekEndDate=${weekEndDate}`),
@@ -214,6 +215,11 @@ export default function ProjectStatusPage() {
       
       setIsEditing(false);
       refetchStatus();
+      
+      // Also refresh the cumulative data if the week matches
+      if (projectStatus.weekEndDate === weekEndDate) {
+        refetchCumulativeStatuses();
+      }
     } catch (error) {
       console.error('Error saving project status:', error);
       
