@@ -19,6 +19,24 @@ type DashboardStats = {
   fullyAllocatedCount: number;
 };
 
+type TeamMember = {
+  id: number;
+  name: string;
+  role: string;
+  avatar: string | null;
+  availability: number;
+  skills: string[] | null;
+};
+
+type Allocation = {
+  id: number;
+  teamMemberId: number;
+  projectId: number;
+  percentage: number;
+  startDate: string;
+  endDate: string;
+};
+
 const TeamAvailability: React.FC = () => {
   const { data: utilizationData, isLoading: utilizationLoading } = useQuery<TeamUtilization[]>({
     queryKey: ["/api/dashboard/team-utilization"],
@@ -27,8 +45,16 @@ const TeamAvailability: React.FC = () => {
   const { data: dashboardStats, isLoading: statsLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
   });
+  
+  const { data: teamMembers, isLoading: teamMembersLoading } = useQuery<TeamMember[]>({
+    queryKey: ["/api/team-members"],
+  });
+  
+  const { data: allocations, isLoading: allocationsLoading } = useQuery<Allocation[]>({
+    queryKey: ["/api/allocations"],
+  });
 
-  const isLoading = utilizationLoading || statsLoading;
+  const isLoading = utilizationLoading || statsLoading || teamMembersLoading || allocationsLoading;
 
   // Function to determine color based on utilization percentage
   const getUtilizationColor = (percentage: number) => {
@@ -56,29 +82,35 @@ const TeamAvailability: React.FC = () => {
       </Card>
     );
   }
-
-  // Calculate all counts from team utilization data to ensure consistency
   
-  // Fully allocated is those with ≥100% allocation
-  const fullyAllocatedMembers = (utilizationData || [])
-    .filter(data => data.utilizationPercentage >= 100)
-    .reduce((sum, data) => sum + data.memberCount, 0);
+  // Calculate team member allocation percentages
+  const memberAllocations = new Map<number, number>();
   
-  const fullyAllocatedCount = fullyAllocatedMembers;
+  // Initialize all team members with 0% allocation
+  (teamMembers || []).forEach(member => {
+    memberAllocations.set(member.id, 0);
+  });
   
-  // Partially allocated is only those with 75-99% allocation
-  const partiallyAllocatedMembers = (utilizationData || [])
-    .filter(data => data.utilizationPercentage >= 75 && data.utilizationPercentage < 100)
-    .reduce((sum, data) => sum + data.memberCount, 0);
+  // Add up all allocations for each team member
+  (allocations || []).forEach(allocation => {
+    const currentAllocation = memberAllocations.get(allocation.teamMemberId) || 0;
+    memberAllocations.set(allocation.teamMemberId, currentAllocation + allocation.percentage);
+  });
   
-  const partialCount = partiallyAllocatedMembers;
+  // Count members in each allocation category
+  let fullyAllocatedCount = 0;
+  let partialCount = 0;
+  let needsAllocationCount = 0;
   
-  // "Needs allocation" should include all team members with <75% allocation
-  const lowAllocationTeamMembers = (utilizationData || [])
-    .filter(data => data.utilizationPercentage < 75)
-    .reduce((sum, data) => sum + data.memberCount, 0);
-  
-  const needsAllocationCount = lowAllocationTeamMembers;
+  memberAllocations.forEach(allocationPercentage => {
+    if (allocationPercentage >= 100) {
+      fullyAllocatedCount++;
+    } else if (allocationPercentage >= 75) {
+      partialCount++;
+    } else {
+      needsAllocationCount++;
+    }
+  });
 
   return (
     <Card className="h-full flex flex-col">
