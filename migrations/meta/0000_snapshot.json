@@ -1,0 +1,684 @@
+{
+  "id": "62edfcd7-430f-4b00-9fca-da7db4a1f599",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.allocations": {
+      "name": "allocations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "team_member_id": {
+          "name": "team_member_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "percentage": {
+          "name": "percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "allocations_team_member_id_idx": {
+          "name": "allocations_team_member_id_idx",
+          "columns": [
+            {
+              "expression": "team_member_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "allocations_project_id_idx": {
+          "name": "allocations_project_id_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "allocations_date_range_idx": {
+          "name": "allocations_date_range_idx",
+          "columns": [
+            {
+              "expression": "start_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "end_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "allocations_team_member_id_team_members_id_fk": {
+          "name": "allocations_team_member_id_team_members_id_fk",
+          "tableFrom": "allocations",
+          "tableTo": "team_members",
+          "columnsFrom": [
+            "team_member_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "allocations_project_id_projects_id_fk": {
+          "name": "allocations_project_id_projects_id_fk",
+          "tableFrom": "allocations",
+          "tableTo": "projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.project_status": {
+      "name": "project_status",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "week_end_date": {
+          "name": "week_end_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contract_hours": {
+          "name": "contract_hours",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "worked_hours": {
+          "name": "worked_hours",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schedule_status": {
+          "name": "schedule_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quality_status": {
+          "name": "quality_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resource_utilization_status": {
+          "name": "resource_utilization_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "client_satisfaction_status": {
+          "name": "client_satisfaction_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "schedule_status_reason": {
+          "name": "schedule_status_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "quality_status_reason": {
+          "name": "quality_status_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resource_utilization_status_reason": {
+          "name": "resource_utilization_status_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "client_satisfaction_status_reason": {
+          "name": "client_satisfaction_status_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "risks": {
+          "name": "risks",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "accomplishments": {
+          "name": "accomplishments",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "next_steps": {
+          "name": "next_steps",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "right_team_status": {
+          "name": "right_team_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "delivery_comments": {
+          "name": "delivery_comments",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "am_status": {
+          "name": "am_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "am_comments": {
+          "name": "am_comments",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "governance_status": {
+          "name": "governance_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_governance_meeting_date": {
+          "name": "last_governance_meeting_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_invoice_date": {
+          "name": "last_invoice_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_receivable_date": {
+          "name": "last_receivable_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "next_invoice_date": {
+          "name": "next_invoice_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "invoice_status": {
+          "name": "invoice_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "risk_dependencies": {
+          "name": "risk_dependencies",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "action_items": {
+          "name": "action_items",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "action_item_owner": {
+          "name": "action_item_owner",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "project_status_project_id_idx": {
+          "name": "project_status_project_id_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "project_status_week_end_date_idx": {
+          "name": "project_status_week_end_date_idx",
+          "columns": [
+            {
+              "expression": "week_end_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "project_status_project_week_idx": {
+          "name": "project_status_project_week_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "week_end_date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "project_status_project_id_projects_id_fk": {
+          "name": "project_status_project_id_projects_id_fk",
+          "tableFrom": "project_status",
+          "tableTo": "projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.projects": {
+      "name": "projects",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'active'"
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'#2563eb'"
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "project_phase": {
+          "name": "project_phase",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "project_owner": {
+          "name": "project_owner",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "account_manager": {
+          "name": "account_manager",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "delivery_manager": {
+          "name": "delivery_manager",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contract_status": {
+          "name": "contract_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "projects_status_idx": {
+          "name": "projects_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "projects_name_idx": {
+          "name": "projects_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "projects_category_idx": {
+          "name": "projects_category_idx",
+          "columns": [
+            {
+              "expression": "category",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.team_members": {
+      "name": "team_members",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "avatar": {
+          "name": "avatar",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "availability": {
+          "name": "availability",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 100
+        },
+        "skills": {
+          "name": "skills",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "team_members_role_idx": {
+          "name": "team_members_role_idx",
+          "columns": [
+            {
+              "expression": "role",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.timeline_phases": {
+      "name": "timeline_phases",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_week": {
+          "name": "start_week",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "duration_weeks": {
+          "name": "duration_weeks",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "color": {
+          "name": "color",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "timeline_phases_project_id_idx": {
+          "name": "timeline_phases_project_id_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "timeline_phases_project_id_projects_id_fk": {
+          "name": "timeline_phases_project_id_projects_id_fk",
+          "tableFrom": "timeline_phases",
+          "tableTo": "projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

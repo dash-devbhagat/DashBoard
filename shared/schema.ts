@@ -284,3 +284,143 @@ export type CategoryHours = {
   estimated: number;
   actual: number;
 };
+
+// Status color type for dropdown selections
+export type StatusColor = "green" | "amber" | "red";
+
+// Project Status Schema
+export const projectStatus = pgTable("project_status", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  weekEndDate: text("week_end_date").notNull(), // Friday date of the week
+  contractHours: integer("contract_hours"), // Number of contract hours
+  workedHours: integer("worked_hours"), // Number of hours worked
+  scheduleStatus: text("schedule_status"), // green, amber, red
+  qualityStatus: text("quality_status"), // green, amber, red
+  resourceUtilizationStatus: text("resource_utilization_status"), // green, amber, red
+  clientSatisfactionStatus: text("client_satisfaction_status"), // green, amber, red
+  scheduleStatusReason: text("schedule_status_reason"), // Reason for schedule status
+  qualityStatusReason: text("quality_status_reason"), // Reason for quality status
+  resourceUtilizationStatusReason: text("resource_utilization_status_reason"), // Reason for resource utilization status
+  clientSatisfactionStatusReason: text("client_satisfaction_status_reason"), // Reason for client satisfaction status
+  risks: text("risks"), // Project risks
+  accomplishments: text("accomplishments"), // Weekly accomplishments
+  nextSteps: text("next_steps"), // Next steps for upcoming week
+  rightTeamStatus: text("right_team_status"), // green, amber, red
+  deliveryComments: text("delivery_comments"),
+  amStatus: text("am_status"), // green, amber, red
+  amComments: text("am_comments"),
+  governanceStatus: text("governance_status"), // green, amber, red
+  lastGovernanceMeetingDate: text("last_governance_meeting_date"),
+  lastInvoiceDate: text("last_invoice_date"),
+  lastReceivableDate: text("last_receivable_date"),
+  nextInvoiceDate: text("next_invoice_date"),
+  invoiceStatus: text("invoice_status"), // green, amber, red
+  riskDependencies: text("risk_dependencies"),
+  actionItems: text("action_items"),
+  actionItemOwner: text("action_item_owner"),
+}, (table) => ({
+  projectIdIdx: index("project_status_project_id_idx").on(table.projectId),
+  weekEndDateIdx: index("project_status_week_end_date_idx").on(table.weekEndDate),
+  // Compound index for unique project status per week
+  projectWeekIdx: uniqueIndex("project_status_project_week_idx").on(table.projectId, table.weekEndDate),
+}));
+
+// Relations
+export const projectStatusRelations = relations(projectStatus, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectStatus.projectId],
+    references: [projects.id],
+  }),
+}));
+
+// Update project relations to include project status
+export const updatedProjectsRelations = relations(projects, ({ many }) => ({
+  allocations: many(allocations),
+  timelinePhases: many(timelinePhases),
+  projectStatus: many(projectStatus),
+}));
+
+// Enhanced validation for project status
+export const insertProjectStatusSchema = createInsertSchema(projectStatus)
+  .pick({
+    projectId: true,
+    weekEndDate: true,
+    contractHours: true,
+    workedHours: true,
+    scheduleStatus: true,
+    qualityStatus: true,
+    resourceUtilizationStatus: true,
+    clientSatisfactionStatus: true,
+    scheduleStatusReason: true,
+    qualityStatusReason: true,
+    resourceUtilizationStatusReason: true,
+    clientSatisfactionStatusReason: true,
+    risks: true,
+    accomplishments: true,
+    nextSteps: true,
+    rightTeamStatus: true,
+    deliveryComments: true,
+    amStatus: true,
+    amComments: true,
+    governanceStatus: true,
+    lastGovernanceMeetingDate: true,
+    lastInvoiceDate: true,
+    lastReceivableDate: true,
+    nextInvoiceDate: true,
+    invoiceStatus: true,
+    riskDependencies: true,
+    actionItems: true,
+    actionItemOwner: true,
+  })
+  .extend({
+    projectId: z.number()
+      .int("Project ID must be an integer")
+      .positive("Project ID must be positive"),
+    weekEndDate: z.string()
+      .refine(val => /^\d{4}-\d{2}-\d{2}$/.test(val), {
+        message: "Week end date must be in the format YYYY-MM-DD",
+      }),
+    contractHours: z.number().int().nullable().optional(),
+    workedHours: z.number().int().nullable().optional(),
+    scheduleStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    qualityStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    resourceUtilizationStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    clientSatisfactionStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    scheduleStatusReason: z.string().max(1000, "Reason cannot exceed 1000 characters").nullable().optional(),
+    qualityStatusReason: z.string().max(1000, "Reason cannot exceed 1000 characters").nullable().optional(),
+    resourceUtilizationStatusReason: z.string().max(1000, "Reason cannot exceed 1000 characters").nullable().optional(),
+    clientSatisfactionStatusReason: z.string().max(1000, "Reason cannot exceed 1000 characters").nullable().optional(),
+    risks: z.string().max(1000, "Risks cannot exceed 1000 characters").nullable().optional(),
+    accomplishments: z.string().max(1000, "Accomplishments cannot exceed 1000 characters").nullable().optional(),
+    nextSteps: z.string().max(1000, "Next steps cannot exceed 1000 characters").nullable().optional(),
+    rightTeamStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    deliveryComments: z.string().max(1000, "Comments cannot exceed 1000 characters").nullable().optional(),
+    amStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    amComments: z.string().max(1000, "Comments cannot exceed 1000 characters").nullable().optional(),
+    governanceStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    lastGovernanceMeetingDate: z.string()
+      .refine(val => val === null || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+        message: "Date must be in the format YYYY-MM-DD",
+      }).nullable().optional(),
+    lastInvoiceDate: z.string()
+      .refine(val => val === null || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+        message: "Date must be in the format YYYY-MM-DD",
+      }).nullable().optional(),
+    lastReceivableDate: z.string()
+      .refine(val => val === null || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+        message: "Date must be in the format YYYY-MM-DD",
+      }).nullable().optional(),
+    nextInvoiceDate: z.string()
+      .refine(val => val === null || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+        message: "Date must be in the format YYYY-MM-DD",
+      }).nullable().optional(),
+    invoiceStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
+    riskDependencies: z.string().max(1000, "Risk/Dependencies cannot exceed 1000 characters").nullable().optional(),
+    actionItems: z.string().max(1000, "Action items cannot exceed 1000 characters").nullable().optional(),
+    actionItemOwner: z.string().max(100, "Owner name cannot exceed 100 characters").nullable().optional(),
+  });
+
+// Types
+export type ProjectStatus = typeof projectStatus.$inferSelect;
+export type InsertProjectStatus = z.infer<typeof insertProjectStatusSchema>;

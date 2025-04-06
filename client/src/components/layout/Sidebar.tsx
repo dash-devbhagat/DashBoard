@@ -15,6 +15,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, setOpen }) => {
     { href: "/", label: "Dashboard", icon: "dashboard" },
     { href: "/projects", label: "Projects", icon: "work" },
     { href: "/team", label: "Team", icon: "people" },
+    { href: "/project-status", label: "Project Status", icon: "assessment" },
     { href: "/reports", label: "Reports", icon: "bar_chart" },
   ];
 

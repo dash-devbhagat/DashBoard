@@ -5,7 +5,8 @@ import {
   insertTeamMemberSchema, 
   insertProjectSchema,
   insertAllocationSchema,
-  insertTimelinePhaseSchema
+  insertTimelinePhaseSchema,
+  insertProjectStatusSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -527,6 +528,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(hours);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch category hours data" });
+    }
+  });
+  
+  // Project Status routes
+  app.get('/api/project-statuses', async (req: Request, res: Response) => {
+    try {
+      const projectId = req.query.projectId ? Number(req.query.projectId) : undefined;
+      const weekEndDate = req.query.weekEndDate as string | undefined;
+      
+      if (projectId && weekEndDate) {
+        const status = await storage.getProjectStatusByWeek(projectId, weekEndDate);
+        if (status) {
+          res.json(status);
+        } else {
+          res.status(404).json({ message: "Project status not found" });
+        }
+      } else if (projectId) {
+        const statuses = await storage.getProjectStatusesByProject(projectId);
+        res.json(statuses);
+      } else {
+        const statuses = await storage.getProjectStatuses();
+        res.json(statuses);
+      }
+    } catch (error) {
+      console.error('Error fetching project statuses:', error);
+      res.status(500).json({ message: "Failed to fetch project statuses" });
+    }
+  });
+  
+  app.post('/api/project-statuses', async (req: Request, res: Response) => {
+    try {
+      // Validate the request body against our schema
+      const validationResult = insertProjectStatusSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        // Format the error messages nicely
+        const formattedErrors = validationResult.error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message
+        }));
+        
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: formattedErrors 
+        });
+      }
+      
+      const projectStatus = await storage.createProjectStatus(validationResult.data);
+      res.status(201).json(projectStatus);
+    } catch (error) {
+      console.error('Error creating project status:', error);
+      res.status(500).json({ message: "Failed to create project status" });
+    }
+  });
+  
+  app.patch('/api/project-statuses/:id', async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      
+      // Create a partial schema for updates
+      const projectStatusUpdateSchema = insertProjectStatusSchema.partial();
+      const validationResult = projectStatusUpdateSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        // Format the error messages nicely
+        const formattedErrors = validationResult.error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message
+        }));
+        
+        return res.status(400).json({ 
+          message: "Validation failed", 
+          errors: formattedErrors 
+        });
+      }
+      
+      const updatedProjectStatus = await storage.updateProjectStatus(id, validationResult.data);
+      
+      if (updatedProjectStatus) {
+        res.json(updatedProjectStatus);
+      } else {
+        res.status(404).json({ message: "Project status not found" });
+      }
+    } catch (error) {
+      console.error('Error updating project status:', error);
+      res.status(500).json({ message: "Failed to update project status" });
+    }
+  });
+  
+  app.delete('/api/project-statuses/:id', async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      const success = await storage.deleteProjectStatus(id);
+      
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: "Project status not found" });
+      }
+    } catch (error) {
+      console.error('Error deleting project status:', error);
+      res.status(500).json({ message: "Failed to delete project status" });
     }
   });
 

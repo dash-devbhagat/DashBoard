@@ -1,9 +1,10 @@
 import {
-  teamMembers, projects, allocations, timelinePhases,
+  teamMembers, projects, allocations, timelinePhases, projectStatus,
   type TeamMember, type InsertTeamMember,
   type Project, type InsertProject,
   type Allocation, type InsertAllocation,
   type TimelinePhase, type InsertTimelinePhase,
+  type ProjectStatus, type InsertProjectStatus,
   type TeamPerformance, type CategoryHours
 } from "@shared/schema";
 import { db } from "./db";
@@ -40,6 +41,14 @@ export interface IStorage {
   updateTimelinePhase(id: number, phase: Partial<InsertTimelinePhase>): Promise<TimelinePhase | undefined>;
   deleteTimelinePhase(id: number): Promise<boolean>;
 
+  // Project Status
+  getProjectStatuses(): Promise<ProjectStatus[]>;
+  getProjectStatusesByProject(projectId: number): Promise<ProjectStatus[]>;
+  getProjectStatusByWeek(projectId: number, weekEndDate: string): Promise<ProjectStatus | undefined>;
+  createProjectStatus(status: InsertProjectStatus): Promise<ProjectStatus>;
+  updateProjectStatus(id: number, status: Partial<InsertProjectStatus>): Promise<ProjectStatus | undefined>;
+  deleteProjectStatus(id: number): Promise<boolean>;
+  
   // Dashboard Stats
   getDashboardStats(): Promise<DashboardStats>;
   getTeamUtilization(): Promise<TeamUtilization[]>;
@@ -66,22 +75,26 @@ export class MemStorage implements IStorage {
   private projects: Map<number, Project>;
   private allocations: Map<number, Allocation>;
   private timelinePhases: Map<number, TimelinePhase>;
+  private projectStatuses: Map<number, ProjectStatus>;
   
   private teamMembersId: number;
   private projectsId: number;
   private allocationsId: number;
   private timelinePhasesId: number;
+  private projectStatusesId: number;
 
   constructor() {
     this.teamMembers = new Map();
     this.projects = new Map();
     this.allocations = new Map();
     this.timelinePhases = new Map();
+    this.projectStatuses = new Map();
 
     this.teamMembersId = 1;
     this.projectsId = 1;
     this.allocationsId = 1;
     this.timelinePhasesId = 1;
+    this.projectStatusesId = 1;
 
     this.seedData();
   }
@@ -335,6 +348,41 @@ export class MemStorage implements IStorage {
       { category: 'QA', estimated: 190, actual: 210 },
       { category: 'DevOps', estimated: 150, actual: 120 }
     ];
+  }
+  
+  // Project Status methods
+  async getProjectStatuses(): Promise<ProjectStatus[]> {
+    return Array.from(this.projectStatuses.values());
+  }
+  
+  async getProjectStatusesByProject(projectId: number): Promise<ProjectStatus[]> {
+    return Array.from(this.projectStatuses.values())
+      .filter(status => status.projectId === projectId);
+  }
+  
+  async getProjectStatusByWeek(projectId: number, weekEndDate: string): Promise<ProjectStatus | undefined> {
+    return Array.from(this.projectStatuses.values())
+      .find(status => status.projectId === projectId && status.weekEndDate === weekEndDate);
+  }
+  
+  async createProjectStatus(status: InsertProjectStatus): Promise<ProjectStatus> {
+    const id = this.projectStatusesId++;
+    const newStatus = { ...status, id };
+    this.projectStatuses.set(id, newStatus);
+    return newStatus;
+  }
+  
+  async updateProjectStatus(id: number, status: Partial<InsertProjectStatus>): Promise<ProjectStatus | undefined> {
+    const existingStatus = this.projectStatuses.get(id);
+    if (!existingStatus) return undefined;
+    
+    const updatedStatus = { ...existingStatus, ...status };
+    this.projectStatuses.set(id, updatedStatus);
+    return updatedStatus;
+  }
+  
+  async deleteProjectStatus(id: number): Promise<boolean> {
+    return this.projectStatuses.delete(id);
   }
 
   // Seed initial data
@@ -736,6 +784,53 @@ export class DatabaseStorage implements IStorage {
       { category: 'QA', estimated: 190, actual: 210 },
       { category: 'DevOps', estimated: 150, actual: 120 }
     ];
+  }
+  
+  // Project Status
+  async getProjectStatuses(): Promise<ProjectStatus[]> {
+    const { db } = await import('./db');
+    return await db.select().from(projectStatus);
+  }
+  
+  async getProjectStatusesByProject(projectId: number): Promise<ProjectStatus[]> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    return await db.select().from(projectStatus).where(eq(projectStatus.projectId, projectId));
+  }
+  
+  async getProjectStatusByWeek(projectId: number, weekEndDate: string): Promise<ProjectStatus | undefined> {
+    const { db } = await import('./db');
+    const { eq, and } = await import('drizzle-orm');
+    const result = await db.select().from(projectStatus).where(
+      and(
+        eq(projectStatus.projectId, projectId),
+        eq(projectStatus.weekEndDate, weekEndDate)
+      )
+    );
+    return result[0];
+  }
+  
+  async createProjectStatus(status: InsertProjectStatus): Promise<ProjectStatus> {
+    const { db } = await import('./db');
+    const [result] = await db.insert(projectStatus).values(status).returning();
+    return result;
+  }
+  
+  async updateProjectStatus(id: number, status: Partial<InsertProjectStatus>): Promise<ProjectStatus | undefined> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const [result] = await db.update(projectStatus)
+      .set(status)
+      .where(eq(projectStatus.id, id))
+      .returning();
+    return result;
+  }
+  
+  async deleteProjectStatus(id: number): Promise<boolean> {
+    const { db } = await import('./db');
+    const { eq } = await import('drizzle-orm');
+    const result = await db.delete(projectStatus).where(eq(projectStatus.id, id)).returning();
+    return result.length > 0;
   }
 }
 
