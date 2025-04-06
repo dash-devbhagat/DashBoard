@@ -306,17 +306,6 @@ export const projectStatus = pgTable("project_status", {
   risks: text("risks"), // Project risks
   accomplishments: text("accomplishments"), // Weekly accomplishments
   nextSteps: text("next_steps"), // Next steps for upcoming week
-  rightTeamStatus: text("right_team_status"), // green, amber, red
-  deliveryComments: text("delivery_comments"),
-  amStatus: text("am_status"), // green, amber, red
-  amComments: text("am_comments"),
-  governanceStatus: text("governance_status"), // green, amber, red
-  lastGovernanceMeetingDate: text("last_governance_meeting_date"),
-  lastInvoiceDate: text("last_invoice_date"),
-  lastReceivableDate: text("last_receivable_date"),
-  nextInvoiceDate: text("next_invoice_date"),
-  invoiceStatus: text("invoice_status"), // green, amber, red
-  riskDependencies: text("risk_dependencies"),
   actionItems: text("action_items"),
   actionItemOwner: text("action_item_owner"),
 }, (table) => ({
@@ -359,17 +348,6 @@ export const insertProjectStatusSchema = createInsertSchema(projectStatus)
     risks: true,
     accomplishments: true,
     nextSteps: true,
-    rightTeamStatus: true,
-    deliveryComments: true,
-    amStatus: true,
-    amComments: true,
-    governanceStatus: true,
-    lastGovernanceMeetingDate: true,
-    lastInvoiceDate: true,
-    lastReceivableDate: true,
-    nextInvoiceDate: true,
-    invoiceStatus: true,
-    riskDependencies: true,
     actionItems: true,
     actionItemOwner: true,
   })
@@ -394,29 +372,6 @@ export const insertProjectStatusSchema = createInsertSchema(projectStatus)
     risks: z.string().max(1000, "Risks cannot exceed 1000 characters").nullable().optional(),
     accomplishments: z.string().max(1000, "Accomplishments cannot exceed 1000 characters").nullable().optional(),
     nextSteps: z.string().max(1000, "Next steps cannot exceed 1000 characters").nullable().optional(),
-    rightTeamStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
-    deliveryComments: z.string().max(1000, "Comments cannot exceed 1000 characters").nullable().optional(),
-    amStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
-    amComments: z.string().max(1000, "Comments cannot exceed 1000 characters").nullable().optional(),
-    governanceStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
-    lastGovernanceMeetingDate: z.string()
-      .refine(val => val === null || /^\d{4}-\d{2}-\d{2}$/.test(val), {
-        message: "Date must be in the format YYYY-MM-DD",
-      }).nullable().optional(),
-    lastInvoiceDate: z.string()
-      .refine(val => val === null || /^\d{4}-\d{2}-\d{2}$/.test(val), {
-        message: "Date must be in the format YYYY-MM-DD",
-      }).nullable().optional(),
-    lastReceivableDate: z.string()
-      .refine(val => val === null || /^\d{4}-\d{2}-\d{2}$/.test(val), {
-        message: "Date must be in the format YYYY-MM-DD",
-      }).nullable().optional(),
-    nextInvoiceDate: z.string()
-      .refine(val => val === null || /^\d{4}-\d{2}-\d{2}$/.test(val), {
-        message: "Date must be in the format YYYY-MM-DD",
-      }).nullable().optional(),
-    invoiceStatus: z.enum(["green", "amber", "red"]).nullable().optional(),
-    riskDependencies: z.string().max(1000, "Risk/Dependencies cannot exceed 1000 characters").nullable().optional(),
     actionItems: z.string().max(1000, "Action items cannot exceed 1000 characters").nullable().optional(),
     actionItemOwner: z.string().max(100, "Owner name cannot exceed 100 characters").nullable().optional(),
   });

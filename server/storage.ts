@@ -789,19 +789,76 @@ export class DatabaseStorage implements IStorage {
   // Project Status
   async getProjectStatuses(): Promise<ProjectStatus[]> {
     const { db } = await import('./db');
-    return await db.select().from(projectStatus);
+    return await db.select({
+      id: projectStatus.id,
+      projectId: projectStatus.projectId,
+      weekEndDate: projectStatus.weekEndDate,
+      contractHours: projectStatus.contractHours,
+      workedHours: projectStatus.workedHours,
+      scheduleStatus: projectStatus.scheduleStatus,
+      qualityStatus: projectStatus.qualityStatus,
+      resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+      clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
+      scheduleStatusReason: projectStatus.scheduleStatusReason,
+      qualityStatusReason: projectStatus.qualityStatusReason,
+      resourceUtilizationStatusReason: projectStatus.resourceUtilizationStatusReason,
+      clientSatisfactionStatusReason: projectStatus.clientSatisfactionStatusReason,
+      risks: projectStatus.risks,
+      accomplishments: projectStatus.accomplishments,
+      nextSteps: projectStatus.nextSteps,
+      actionItems: projectStatus.actionItems,
+      actionItemOwner: projectStatus.actionItemOwner,
+    }).from(projectStatus);
   }
   
   async getProjectStatusesByProject(projectId: number): Promise<ProjectStatus[]> {
     const { db } = await import('./db');
     const { eq } = await import('drizzle-orm');
-    return await db.select().from(projectStatus).where(eq(projectStatus.projectId, projectId));
+    return await db.select({
+      id: projectStatus.id,
+      projectId: projectStatus.projectId,
+      weekEndDate: projectStatus.weekEndDate,
+      contractHours: projectStatus.contractHours,
+      workedHours: projectStatus.workedHours,
+      scheduleStatus: projectStatus.scheduleStatus,
+      qualityStatus: projectStatus.qualityStatus,
+      resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+      clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
+      scheduleStatusReason: projectStatus.scheduleStatusReason,
+      qualityStatusReason: projectStatus.qualityStatusReason,
+      resourceUtilizationStatusReason: projectStatus.resourceUtilizationStatusReason,
+      clientSatisfactionStatusReason: projectStatus.clientSatisfactionStatusReason,
+      risks: projectStatus.risks,
+      accomplishments: projectStatus.accomplishments,
+      nextSteps: projectStatus.nextSteps,
+      actionItems: projectStatus.actionItems,
+      actionItemOwner: projectStatus.actionItemOwner,
+    }).from(projectStatus).where(eq(projectStatus.projectId, projectId));
   }
   
   async getProjectStatusByWeek(projectId: number, weekEndDate: string): Promise<ProjectStatus | undefined> {
     const { db } = await import('./db');
     const { eq, and } = await import('drizzle-orm');
-    const result = await db.select().from(projectStatus).where(
+    const result = await db.select({
+      id: projectStatus.id,
+      projectId: projectStatus.projectId,
+      weekEndDate: projectStatus.weekEndDate,
+      contractHours: projectStatus.contractHours,
+      workedHours: projectStatus.workedHours,
+      scheduleStatus: projectStatus.scheduleStatus,
+      qualityStatus: projectStatus.qualityStatus,
+      resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+      clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
+      scheduleStatusReason: projectStatus.scheduleStatusReason,
+      qualityStatusReason: projectStatus.qualityStatusReason,
+      resourceUtilizationStatusReason: projectStatus.resourceUtilizationStatusReason,
+      clientSatisfactionStatusReason: projectStatus.clientSatisfactionStatusReason,
+      risks: projectStatus.risks,
+      accomplishments: projectStatus.accomplishments,
+      nextSteps: projectStatus.nextSteps,
+      actionItems: projectStatus.actionItems,
+      actionItemOwner: projectStatus.actionItemOwner,
+    }).from(projectStatus).where(
       and(
         eq(projectStatus.projectId, projectId),
         eq(projectStatus.weekEndDate, weekEndDate)
@@ -812,7 +869,26 @@ export class DatabaseStorage implements IStorage {
   
   async createProjectStatus(status: InsertProjectStatus): Promise<ProjectStatus> {
     const { db } = await import('./db');
-    const [result] = await db.insert(projectStatus).values(status).returning();
+    const [result] = await db.insert(projectStatus).values(status).returning({
+      id: projectStatus.id,
+      projectId: projectStatus.projectId,
+      weekEndDate: projectStatus.weekEndDate,
+      contractHours: projectStatus.contractHours,
+      workedHours: projectStatus.workedHours,
+      scheduleStatus: projectStatus.scheduleStatus,
+      qualityStatus: projectStatus.qualityStatus,
+      resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+      clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
+      scheduleStatusReason: projectStatus.scheduleStatusReason,
+      qualityStatusReason: projectStatus.qualityStatusReason,
+      resourceUtilizationStatusReason: projectStatus.resourceUtilizationStatusReason,
+      clientSatisfactionStatusReason: projectStatus.clientSatisfactionStatusReason,
+      risks: projectStatus.risks,
+      accomplishments: projectStatus.accomplishments,
+      nextSteps: projectStatus.nextSteps,
+      actionItems: projectStatus.actionItems,
+      actionItemOwner: projectStatus.actionItemOwner,
+    });
     return result;
   }
   
@@ -822,7 +898,26 @@ export class DatabaseStorage implements IStorage {
     const [result] = await db.update(projectStatus)
       .set(status)
       .where(eq(projectStatus.id, id))
-      .returning();
+      .returning({
+        id: projectStatus.id,
+        projectId: projectStatus.projectId,
+        weekEndDate: projectStatus.weekEndDate,
+        contractHours: projectStatus.contractHours,
+        workedHours: projectStatus.workedHours,
+        scheduleStatus: projectStatus.scheduleStatus,
+        qualityStatus: projectStatus.qualityStatus,
+        resourceUtilizationStatus: projectStatus.resourceUtilizationStatus,
+        clientSatisfactionStatus: projectStatus.clientSatisfactionStatus,
+        scheduleStatusReason: projectStatus.scheduleStatusReason,
+        qualityStatusReason: projectStatus.qualityStatusReason,
+        resourceUtilizationStatusReason: projectStatus.resourceUtilizationStatusReason,
+        clientSatisfactionStatusReason: projectStatus.clientSatisfactionStatusReason,
+        risks: projectStatus.risks,
+        accomplishments: projectStatus.accomplishments,
+        nextSteps: projectStatus.nextSteps,
+        actionItems: projectStatus.actionItems,
+        actionItemOwner: projectStatus.actionItemOwner,
+      });
     return result;
   }
   

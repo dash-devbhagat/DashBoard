@@ -7,9 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import { Project, ProjectStatus } from '@shared/schema';
+import { Project, ProjectStatus, insertProjectStatusSchema } from '@shared/schema';
 import { formatDate } from '@/lib/utils';
 import { apiRequest } from '@/lib/queryClient';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Helper function to get week options (previous 12 weeks ending on Friday)
 const getWeekOptions = (): { value: string; label: string }[] => {
@@ -84,6 +85,7 @@ export default function ProjectStatusPage() {
   const [weekEndDate, setWeekEndDate] = useState<string>(getPreviousWeekEndDate());
   const [projectStatus, setProjectStatus] = useState<Partial<ProjectStatus> | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   
   // Fetch all projects
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
@@ -153,7 +155,33 @@ export default function ProjectStatusPage() {
   const handleSave = async () => {
     if (!projectStatus || !selectedProject) return;
     
+    // Validate project status
+    setValidationErrors({});
+    
     try {
+      // Run validation using the schema
+      const validationResult = insertProjectStatusSchema.safeParse(projectStatus);
+      
+      if (!validationResult.success) {
+        const formattedErrors: Record<string, string> = {};
+        
+        validationResult.error.errors.forEach((error) => {
+          const field = error.path[0] as string;
+          formattedErrors[field] = error.message;
+        });
+        
+        setValidationErrors(formattedErrors);
+        
+        toast({
+          title: "Validation Error",
+          description: "Please correct the errors in the form.",
+          variant: "destructive"
+        });
+        
+        return;
+      }
+      
+      // Proceed with saving
       if (statusData) {
         // Update existing status
         await apiRequest(`/api/project-statuses/${statusData.id}`, {
@@ -177,11 +205,21 @@ export default function ProjectStatusPage() {
       refetchStatus();
     } catch (error) {
       console.error('Error saving project status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save project status.",
-        variant: "destructive"
-      });
+      
+      // Check if this is a validation error from the server
+      if ((error as any)?.status === 400) {
+        toast({
+          title: "Validation Error",
+          description: "The server rejected the data. Please check your inputs.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to save project status.",
+          variant: "destructive"
+        });
+      }
     }
   };
   
@@ -189,11 +227,33 @@ export default function ProjectStatusPage() {
   const handleChange = (field: string, value: any) => {
     if (!projectStatus) return;
     
+    // Clear validation error for the field when it's changed
+    if (validationErrors[field]) {
+      setValidationErrors(prev => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
+    }
+    
     setProjectStatus(prev => ({
       ...prev,
       [field]: value
     }));
   };
+  
+  // Field error display component
+  const FieldError = ({ fieldName }: { fieldName: string }) => {
+    const error = validationErrors[fieldName];
+    if (!error) return null;
+    
+    return (
+      <div className="text-sm text-red-600 mt-1">{error}</div>
+    );
+  };
+  
+  // Check if there are any validation errors
+  const hasValidationErrors = Object.keys(validationErrors).length > 0;
   
   return (
     <div className="space-y-6">
@@ -206,6 +266,7 @@ export default function ProjectStatusPage() {
                 variant="outline" 
                 onClick={() => {
                   setIsEditing(false);
+                  setValidationErrors({});
                   if (statusData) {
                     setProjectStatus(statusData);
                   }
@@ -220,6 +281,19 @@ export default function ProjectStatusPage() {
           )}
         </div>
       </div>
+      
+      {isEditing && hasValidationErrors && (
+        <Alert className="bg-red-50 border-red-200">
+          <AlertDescription className="text-red-800">
+            <h3 className="font-semibold mb-1">Please fix the following errors:</h3>
+            <ul className="list-disc list-inside text-sm space-y-1">
+              {Object.entries(validationErrors).map(([field, message]) => (
+                <li key={field}>{message}</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
       
       <Card>
         <CardHeader>
@@ -484,12 +558,16 @@ export default function ProjectStatusPage() {
                     Contract Hours
                   </label>
                   {isEditing ? (
-                    <Input
-                      type="number"
-                      value={projectStatus?.contractHours || ''}
-                      onChange={(e) => handleChange('contractHours', e.target.value ? Number(e.target.value) : null)}
-                      placeholder="Enter contract hours"
-                    />
+                    <>
+                      <Input
+                        type="number"
+                        value={projectStatus?.contractHours || ''}
+                        onChange={(e) => handleChange('contractHours', e.target.value ? Number(e.target.value) : null)}
+                        placeholder="Enter contract hours"
+                        className={validationErrors.contractHours ? 'border-red-500' : ''}
+                      />
+                      <FieldError fieldName="contractHours" />
+                    </>
                   ) : (
                     <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
                       {projectStatus?.contractHours ?? '-'}
@@ -501,12 +579,16 @@ export default function ProjectStatusPage() {
                     Worked Hours
                   </label>
                   {isEditing ? (
-                    <Input
-                      type="number"
-                      value={projectStatus?.workedHours || ''}
-                      onChange={(e) => handleChange('workedHours', e.target.value ? Number(e.target.value) : null)}
-                      placeholder="Enter worked hours"
-                    />
+                    <>
+                      <Input
+                        type="number"
+                        value={projectStatus?.workedHours || ''}
+                        onChange={(e) => handleChange('workedHours', e.target.value ? Number(e.target.value) : null)}
+                        placeholder="Enter worked hours"
+                        className={validationErrors.workedHours ? 'border-red-500' : ''}
+                      />
+                      <FieldError fieldName="workedHours" />
+                    </>
                   ) : (
                     <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
                       {projectStatus?.workedHours ?? '-'}
@@ -594,11 +676,15 @@ export default function ProjectStatusPage() {
                     Action Item Owner
                   </label>
                   {isEditing ? (
-                    <Input
-                      value={projectStatus?.actionItemOwner || ''}
-                      onChange={(e) => handleChange('actionItemOwner', e.target.value || null)}
-                      placeholder="Name of person responsible for action items"
-                    />
+                    <>
+                      <Input
+                        value={projectStatus?.actionItemOwner || ''}
+                        onChange={(e) => handleChange('actionItemOwner', e.target.value || null)}
+                        placeholder="Name of person responsible for action items"
+                        className={validationErrors.actionItemOwner ? 'border-red-500' : ''}
+                      />
+                      <FieldError fieldName="actionItemOwner" />
+                    </>
                   ) : (
                     <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
                       {projectStatus?.actionItemOwner || '-'}
