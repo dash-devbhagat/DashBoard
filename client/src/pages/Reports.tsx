@@ -58,9 +58,6 @@ type Project = {
 
 const Reports: React.FC = () => {
   const [timeRange, setTimeRange] = useState("thisMonth");
-  const [projectFilter, setProjectFilter] = useState("");
-  const [roleFilter, setRoleFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string[]>([]);
   
   // Get all the data
   const { data: dashboardStats, isLoading: statsLoading } = useQuery<DashboardStats>({
@@ -83,29 +80,52 @@ const Reports: React.FC = () => {
     queryKey: ["/api/dashboard/category-hours"],
   });
 
-  // Filter projects based on search input and status
+  // Use time range to filter projects
   const filteredProjects = React.useMemo(() => {
     if (!projects) return [];
     
-    return projects.filter(project => {
-      const matchesName = project.name.toLowerCase().includes(projectFilter.toLowerCase());
-      const matchesStatus = statusFilter.length === 0 || statusFilter.includes(project.status);
-      
-      return matchesName && matchesStatus;
-    });
-  }, [projects, projectFilter, statusFilter]);
+    const now = new Date();
+    const oneWeekAgo = new Date(now);
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    const oneMonthAgo = new Date(now);
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+    
+    const threeMonthsAgo = new Date(now);
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    
+    // Filter projects based on the selected time range
+    switch (timeRange) {
+      case "thisWeek":
+        return projects.filter(project => {
+          const startDate = new Date(project.startDate);
+          return startDate >= oneWeekAgo || project.status === "active";
+        });
+      case "thisMonth":
+        return projects.filter(project => {
+          const startDate = new Date(project.startDate);
+          return startDate >= oneMonthAgo || project.status === "active";
+        });
+      case "lastMonth":
+        return projects.filter(project => {
+          const startDate = new Date(project.startDate);
+          return startDate >= oneMonthAgo && startDate < now;
+        });
+      case "lastQuarter":
+        return projects.filter(project => {
+          const startDate = new Date(project.startDate);
+          return startDate >= threeMonthsAgo;
+        });
+      default:
+        return projects;
+    }
+  }, [projects, timeRange]);
 
-  // Filter team members based on search input and role
+  // Get all team members for display
   const filteredTeamMembers = React.useMemo(() => {
     if (!teamMembers) return [];
-    
-    return teamMembers.filter(member => {
-      const matchesName = member.name.toLowerCase().includes(roleFilter.toLowerCase());
-      const matchesRole = member.role.toLowerCase().includes(roleFilter.toLowerCase());
-      
-      return matchesName || matchesRole;
-    });
-  }, [teamMembers, roleFilter]);
+    return teamMembers;
+  }, [teamMembers]);
   
   const isLoading = statsLoading || utilizationLoading || membersLoading || projectsLoading || hoursLoading;
 
@@ -196,80 +216,7 @@ const Reports: React.FC = () => {
         </Select>
       </div>
       
-      {/* Filter controls */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div>
-          <Label htmlFor="projectFilter" className="mb-2 block">Project Filter</Label>
-          <Input
-            id="projectFilter"
-            placeholder="Filter by project name"
-            value={projectFilter}
-            onChange={(e) => setProjectFilter(e.target.value)}
-            className="w-full"
-          />
-        </div>
-        
-        <div>
-          <Label htmlFor="roleFilter" className="mb-2 block">Role/Team Member Filter</Label>
-          <Input
-            id="roleFilter"
-            placeholder="Filter by role or team member"
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="w-full"
-          />
-        </div>
-        
-        <div>
-          <Label className="mb-2 block">Project Status</Label>
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="active" 
-                checked={statusFilter.includes('active')}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setStatusFilter([...statusFilter, 'active']);
-                  } else {
-                    setStatusFilter(statusFilter.filter(s => s !== 'active'));
-                  }
-                }}
-              />
-              <label htmlFor="active" className="cursor-pointer">Active</label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="completed" 
-                checked={statusFilter.includes('completed')}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setStatusFilter([...statusFilter, 'completed']);
-                  } else {
-                    setStatusFilter(statusFilter.filter(s => s !== 'completed'));
-                  }
-                }}
-              />
-              <label htmlFor="completed" className="cursor-pointer">Completed</label>
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="on-hold" 
-                checked={statusFilter.includes('on-hold')}
-                onCheckedChange={(checked) => {
-                  if (checked) {
-                    setStatusFilter([...statusFilter, 'on-hold']);
-                  } else {
-                    setStatusFilter(statusFilter.filter(s => s !== 'on-hold'));
-                  }
-                }}
-              />
-              <label htmlFor="on-hold" className="cursor-pointer">On Hold</label>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       <Tabs defaultValue="resource" className="mb-6">
         <TabsList className="mb-4">
