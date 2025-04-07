@@ -11,18 +11,33 @@ const QuickStats: React.FC = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         {[...Array(4)].map((_, i) => (
-          <Card key={i} className="p-5 animate-pulse">
-            <div className="h-20 bg-slate-200 rounded"></div>
+          <Card key={i} className="p-6 animate-pulse bg-slate-800 border-none shadow-lg">
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <div className="h-4 bg-slate-700 rounded w-1/3"></div>
+                <div className="h-8 w-8 bg-slate-700 rounded-lg"></div>
+              </div>
+              <div className="h-8 bg-slate-700 rounded w-1/2 mt-2"></div>
+              <div className="h-4 bg-slate-700 rounded w-2/3 mt-4"></div>
+            </div>
           </Card>
         ))}
       </div>
     );
   }
 
+  const dashboardStats = stats || {
+    activeProjects: 0,
+    teamUtilizationAvg: 0,
+    zeroAllocationCount: 0,
+    partiallyAllocatedCount: 0,
+    fullyAllocatedCount: 0
+  };
+  
   const statCards = [
     {
       title: "Active Projects",
-      value: stats?.activeProjects ?? 0,
+      value: dashboardStats.activeProjects,
       icon: "work",
       gradient: "from-blue-500/20 to-blue-600/20",
       iconColor: "text-blue-600",
@@ -30,7 +45,7 @@ const QuickStats: React.FC = () => {
     },
     {
       title: "Team Utilization",
-      value: `${stats?.teamUtilizationAvg ?? 0}%`,
+      value: `${dashboardStats.teamUtilizationAvg}%`,
       icon: "groups",
       gradient: "from-indigo-500/20 to-violet-500/20",
       iconColor: "text-indigo-600",
@@ -38,7 +53,7 @@ const QuickStats: React.FC = () => {
     },
     {
       title: "Unallocated Team",
-      value: stats?.zeroAllocationCount ?? 0,
+      value: dashboardStats.zeroAllocationCount,
       icon: "person_off",
       gradient: "from-red-500/20 to-orange-500/20",
       iconColor: "text-red-600",
@@ -46,7 +61,7 @@ const QuickStats: React.FC = () => {
     },
     {
       title: "Fully Allocated",
-      value: stats?.fullyAllocatedCount ?? 0,
+      value: dashboardStats.fullyAllocatedCount,
       icon: "person_check",
       gradient: "from-emerald-500/20 to-green-500/20",
       iconColor: "text-emerald-600",
@@ -59,7 +74,7 @@ const QuickStats: React.FC = () => {
       {statCards.map((card, index) => (
         <Card 
           key={index} 
-          className="relative bg-white p-6 overflow-hidden border-none shadow-md hover:shadow-lg transition-shadow"
+          className="relative bg-slate-800 p-6 overflow-hidden border-none shadow-lg hover:shadow-xl transition-shadow"
         >
           {/* Background gradient */}
           <div className="absolute inset-0 bg-gradient-to-br opacity-10 rounded-lg" 
@@ -72,10 +87,10 @@ const QuickStats: React.FC = () => {
           
           <div className="flex items-center justify-between relative">
             <div>
-              <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">{card.title}</p>
-              <p className="text-3xl font-bold mt-1 bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">{card.value}</p>
+              <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">{card.title}</p>
+              <p className="text-3xl font-bold mt-1 bg-gradient-to-r from-slate-200 to-white bg-clip-text text-transparent">{card.value}</p>
             </div>
-            <div className={`p-3 rounded-xl bg-white shadow-sm border border-slate-100 z-10`}>
+            <div className={`p-3 rounded-xl bg-slate-700 shadow-md border border-slate-600/50 z-10`}>
               <span className={`material-icons ${card.iconColor}`}>{card.icon}</span>
             </div>
           </div>
@@ -84,10 +99,10 @@ const QuickStats: React.FC = () => {
             <span
               className={`text-sm ${
                 card.trend.direction === "up"
-                  ? "text-emerald-600"
+                  ? "text-emerald-400"
                   : card.trend.direction === "down"
-                  ? "text-red-600"
-                  : "text-slate-500"
+                  ? "text-red-400"
+                  : "text-slate-400"
               } font-medium flex items-center text-xs`}
             >
               {card.trend.direction !== "none" && (
@@ -96,12 +111,12 @@ const QuickStats: React.FC = () => {
                 </span>
               )}
               <span className="font-semibold">{card.trend.value}</span>{" "}
-              <span className="text-slate-500 ml-1">{card.trend.text}</span>
+              <span className="text-slate-400 ml-1">{card.trend.text}</span>
             </span>
           </div>
           
           {/* Decorative line */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
         </Card>
       ))}
     </div>

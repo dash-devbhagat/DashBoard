@@ -12,13 +12,13 @@ const StatusBadge: React.FC<{ status: string | null }> = ({ status }) => {
   const getStatusClasses = () => {
     switch(status.toLowerCase()) {
       case 'green':
-        return "bg-green-100 text-green-800 border border-green-200 font-medium";
+        return "bg-green-900/60 text-green-300 border border-green-700/70 font-medium";
       case 'amber':
-        return "bg-amber-100 text-amber-800 border border-amber-200 font-medium";
+        return "bg-amber-900/60 text-amber-300 border border-amber-700/70 font-medium";
       case 'red':
-        return "bg-red-100 text-red-800 border border-red-200 font-medium";
+        return "bg-red-900/60 text-red-300 border border-red-700/70 font-medium";
       default:
-        return "bg-gray-100 text-gray-800 border border-gray-200 font-medium";
+        return "bg-slate-700/60 text-slate-300 border border-slate-600/70 font-medium";
     }
   };
 
@@ -61,44 +61,44 @@ const ProjectStatusTable: React.FC<ProjectStatusTableProps> = ({
       <Table className="w-full min-w-[1700px]">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[180px]">Project</TableHead>
+            <TableHead className="w-[180px] text-slate-300">Project</TableHead>
             {/* Delivery Status Headers */}
-            <TableHead colSpan={7} className="text-center text-blue-700 bg-blue-50 border-b border-blue-100">
+            <TableHead colSpan={7} className="text-center text-blue-300 bg-blue-950/60 border-b border-blue-900">
               Delivery Status
             </TableHead>
             {/* Account Management Headers */}
-            <TableHead colSpan={7} className="text-center text-emerald-700 bg-emerald-50 border-b border-emerald-100">
+            <TableHead colSpan={7} className="text-center text-emerald-300 bg-emerald-950/60 border-b border-emerald-900">
               Account Management
             </TableHead>
             {/* Other Updates */}
-            <TableHead colSpan={3} className="text-center text-purple-700 bg-purple-50 border-b border-purple-100">
+            <TableHead colSpan={3} className="text-center text-purple-300 bg-purple-950/60 border-b border-purple-900">
               Other Updates
             </TableHead>
           </TableRow>
           <TableRow>
             <TableHead></TableHead>
             {/* Delivery Status Subheaders */}
-            <TableHead className="bg-blue-50">Contract Hours</TableHead>
-            <TableHead className="bg-blue-50">Worked Hours</TableHead>
-            <TableHead className="bg-blue-50">Schedule</TableHead>
-            <TableHead className="bg-blue-50">Quality</TableHead>
-            <TableHead className="bg-blue-50">Resources</TableHead>
-            <TableHead className="bg-blue-50">Right Team</TableHead>
-            <TableHead className="bg-blue-50">Comments</TableHead>
+            <TableHead className="bg-blue-950/40 text-slate-300">Contract Hours</TableHead>
+            <TableHead className="bg-blue-950/40 text-slate-300">Worked Hours</TableHead>
+            <TableHead className="bg-blue-950/40 text-slate-300">Schedule</TableHead>
+            <TableHead className="bg-blue-950/40 text-slate-300">Quality</TableHead>
+            <TableHead className="bg-blue-950/40 text-slate-300">Resources</TableHead>
+            <TableHead className="bg-blue-950/40 text-slate-300">Right Team</TableHead>
+            <TableHead className="bg-blue-950/40 text-slate-300">Comments</TableHead>
             
             {/* Account Management Subheaders */}
-            <TableHead className="bg-emerald-50">AM Status</TableHead>
-            <TableHead className="bg-emerald-50">Comments</TableHead>
-            <TableHead className="bg-emerald-50">Governance</TableHead>
-            <TableHead className="bg-emerald-50">Last Gov. Meeting</TableHead>
-            <TableHead className="bg-emerald-50">Last Invoice</TableHead>
-            <TableHead className="bg-emerald-50">Last Received</TableHead>
-            <TableHead className="bg-emerald-50">Next Invoice</TableHead>
+            <TableHead className="bg-emerald-950/40 text-slate-300">AM Status</TableHead>
+            <TableHead className="bg-emerald-950/40 text-slate-300">Comments</TableHead>
+            <TableHead className="bg-emerald-950/40 text-slate-300">Governance</TableHead>
+            <TableHead className="bg-emerald-950/40 text-slate-300">Last Gov. Meeting</TableHead>
+            <TableHead className="bg-emerald-950/40 text-slate-300">Last Invoice</TableHead>
+            <TableHead className="bg-emerald-950/40 text-slate-300">Last Received</TableHead>
+            <TableHead className="bg-emerald-950/40 text-slate-300">Next Invoice</TableHead>
             
             {/* Other Updates Subheaders */}
-            <TableHead className="bg-purple-50">Risks</TableHead>
-            <TableHead className="bg-purple-50">Action Items</TableHead>
-            <TableHead className="bg-purple-50">Owner</TableHead>
+            <TableHead className="bg-purple-950/40 text-slate-300">Risks</TableHead>
+            <TableHead className="bg-purple-950/40 text-slate-300">Action Items</TableHead>
+            <TableHead className="bg-purple-950/40 text-slate-300">Owner</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

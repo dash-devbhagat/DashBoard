@@ -101,9 +101,9 @@ const StatusBadge = ({ status, count }: { status: string | null, count: number }
   if (!status) return null;
   
   const colorMap: Record<string, string> = {
-    'green': 'bg-green-100 text-green-800 border-green-200',
-    'amber': 'bg-amber-100 text-amber-800 border-amber-200',
-    'red': 'bg-red-100 text-red-800 border-red-200'
+    'green': 'bg-green-900/60 text-green-300 border-green-700/70',
+    'amber': 'bg-amber-900/60 text-amber-300 border-amber-700/70',
+    'red': 'bg-red-900/60 text-red-300 border-red-700/70'
   };
   
   const colorClass = colorMap[status.toLowerCase()] || 'bg-gray-100 text-gray-800 border-gray-200';
@@ -236,25 +236,25 @@ const ProjectStatusSummary: React.FC = () => {
   const isSearchingForWeek = latestWeekWithData === null && checkedWeeks.size < weekOptions.length;
   
   return (
-    <Card className="h-full">
-      <CardHeader className="flex-row items-center justify-between pb-2">
+    <Card className="h-full bg-slate-800 border-none shadow-md">
+      <CardHeader className="flex-row items-center justify-between pb-2 border-b border-slate-700/50">
         <div>
-          <CardTitle className="text-lg">Project Status Summary</CardTitle>
-          <CardDescription className="flex items-center">
+          <CardTitle className="text-lg text-slate-100">Project Status Summary</CardTitle>
+          <CardDescription className="flex items-center text-slate-400">
             Week: {getWeekRangeDisplayFromEndDate(weekEndDate)}
             {isSearchingForWeek && (
-              <span className="ml-2 text-xs text-blue-600 animate-pulse">(Finding latest data...)</span>
+              <span className="ml-2 text-xs text-blue-400 animate-pulse">(Finding latest data...)</span>
             )}
           </CardDescription>
         </div>
         <div className="flex items-center gap-2">
           <Select value={weekEndDate} onValueChange={setWeekEndDate}>
-            <SelectTrigger className="w-[220px]">
+            <SelectTrigger className="w-[220px] bg-slate-700 border-slate-600 text-slate-200">
               <SelectValue placeholder="Select week" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-slate-800 border-slate-700">
               {getWeekOptions().map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem key={option.value} value={option.value} className="text-slate-200 focus:bg-slate-700 focus:text-white">
                   {option.label}
                 </SelectItem>
               ))}
@@ -262,17 +262,17 @@ const ProjectStatusSummary: React.FC = () => {
           </Select>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="bg-slate-800">
         {isLoading || isSearchingForWeek ? (
           <div className="animate-pulse space-y-3">
-            <div className="h-10 bg-slate-200 rounded w-full"></div>
-            <div className="h-20 bg-slate-200 rounded w-full"></div>
-            <div className="h-20 bg-slate-200 rounded w-full"></div>
+            <div className="h-10 bg-slate-700 rounded w-full"></div>
+            <div className="h-20 bg-slate-700 rounded w-full"></div>
+            <div className="h-20 bg-slate-700 rounded w-full"></div>
           </div>
         ) : projectStatuses?.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
+          <div className="text-center py-6 text-slate-400">
             No project status reports found for this week.
-            <p className="mt-2 text-sm">
+            <p className="mt-2 text-sm text-slate-500">
               Please select a different week or create project status reports.
             </p>
           </div>
