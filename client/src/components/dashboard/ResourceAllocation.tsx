@@ -82,9 +82,9 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
 
   // Get allocation status from percentage using agreed upon thresholds
   const getAllocationStatus = (percentage: number) => {
-    if (percentage >= 100) return { label: "Fully Allocated", class: "bg-emerald-100 text-emerald-800" };
-    if (percentage >= 75) return { label: "Partially Allocated", class: "bg-amber-100 text-amber-800" };
-    return { label: "Needs Allocation", class: "bg-red-100 text-red-800" };
+    if (percentage >= 100) return { label: "Fully Allocated", class: "bg-emerald-900/60 text-emerald-300 border border-emerald-700/70" };
+    if (percentage >= 75) return { label: "Partially Allocated", class: "bg-amber-900/60 text-amber-300 border border-amber-700/70" };
+    return { label: "Needs Allocation", class: "bg-red-900/60 text-red-300 border border-red-700/70" };
   };
 
   // Get project name from projectId
