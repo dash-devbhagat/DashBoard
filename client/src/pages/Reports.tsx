@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -56,6 +56,15 @@ type Project = {
   color: string;
 };
 
+type Allocation = {
+  id: number;
+  teamMemberId: number;
+  projectId: number;
+  percentage: number;
+  startDate: string;
+  endDate: string;
+};
+
 const Reports: React.FC = () => {
   const [timeRange, setTimeRange] = useState("thisMonth");
   
@@ -78,6 +87,10 @@ const Reports: React.FC = () => {
 
   const { data: categoryHours, isLoading: hoursLoading } = useQuery<CategoryHours[]>({
     queryKey: ["/api/dashboard/category-hours"],
+  });
+  
+  const { data: allocations, isLoading: allocationsLoading } = useQuery<Allocation[]>({
+    queryKey: ["/api/allocations"],
   });
 
   // Use time range to filter projects
@@ -127,7 +140,7 @@ const Reports: React.FC = () => {
     return teamMembers;
   }, [teamMembers]);
   
-  const isLoading = statsLoading || utilizationLoading || membersLoading || projectsLoading || hoursLoading;
+  const isLoading = statsLoading || utilizationLoading || membersLoading || projectsLoading || hoursLoading || allocationsLoading;
 
   // Prepare utilization by role chart data
   const utilizationByRoleData = React.useMemo(() => {
@@ -184,6 +197,51 @@ const Reports: React.FC = () => {
       };
     });
   }, [filteredProjects]);
+  
+  // Prepare project allocation data for "Team Utilization by Project" component
+  const projectAllocationData = React.useMemo(() => {
+    if (!allocations || !projects || !teamMembers) return [];
+    
+    // Group allocations by project
+    const projectAllocations = new Map<number, { 
+      projectId: number, 
+      name: string, 
+      color: string,
+      totalAllocation: number,
+      memberCount: number 
+    }>();
+    
+    // Initialize with all projects
+    projects.forEach(project => {
+      projectAllocations.set(project.id, {
+        projectId: project.id,
+        name: project.name,
+        color: project.color,
+        totalAllocation: 0,
+        memberCount: 0
+      });
+    });
+    
+    // Sum up allocations for each project
+    allocations.forEach(allocation => {
+      const projectData = projectAllocations.get(allocation.projectId);
+      if (projectData) {
+        projectData.totalAllocation += allocation.percentage;
+        projectData.memberCount += 1;
+      }
+    });
+    
+    // Convert to array and calculate average allocation
+    return Array.from(projectAllocations.values())
+      .filter(p => p.memberCount > 0) // Only show projects with allocations
+      .map(p => ({
+        name: p.name,
+        allocation: p.totalAllocation / p.memberCount, // Average allocation per team member
+        memberCount: p.memberCount,
+        color: p.color
+      }))
+      .sort((a, b) => b.allocation - a.allocation); // Sort by allocation percentage
+  }, [allocations, projects, teamMembers]);
 
   // Color schemes for charts
   const COLORS = ['#2563eb', '#4f46e5', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
@@ -227,6 +285,46 @@ const Reports: React.FC = () => {
         {/* Resource Utilization Tab */}
         <TabsContent value="resource">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Team Utilization by Project */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Team Utilization by Project</CardTitle>
+                <CardDescription>Average allocation percentage by project</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {projectAllocationData.length === 0 ? (
+                    <div className="flex items-center justify-center h-40 text-slate-500">
+                      No allocation data available
+                    </div>
+                  ) : (
+                    projectAllocationData.map((project) => (
+                      <div key={project.name} className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: project.color }} />
+                            <span className="font-medium">{project.name}</span>
+                          </div>
+                          <div className="text-sm text-slate-500">
+                            {project.allocation.toFixed(0)}% avg allocation ({project.memberCount} team members)
+                          </div>
+                        </div>
+                        <div className="h-2 bg-slate-200 rounded-full">
+                          <div
+                            className="h-2 rounded-full"
+                            style={{
+                              width: `${Math.min(100, project.allocation)}%`,
+                              backgroundColor: project.color,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+            
             <Card>
               <CardHeader>
                 <CardTitle>Utilization by Role</CardTitle>
