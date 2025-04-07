@@ -444,10 +444,10 @@ const Reports: React.FC = () => {
         <TabsContent value="resource">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Team Member Allocation Detail - Moved to the top */}
-            <Card className="lg:col-span-2 bg-slate-800 border-slate-700 shadow-lg">
+            <Card className="lg:col-span-2 bg-slate-800 border border-slate-700 shadow-lg rounded-xl overflow-hidden border-t-4 border-t-blue-600/80">
               <CardHeader className="flex flex-row items-center justify-between border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
                 <div>
-                  <CardTitle className="text-white">Team Member Allocation Detail</CardTitle>
+                  <CardTitle className="text-xl bg-gradient-to-r from-blue-300 to-indigo-300 text-transparent bg-clip-text font-bold">Team Member Allocation Detail</CardTitle>
                   <CardDescription className="text-slate-300">Detailed allocation by team member and project</CardDescription>
                 </div>
                 <Button 
@@ -569,9 +569,9 @@ const Reports: React.FC = () => {
             </Card>
             
             {/* Team Utilization by Project */}
-            <Card className="lg:col-span-2 bg-slate-800 border-slate-700 shadow-lg">
+            <Card className="lg:col-span-2 bg-slate-800 border border-slate-700 shadow-lg rounded-xl overflow-hidden border-t-4 border-t-purple-600/80">
               <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
-                <CardTitle className="text-white">Team Utilization by Project</CardTitle>
+                <CardTitle className="text-xl bg-gradient-to-r from-purple-300 to-indigo-300 text-transparent bg-clip-text font-bold">Team Utilization by Project</CardTitle>
                 <CardDescription className="text-slate-300">Average allocation percentage by project</CardDescription>
               </CardHeader>
               <CardContent className="bg-slate-800 p-5">
@@ -608,9 +608,9 @@ const Reports: React.FC = () => {
               </CardContent>
             </Card>
             
-            <Card className="bg-slate-800 border-slate-700 shadow-lg">
+            <Card className="bg-slate-800 border border-slate-700 shadow-lg rounded-xl overflow-hidden border-t-4 border-t-blue-600/80">
               <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
-                <CardTitle className="text-white">Utilization by Role</CardTitle>
+                <CardTitle className="text-xl bg-gradient-to-r from-blue-300 to-indigo-300 text-transparent bg-clip-text font-bold">Utilization by Role</CardTitle>
               </CardHeader>
               <CardContent className="bg-slate-800 p-5">
                 <div className="h-80">
@@ -633,9 +633,9 @@ const Reports: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800 border-slate-700 shadow-lg">
+            <Card className="bg-slate-800 border border-slate-700 shadow-lg rounded-xl overflow-hidden border-t-4 border-t-green-600/80">
               <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
-                <CardTitle className="text-white">Resource Allocation</CardTitle>
+                <CardTitle className="text-xl bg-gradient-to-r from-green-300 to-emerald-300 text-transparent bg-clip-text font-bold">Resource Allocation</CardTitle>
               </CardHeader>
               <CardContent className="bg-slate-800 p-5">
                 <div className="h-80">
@@ -671,9 +671,9 @@ const Reports: React.FC = () => {
         {/* Project Status Tab */}
         <TabsContent value="project">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="bg-slate-800 border-slate-700 shadow-lg">
+            <Card className="bg-slate-800 border border-slate-700 shadow-lg rounded-xl overflow-hidden border-t-4 border-t-amber-600/80">
               <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
-                <CardTitle className="text-white">Project Status Overview</CardTitle>
+                <CardTitle className="text-xl bg-gradient-to-r from-amber-300 to-yellow-300 text-transparent bg-clip-text font-bold">Project Status Overview</CardTitle>
               </CardHeader>
               <CardContent className="bg-slate-800 p-5">
                 <div className="h-80">
@@ -701,9 +701,9 @@ const Reports: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-800 border-slate-700 shadow-lg">
+            <Card className="bg-slate-800 border border-slate-700 shadow-lg rounded-xl overflow-hidden border-t-4 border-t-indigo-600/80">
               <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
-                <CardTitle className="text-white">Project Timeline</CardTitle>
+                <CardTitle className="text-xl bg-gradient-to-r from-indigo-300 to-violet-300 text-transparent bg-clip-text font-bold">Project Timeline</CardTitle>
               </CardHeader>
               <CardContent className="bg-slate-800 p-5">
                 <div className="h-80">
