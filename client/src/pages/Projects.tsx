@@ -138,6 +138,8 @@ const projectFormSchema = z.object({
   teamAllocations: z.array(z.object({
     teamMemberId: z.number().int().positive("Team member must be selected"),
     percentage: z.number().min(1, "Allocation must be at least 1%").max(100, "Allocation cannot exceed 100%"),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
   })).optional(),
 }).refine(
   data => {
@@ -401,8 +403,8 @@ const Projects: React.FC = () => {
               teamMemberId: allocation.teamMemberId,
               projectId: newProject.id,
               percentage: allocation.percentage,
-              startDate: data.startDate,
-              endDate: data.endDate
+              startDate: allocation.startDate || data.startDate,
+              endDate: allocation.endDate || data.endDate
             });
           }
         }
@@ -437,8 +439,8 @@ const Projects: React.FC = () => {
               teamMemberId: allocation.teamMemberId,
               projectId: currentProject.id,
               percentage: allocation.percentage,
-              startDate: data.startDate,
-              endDate: data.endDate
+              startDate: allocation.startDate || data.startDate,
+              endDate: allocation.endDate || data.endDate
             });
           }
         }
@@ -468,7 +470,9 @@ const Projects: React.FC = () => {
     const projectAllocations = allocations?.filter(a => a.projectId === project.id) || [];
     const teamAllocs = projectAllocations.map(a => ({
       teamMemberId: a.teamMemberId,
-      percentage: a.percentage
+      percentage: a.percentage,
+      startDate: a.startDate,
+      endDate: a.endDate
     }));
     
     editProjectForm.reset({

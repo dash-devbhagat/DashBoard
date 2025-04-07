@@ -104,8 +104,8 @@ const AssignResourceDialog: React.FC<AssignResourceDialogProps> = ({
         teamMemberId: parseInt(selectedTeamMember),
         projectId: parseInt(selectedProject),
         percentage: allocationPercentage,
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString()
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0]
       };
       
       return apiRequest("/api/allocations", {
