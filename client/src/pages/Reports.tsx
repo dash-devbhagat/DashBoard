@@ -6,6 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Download as DownloadIcon } from "lucide-react";
+import * as XLSX from "xlsx";
 import {
   BarChart,
   Bar,
@@ -67,6 +70,41 @@ type Allocation = {
 
 const Reports: React.FC = () => {
   const [timeRange, setTimeRange] = useState("thisMonth");
+  
+  // Function to export team allocation data to Excel
+  const exportToExcel = (data: any[]) => {
+    // Prepare data for Excel export
+    const exportData = data.map(member => {
+      // Convert project allocations array to a readable string
+      const projectsStr = member.projectAllocations
+        .map((alloc: any) => `${alloc.projectName} (${alloc.percentage}%)`)
+        .join(", ");
+      
+      // Map status to friendly text
+      const statusText = member.status === 'fullyAllocated' ? 'Fully Allocated' : 
+                        member.status === 'partiallyAllocated' ? 'Partial Allocation' : 
+                        'Needs Allocation';
+      
+      // Return a flattened object for Excel
+      return {
+        "Team Member": member.name,
+        "Role": member.role,
+        "Projects": projectsStr || "No allocations",
+        "Total Allocation": `${member.totalAllocation}%`,
+        "Status": statusText
+      };
+    });
+    
+    // Create a worksheet from the data
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    
+    // Create a workbook and add the worksheet
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Team Allocations");
+    
+    // Generate Excel file and trigger download
+    XLSX.writeFile(workbook, "team_allocations.xlsx");
+  };
   
   // Get all the data
   const { data: dashboardStats, isLoading: statsLoading } = useQuery<DashboardStats>({
@@ -267,11 +305,11 @@ const Reports: React.FC = () => {
           comparison = a.projectCount - b.projectCount;
           break;
         case "status":
-          // Custom order: underutilized, optimal, overallocated
+          // Custom order: needsAllocation, partiallyAllocated, fullyAllocated
           const statusOrder = {
-            "underutilized": 0,
-            "optimal": 1,
-            "overallocated": 2
+            "needsAllocation": 0,
+            "partiallyAllocated": 1,
+            "fullyAllocated": 2
           };
           comparison = statusOrder[a.status as keyof typeof statusOrder] - 
                       statusOrder[b.status as keyof typeof statusOrder];
@@ -341,8 +379,8 @@ const Reports: React.FC = () => {
     const result = Array.from(memberAllocations.values())
       .map(member => ({
         ...member,
-        status: member.totalAllocation < 50 ? "underutilized" : 
-                member.totalAllocation > 100 ? "overallocated" : "optimal",
+        status: member.totalAllocation >= 100 ? "fullyAllocated" : 
+                member.totalAllocation >= 75 ? "partiallyAllocated" : "needsAllocation",
         projectCount: member.projectAllocations.length
       }));
                 
@@ -394,9 +432,20 @@ const Reports: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Team Member Allocation Detail - Moved to the top */}
             <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Team Member Allocation Detail</CardTitle>
-                <CardDescription>Detailed allocation by team member and project</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Team Member Allocation Detail</CardTitle>
+                  <CardDescription>Detailed allocation by team member and project</CardDescription>
+                </div>
+                <Button 
+                  onClick={() => exportToExcel(teamAllocationTableData)} 
+                  variant="outline" 
+                  size="sm" 
+                  className="ml-auto"
+                >
+                  <DownloadIcon className="mr-2 h-4 w-4" />
+                  Export to Excel
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="border rounded-md">
@@ -488,14 +537,14 @@ const Reports: React.FC = () => {
                           <td className="p-3 text-center">
                             <div 
                               className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                ${member.status === 'optimal' ? 'bg-green-100 text-green-800' : 
-                                  member.status === 'underutilized' ? 'bg-amber-100 text-amber-800' : 
+                                ${member.status === 'fullyAllocated' ? 'bg-green-100 text-green-800' : 
+                                  member.status === 'partiallyAllocated' ? 'bg-amber-100 text-amber-800' : 
                                   'bg-red-100 text-red-800'}`
                               }
                             >
-                              {member.status === 'optimal' ? 'Optimal' : 
-                                member.status === 'underutilized' ? 'Underutilized' : 
-                                'Overallocated'}
+                              {member.status === 'fullyAllocated' ? 'Fully Allocated' : 
+                                member.status === 'partiallyAllocated' ? 'Partial Allocation' : 
+                                'Needs Allocation'}
                             </div>
                           </td>
                         </tr>
