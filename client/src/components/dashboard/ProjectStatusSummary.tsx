@@ -117,10 +117,17 @@ const StatusBadge = ({ status, count }: { status: string | null, count: number }
 };
 
 const ProjectStatusSummary: React.FC = () => {
-  const [weekEndDate, setWeekEndDate] = React.useState<string>(getPreviousWeekEndDate());
+  // Get all potential week options (last 4 weeks)
+  const weekOptions = getWeekOptions();
+  // Start with the most recent week's end date
+  const [weekEndDate, setWeekEndDate] = React.useState<string>(weekOptions[0]?.value || getPreviousWeekEndDate());
+  // Track which week has data (most recent with data)
+  const [latestWeekWithData, setLatestWeekWithData] = React.useState<string | null>(null);
+  // Track which weeks we've checked
+  const [checkedWeeks, setCheckedWeeks] = React.useState<Set<string>>(new Set());
   const [, navigate] = useLocation();
   const { toast } = useToast();
-
+  
   // Fetch cumulative project statuses for the selected week
   const {
     data: projectStatuses,
@@ -146,6 +153,36 @@ const ProjectStatusSummary: React.FC = () => {
       }
     }
   });
+  
+  // Effect to track which weeks have data and which don't
+  React.useEffect(() => {
+    // Update our tracked set of weeks we've checked
+    if (!isLoading) {
+      setCheckedWeeks(prev => {
+        const newSet = new Set(prev);
+        newSet.add(weekEndDate);
+        return newSet;
+      });
+      
+      // If this week has data, set it as the latest week with data
+      if (projectStatuses && projectStatuses.length > 0) {
+        setLatestWeekWithData(weekEndDate);
+      } 
+      // If we've checked all weeks and found no data, don't try to search anymore
+      else if (latestWeekWithData === null && checkedWeeks.size < weekOptions.length) {
+        // Find the next week we haven't checked yet
+        const nextWeekToCheck = weekOptions.find(option => 
+          !checkedWeeks.has(option.value) && 
+          option.value !== weekEndDate
+        );
+        
+        // If we found a week we haven't checked, select it
+        if (nextWeekToCheck) {
+          setWeekEndDate(nextWeekToCheck.value);
+        }
+      }
+    }
+  }, [projectStatuses, isLoading, weekEndDate]);
 
   // Fetch projects to join with project statuses
   const { data: projects } = useQuery({
@@ -195,13 +232,19 @@ const ProjectStatusSummary: React.FC = () => {
     navigate(`/project-status?week=${weekEndDate}&tab=project&project=${projectId}`);
   };
 
+  // Determine if we're still searching for a week with data
+  const isSearchingForWeek = latestWeekWithData === null && checkedWeeks.size < weekOptions.length;
+  
   return (
     <Card className="h-full">
       <CardHeader className="flex-row items-center justify-between pb-2">
         <div>
           <CardTitle className="text-lg">Project Status Summary</CardTitle>
-          <CardDescription>
+          <CardDescription className="flex items-center">
             Week: {getWeekRangeDisplayFromEndDate(weekEndDate)}
+            {isSearchingForWeek && (
+              <span className="ml-2 text-xs text-blue-600 animate-pulse">(Finding latest data...)</span>
+            )}
           </CardDescription>
         </div>
         <div className="flex items-center gap-2">
@@ -223,7 +266,7 @@ const ProjectStatusSummary: React.FC = () => {
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {isLoading || isSearchingForWeek ? (
           <div className="animate-pulse space-y-3">
             <div className="h-10 bg-slate-200 rounded w-full"></div>
             <div className="h-20 bg-slate-200 rounded w-full"></div>
@@ -232,6 +275,9 @@ const ProjectStatusSummary: React.FC = () => {
         ) : projectStatuses?.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             No project status reports found for this week.
+            <p className="mt-2 text-sm">
+              Please select a different week or create project status reports.
+            </p>
           </div>
         ) : (
           <div className="overflow-hidden">
