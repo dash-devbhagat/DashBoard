@@ -127,12 +127,12 @@ const StatusBadge = ({ status }: { status: string | null }) => {
   if (!status) return null;
   
   const colorMap: Record<string, string> = {
-    'green': 'bg-green-100 text-green-800 border-green-200',
-    'amber': 'bg-amber-100 text-amber-800 border-amber-200',
-    'red': 'bg-red-100 text-red-800 border-red-200'
+    'green': 'bg-green-900/60 text-green-300 border-green-700/70',
+    'amber': 'bg-amber-900/60 text-amber-300 border-amber-700/70',
+    'red': 'bg-red-900/60 text-red-300 border-red-700/70'
   };
   
-  const colorClass = colorMap[status.toLowerCase()] || 'bg-gray-100 text-gray-800 border-gray-200';
+  const colorClass = colorMap[status.toLowerCase()] || 'bg-slate-800 text-slate-300 border-slate-700';
   
   return (
     <span className={`px-2 py-1 rounded-full text-xs font-medium ${colorClass} border`}>
@@ -393,8 +393,8 @@ export default function ProjectStatusPage() {
       </div>
       
       {activeTab === "byProject" && isEditing && hasValidationErrors && (
-        <Alert className="bg-red-50 border-red-200">
-          <AlertDescription className="text-red-800">
+        <Alert className="bg-red-950/70 border-red-800">
+          <AlertDescription className="text-red-300">
             <h3 className="font-semibold mb-1">Please fix the following errors:</h3>
             <ul className="list-disc list-inside text-sm space-y-1">
               {Object.entries(validationErrors).map(([field, message]) => (
@@ -521,9 +521,9 @@ export default function ProjectStatusPage() {
               </Table>
               
               {/* Delivery Updates Section */}
-              <Card className="mb-6 border-t-4 border-t-blue-600">
+              <Card className="mb-6 border-t-4 border-t-blue-600/80">
                 <CardHeader>
-                  <CardTitle className="text-xl text-blue-700">Delivery Updates</CardTitle>
+                  <CardTitle className="text-xl text-blue-400">Delivery Updates</CardTitle>
                   <CardDescription>Information related to project delivery</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -691,9 +691,9 @@ export default function ProjectStatusPage() {
               </Card>
               
               {/* Account Manager Updates Section */}
-              <Card className="mb-6 border-t-4 border-t-emerald-600">
+              <Card className="mb-6 border-t-4 border-t-emerald-600/80">
                 <CardHeader>
-                  <CardTitle className="text-xl text-emerald-700">Account Manager Updates</CardTitle>
+                  <CardTitle className="text-xl text-emerald-400">Account Manager Updates</CardTitle>
                   <CardDescription>Information related to account management</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -862,9 +862,9 @@ export default function ProjectStatusPage() {
               </Card>
               
               {/* Other Updates Section */}
-              <Card className="mb-6 border-t-4 border-t-purple-600">
+              <Card className="mb-6 border-t-4 border-t-purple-600/80">
                 <CardHeader>
-                  <CardTitle className="text-xl text-purple-700">Other Updates</CardTitle>
+                  <CardTitle className="text-xl text-purple-400">Other Updates</CardTitle>
                   <CardDescription>Additional project information</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -985,11 +985,11 @@ export default function ProjectStatusPage() {
                       {/* Delivery Status */}
                       <Card>
                         <CardHeader className="pb-2 border-b">
-                          <CardTitle className="text-lg text-blue-700">Delivery Status</CardTitle>
+                          <CardTitle className="text-lg text-blue-400">Delivery Status</CardTitle>
                         </CardHeader>
                         <CardContent className="pt-4">
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div className="bg-gray-50 p-4 rounded-lg border">
+                            <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
                               <h4 className="text-sm font-medium mb-2">Schedule</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
@@ -1013,7 +1013,7 @@ export default function ProjectStatusPage() {
                               </div>
                             </div>
                             
-                            <div className="bg-gray-50 p-4 rounded-lg border">
+                            <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
                               <h4 className="text-sm font-medium mb-2">Quality</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
@@ -1037,7 +1037,7 @@ export default function ProjectStatusPage() {
                               </div>
                             </div>
                             
-                            <div className="bg-gray-50 p-4 rounded-lg border">
+                            <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
                               <h4 className="text-sm font-medium mb-2">Resource Utilization</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
@@ -1061,7 +1061,7 @@ export default function ProjectStatusPage() {
                               </div>
                             </div>
                             
-                            <div className="bg-gray-50 p-4 rounded-lg border">
+                            <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
                               <h4 className="text-sm font-medium mb-2">Right Team</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
@@ -1091,11 +1091,11 @@ export default function ProjectStatusPage() {
                       {/* Account Management Status */}
                       <Card>
                         <CardHeader className="pb-2 border-b">
-                          <CardTitle className="text-lg text-emerald-700">Account Management Status</CardTitle>
+                          <CardTitle className="text-lg text-emerald-400">Account Management Status</CardTitle>
                         </CardHeader>
                         <CardContent className="pt-4">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="bg-gray-50 p-4 rounded-lg border">
+                            <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
                               <h4 className="text-sm font-medium mb-2">AM Status</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
@@ -1119,7 +1119,7 @@ export default function ProjectStatusPage() {
                               </div>
                             </div>
                             
-                            <div className="bg-gray-50 p-4 rounded-lg border">
+                            <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
                               <h4 className="text-sm font-medium mb-2">Governance Status</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
@@ -1143,7 +1143,7 @@ export default function ProjectStatusPage() {
                               </div>
                             </div>
                             
-                            <div className="bg-gray-50 p-4 rounded-lg border">
+                            <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
                               <h4 className="text-sm font-medium mb-2">Invoice Status</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
@@ -1186,7 +1186,7 @@ export default function ProjectStatusPage() {
                         ) : (
                           <ProjectStatusTable 
                             projectStatuses={
-                              cumulativeStatuses.map(status => ({
+                              cumulativeStatuses?.map(status => ({
                                 ...status,
                                 project: projects?.find(p => p.id === status.projectId)
                               })) || []
