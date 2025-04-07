@@ -413,26 +413,26 @@ export default function ProjectStatusPage() {
         onValueChange={(value) => setActiveTab(value)}
         value={activeTab}
       >
-        <Card>
-          <CardHeader>
+        <Card className="bg-slate-800 border border-slate-700 shadow-xl">
+          <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle>Project Status Reports</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-white bg-gradient-to-r from-blue-300 to-indigo-300 text-transparent bg-clip-text font-bold">Project Status Reports</CardTitle>
+                <CardDescription className="text-slate-300">
                   View and update project status reports
                 </CardDescription>
               </div>
-              <TabsList>
-                <TabsTrigger value="byProject">By Project</TabsTrigger>
-                <TabsTrigger value="cumulative">Cumulative Report</TabsTrigger>
+              <TabsList className="bg-slate-900/70 border border-slate-700">
+                <TabsTrigger value="byProject" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">By Project</TabsTrigger>
+                <TabsTrigger value="cumulative" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">Cumulative Report</TabsTrigger>
               </TabsList>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="bg-slate-800/80">
             <TabsContent value="byProject">
           <div className="grid gap-6 mb-6 md:grid-cols-3">
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2 text-slate-300">
                 Project
               </label>
               <Select
@@ -440,12 +440,12 @@ export default function ProjectStatusPage() {
                 onValueChange={(value) => setSelectedProject(Number(value))}
                 disabled={isLoadingProjects}
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
                   <SelectValue placeholder="Select a project" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-800 border-slate-600 text-white">
                   {projects?.map((project) => (
-                    <SelectItem key={project.id} value={project.id.toString()}>
+                    <SelectItem key={project.id} value={project.id.toString()} className="hover:bg-slate-700">
                       {project.name}
                     </SelectItem>
                   ))}
@@ -454,7 +454,7 @@ export default function ProjectStatusPage() {
             </div>
             
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2 text-slate-300">
                 Week Range
               </label>
               <Select
@@ -462,12 +462,12 @@ export default function ProjectStatusPage() {
                 onValueChange={(value) => setWeekEndDate(value)}
                 disabled={isLoadingStatus}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-slate-800 border-slate-600 text-white">
                   <SelectValue placeholder="Select week range" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-800 border-slate-600 text-white">
                   {getWeekOptions().map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
+                    <SelectItem key={option.value} value={option.value} className="hover:bg-slate-700">
                       {option.label}
                     </SelectItem>
                   ))}
@@ -481,57 +481,57 @@ export default function ProjectStatusPage() {
           ) : selectedProject ? (
             <div className="space-y-6">
               {/* Project Info */}
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead colSpan={2} className="font-bold text-lg">
+              <Table className="border border-slate-700 bg-slate-800/70 rounded-lg overflow-hidden">
+                <TableHeader className="bg-slate-900">
+                  <TableRow className="border-b-slate-700 hover:bg-slate-900">
+                    <TableHead colSpan={2} className="font-bold text-lg text-slate-200">
                       Project Information
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">Project Name</TableCell>
-                    <TableCell>{selectedProjectDetails?.name}</TableCell>
+                  <TableRow className="border-b-slate-700 hover:bg-slate-700/50">
+                    <TableCell className="font-medium text-slate-300">Project Name</TableCell>
+                    <TableCell className="text-white">{selectedProjectDetails?.name}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Category</TableCell>
-                    <TableCell>{selectedProjectDetails?.category || '-'}</TableCell>
+                  <TableRow className="border-b-slate-700 hover:bg-slate-700/50">
+                    <TableCell className="font-medium text-slate-300">Category</TableCell>
+                    <TableCell className="text-white">{selectedProjectDetails?.category || '-'}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Project Phase</TableCell>
-                    <TableCell>{selectedProjectDetails?.projectPhase || '-'}</TableCell>
+                  <TableRow className="border-b-slate-700 hover:bg-slate-700/50">
+                    <TableCell className="font-medium text-slate-300">Project Phase</TableCell>
+                    <TableCell className="text-white">{selectedProjectDetails?.projectPhase || '-'}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Project Owner</TableCell>
-                    <TableCell>{selectedProjectDetails?.projectOwner || '-'}</TableCell>
+                  <TableRow className="border-b-slate-700 hover:bg-slate-700/50">
+                    <TableCell className="font-medium text-slate-300">Project Owner</TableCell>
+                    <TableCell className="text-white">{selectedProjectDetails?.projectOwner || '-'}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Account Manager</TableCell>
-                    <TableCell>{selectedProjectDetails?.accountManager || '-'}</TableCell>
+                  <TableRow className="border-b-slate-700 hover:bg-slate-700/50">
+                    <TableCell className="font-medium text-slate-300">Account Manager</TableCell>
+                    <TableCell className="text-white">{selectedProjectDetails?.accountManager || '-'}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Delivery Manager</TableCell>
-                    <TableCell>{selectedProjectDetails?.deliveryManager || '-'}</TableCell>
+                  <TableRow className="border-b-slate-700 hover:bg-slate-700/50">
+                    <TableCell className="font-medium text-slate-300">Delivery Manager</TableCell>
+                    <TableCell className="text-white">{selectedProjectDetails?.deliveryManager || '-'}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Contract Status</TableCell>
-                    <TableCell>{selectedProjectDetails?.contractStatus || '-'}</TableCell>
+                  <TableRow className="border-b-slate-700 hover:bg-slate-700/50">
+                    <TableCell className="font-medium text-slate-300">Contract Status</TableCell>
+                    <TableCell className="text-white">{selectedProjectDetails?.contractStatus || '-'}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
               
               {/* Delivery Updates Section */}
-              <Card className="mb-6 border-t-4 border-t-blue-600/80">
-                <CardHeader>
-                  <CardTitle className="text-xl text-blue-400">Delivery Updates</CardTitle>
-                  <CardDescription>Information related to project delivery</CardDescription>
+              <Card className="mb-6 border-t-4 border-t-blue-600/80 bg-slate-800 border border-slate-700 shadow-lg">
+                <CardHeader className="border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
+                  <CardTitle className="text-xl bg-gradient-to-r from-blue-300 to-cyan-300 text-transparent bg-clip-text font-bold">Delivery Updates</CardTitle>
+                  <CardDescription className="text-slate-300">Information related to project delivery</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pt-6">
                   {/* Hours */}
                   <div className="grid gap-6 md:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-medium mb-2">
+                      <label className="block text-sm font-medium mb-2 text-slate-300">
                         Contract Hours
                       </label>
                       {isEditing ? (
@@ -541,19 +541,19 @@ export default function ProjectStatusPage() {
                             value={projectStatus?.contractHours || ''}
                             onChange={(e) => handleChange('contractHours', e.target.value ? Number(e.target.value) : null)}
                             placeholder="Enter contract hours"
-                            className={validationErrors.contractHours ? 'border-red-500' : ''}
+                            className={`bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 ${validationErrors.contractHours ? 'border-red-500' : ''}`}
                           />
                           <FieldError fieldName="contractHours" />
                         </>
                       ) : (
-                        <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
+                        <div className="h-10 px-3 py-2 rounded-md border border-slate-600 bg-slate-700 text-white">
                           {projectStatus?.contractHours ?? '-'}
                         </div>
                       )}
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-2">
+                      <label className="block text-sm font-medium mb-2 text-slate-300">
                         Worked Hours
                       </label>
                       {isEditing ? (
@@ -563,12 +563,12 @@ export default function ProjectStatusPage() {
                             value={projectStatus?.workedHours || ''}
                             onChange={(e) => handleChange('workedHours', e.target.value ? Number(e.target.value) : null)}
                             placeholder="Enter worked hours"
-                            className={validationErrors.workedHours ? 'border-red-500' : ''}
+                            className={`bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 ${validationErrors.workedHours ? 'border-red-500' : ''}`}
                           />
                           <FieldError fieldName="workedHours" />
                         </>
                       ) : (
-                        <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
+                        <div className="h-10 px-3 py-2 rounded-md border border-slate-600 bg-slate-700 text-white">
                           {projectStatus?.workedHours ?? '-'}
                         </div>
                       )}
@@ -578,7 +578,7 @@ export default function ProjectStatusPage() {
                   {/* Delivery Status Indicators */}
                   <div className="grid gap-6 md:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-medium mb-2">
+                      <label className="block text-sm font-medium mb-2 text-slate-300">
                         Schedule Status
                       </label>
                       {isEditing ? (
@@ -586,13 +586,13 @@ export default function ProjectStatusPage() {
                           value={projectStatus?.scheduleStatus || ''}
                           onValueChange={(value) => handleChange('scheduleStatus', value || null)}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="green">Green</SelectItem>
-                            <SelectItem value="amber">Amber</SelectItem>
-                            <SelectItem value="red">Red</SelectItem>
+                          <SelectContent className="bg-slate-800 border-slate-600 text-white">
+                            <SelectItem value="green" className="hover:bg-slate-700">Green</SelectItem>
+                            <SelectItem value="amber" className="hover:bg-slate-700">Amber</SelectItem>
+                            <SelectItem value="red" className="hover:bg-slate-700">Red</SelectItem>
                           </SelectContent>
                         </Select>
                       ) : (
@@ -672,7 +672,7 @@ export default function ProjectStatusPage() {
                   
                   {/* Delivery Comments */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label className="block text-sm font-medium mb-2 text-slate-300">
                       Delivery Comments
                     </label>
                     {isEditing ? (
@@ -680,10 +680,10 @@ export default function ProjectStatusPage() {
                         value={projectStatus?.deliveryComments || ''}
                         onChange={(e) => handleChange('deliveryComments', e.target.value || null)}
                         placeholder="Enter delivery comments"
-                        className="min-h-[100px]"
+                        className="min-h-[100px] bg-slate-800 border-slate-600 text-white placeholder:text-slate-400"
                       />
                     ) : (
-                      <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
+                      <div className="p-3 rounded-md border border-slate-600 bg-slate-700 text-white whitespace-pre-wrap min-h-[80px]">
                         {projectStatus?.deliveryComments || '-'}
                       </div>
                     )}
@@ -692,12 +692,12 @@ export default function ProjectStatusPage() {
               </Card>
               
               {/* Account Manager Updates Section */}
-              <Card className="mb-6 border-t-4 border-t-emerald-600/80">
-                <CardHeader>
-                  <CardTitle className="text-xl text-emerald-400">Account Manager Updates</CardTitle>
-                  <CardDescription>Information related to account management</CardDescription>
+              <Card className="mb-6 border-t-4 border-t-emerald-600/80 bg-slate-800 border border-slate-700 shadow-lg">
+                <CardHeader className="border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
+                  <CardTitle className="text-xl bg-gradient-to-r from-emerald-300 to-teal-300 text-transparent bg-clip-text font-bold">Account Manager Updates</CardTitle>
+                  <CardDescription className="text-slate-300">Information related to account management</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pt-6">
                   {/* AM Status and Governance */}
                   <div className="grid gap-6 md:grid-cols-2">
                     <div>
@@ -843,7 +843,7 @@ export default function ProjectStatusPage() {
                   
                   {/* AM Comments */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label className="block text-sm font-medium mb-2 text-slate-300">
                       AM Comments
                     </label>
                     {isEditing ? (
@@ -851,10 +851,10 @@ export default function ProjectStatusPage() {
                         value={projectStatus?.amComments || ''}
                         onChange={(e) => handleChange('amComments', e.target.value || null)}
                         placeholder="Enter account manager comments"
-                        className="min-h-[100px]"
+                        className="min-h-[100px] bg-slate-800 border-slate-600 text-white placeholder:text-slate-400"
                       />
                     ) : (
-                      <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
+                      <div className="p-3 rounded-md border border-slate-600 bg-slate-700 text-white whitespace-pre-wrap min-h-[80px]">
                         {projectStatus?.amComments || '-'}
                       </div>
                     )}
@@ -863,15 +863,15 @@ export default function ProjectStatusPage() {
               </Card>
               
               {/* Other Updates Section */}
-              <Card className="mb-6 border-t-4 border-t-purple-600/80">
-                <CardHeader>
-                  <CardTitle className="text-xl text-purple-400">Other Updates</CardTitle>
-                  <CardDescription>Additional project information</CardDescription>
+              <Card className="mb-6 border-t-4 border-t-purple-600/80 bg-slate-800 border border-slate-700 shadow-lg">
+                <CardHeader className="border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
+                  <CardTitle className="text-xl bg-gradient-to-r from-purple-300 to-fuchsia-300 text-transparent bg-clip-text font-bold">Other Updates</CardTitle>
+                  <CardDescription className="text-slate-300">Additional project information</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pt-6">
                   {/* Risks */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label className="block text-sm font-medium mb-2 text-slate-300">
                       Risks/Dependencies
                     </label>
                     {isEditing ? (
@@ -879,10 +879,10 @@ export default function ProjectStatusPage() {
                         value={projectStatus?.risks || ''}
                         onChange={(e) => handleChange('risks', e.target.value || null)}
                         placeholder="Enter project risks and dependencies"
-                        className="min-h-[100px]"
+                        className="min-h-[100px] bg-slate-800 border-slate-600 text-white placeholder:text-slate-400"
                       />
                     ) : (
-                      <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
+                      <div className="p-3 rounded-md border border-slate-600 bg-slate-700 text-white whitespace-pre-wrap min-h-[80px]">
                         {projectStatus?.risks || '-'}
                       </div>
                     )}
@@ -890,7 +890,7 @@ export default function ProjectStatusPage() {
                   
                   {/* Action Items */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label className="block text-sm font-medium mb-2 text-slate-300">
                       Key Action Items/Help Required
                     </label>
                     {isEditing ? (
@@ -898,10 +898,10 @@ export default function ProjectStatusPage() {
                         value={projectStatus?.actionItems || ''}
                         onChange={(e) => handleChange('actionItems', e.target.value || null)}
                         placeholder="Enter action items or help required"
-                        className="min-h-[100px]"
+                        className="min-h-[100px] bg-slate-800 border-slate-600 text-white placeholder:text-slate-400"
                       />
                     ) : (
-                      <div className="p-3 rounded-md border border-input bg-background whitespace-pre-wrap min-h-[80px]">
+                      <div className="p-3 rounded-md border border-slate-600 bg-slate-700 text-white whitespace-pre-wrap min-h-[80px]">
                         {projectStatus?.actionItems || '-'}
                       </div>
                     )}
@@ -909,7 +909,7 @@ export default function ProjectStatusPage() {
                   
                   {/* Action Item Owner */}
                   <div>
-                    <label className="block text-sm font-medium mb-2">
+                    <label className="block text-sm font-medium mb-2 text-slate-300">
                       Owner of Action Item
                     </label>
                     {isEditing ? (
@@ -918,12 +918,12 @@ export default function ProjectStatusPage() {
                           value={projectStatus?.actionItemOwner || ''}
                           onChange={(e) => handleChange('actionItemOwner', e.target.value || null)}
                           placeholder="Name of person responsible for action items"
-                          className={validationErrors.actionItemOwner ? 'border-red-500' : ''}
+                          className={`bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 ${validationErrors.actionItemOwner ? 'border-red-500' : ''}`}
                         />
                         <FieldError fieldName="actionItemOwner" />
                       </>
                     ) : (
-                      <div className="h-10 px-3 py-2 rounded-md border border-input bg-background">
+                      <div className="h-10 px-3 py-2 rounded-md border border-slate-600 bg-slate-700 text-white">
                         {projectStatus?.actionItemOwner || '-'}
                       </div>
                     )}
@@ -955,17 +955,17 @@ export default function ProjectStatusPage() {
             <TabsContent value="cumulative">
               <div className="space-y-6">
                 <div className="mb-6">
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm font-medium mb-2 text-slate-300">
                     Week Range
                   </label>
                   <Select
                     value={weekEndDate}
                     onValueChange={(value) => setWeekEndDate(value)}
                   >
-                    <SelectTrigger className="w-full md:w-[300px]">
+                    <SelectTrigger className="w-full md:w-[300px] bg-slate-800 border-slate-600 text-white">
                       <SelectValue placeholder="Select week range" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-slate-800 border-slate-600 text-white">
                       {getWeekOptions().map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
@@ -984,30 +984,30 @@ export default function ProjectStatusPage() {
                     {/* Status Summary Cards */}
                     <div className="space-y-6 mb-6">
                       {/* Delivery Status */}
-                      <Card>
-                        <CardHeader className="pb-2 border-b">
-                          <CardTitle className="text-lg text-blue-400">Delivery Status</CardTitle>
+                      <Card className="bg-slate-800 border border-slate-700 shadow-lg border-t-4 border-t-blue-600/80">
+                        <CardHeader className="pb-2 border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
+                          <CardTitle className="text-xl bg-gradient-to-r from-blue-300 to-indigo-300 text-transparent bg-clip-text font-bold">Delivery Status</CardTitle>
                         </CardHeader>
                         <CardContent className="pt-4">
                           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
-                              <h4 className="text-sm font-medium mb-2">Schedule</h4>
+                              <h4 className="text-sm font-medium mb-2 text-slate-300">Schedule</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.scheduleStatus === 'green').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.scheduleStatus === 'amber').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.scheduleStatus === 'red').length || 0}
                                   </span>
                                 </div>
@@ -1015,23 +1015,23 @@ export default function ProjectStatusPage() {
                             </div>
                             
                             <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
-                              <h4 className="text-sm font-medium mb-2">Quality</h4>
+                              <h4 className="text-sm font-medium mb-2 text-slate-300">Quality</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.qualityStatus === 'green').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.qualityStatus === 'amber').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.qualityStatus === 'red').length || 0}
                                   </span>
                                 </div>
@@ -1039,23 +1039,23 @@ export default function ProjectStatusPage() {
                             </div>
                             
                             <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
-                              <h4 className="text-sm font-medium mb-2">Resource Utilization</h4>
+                              <h4 className="text-sm font-medium mb-2 text-slate-300">Resource Utilization</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.resourceUtilizationStatus === 'green').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.resourceUtilizationStatus === 'amber').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.resourceUtilizationStatus === 'red').length || 0}
                                   </span>
                                 </div>
@@ -1063,23 +1063,23 @@ export default function ProjectStatusPage() {
                             </div>
                             
                             <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
-                              <h4 className="text-sm font-medium mb-2">Right Team</h4>
+                              <h4 className="text-sm font-medium mb-2 text-slate-300">Right Team</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.rightTeamStatus === 'green').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.rightTeamStatus === 'amber').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.rightTeamStatus === 'red').length || 0}
                                   </span>
                                 </div>
@@ -1090,30 +1090,30 @@ export default function ProjectStatusPage() {
                       </Card>
                       
                       {/* Account Management Status */}
-                      <Card>
-                        <CardHeader className="pb-2 border-b">
-                          <CardTitle className="text-lg text-emerald-400">Account Management Status</CardTitle>
+                      <Card className="bg-slate-800 border border-slate-700 shadow-lg border-t-4 border-t-emerald-600/80">
+                        <CardHeader className="pb-2 border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
+                          <CardTitle className="text-xl bg-gradient-to-r from-emerald-300 to-teal-300 text-transparent bg-clip-text font-bold">Account Management Status</CardTitle>
                         </CardHeader>
                         <CardContent className="pt-4">
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
-                              <h4 className="text-sm font-medium mb-2">AM Status</h4>
+                              <h4 className="text-sm font-medium mb-2 text-slate-300">AM Status</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.amStatus === 'green').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.amStatus === 'amber').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.amStatus === 'red').length || 0}
                                   </span>
                                 </div>
@@ -1121,23 +1121,23 @@ export default function ProjectStatusPage() {
                             </div>
                             
                             <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
-                              <h4 className="text-sm font-medium mb-2">Governance Status</h4>
+                              <h4 className="text-sm font-medium mb-2 text-slate-300">Governance Status</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.governanceStatus === 'green').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.governanceStatus === 'amber').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.governanceStatus === 'red').length || 0}
                                   </span>
                                 </div>
@@ -1145,23 +1145,23 @@ export default function ProjectStatusPage() {
                             </div>
                             
                             <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
-                              <h4 className="text-sm font-medium mb-2">Invoice Status</h4>
+                              <h4 className="text-sm font-medium mb-2 text-slate-300">Invoice Status</h4>
                               <div className="flex gap-3">
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.invoiceStatus === 'green').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.invoiceStatus === 'amber').length || 0}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                  <span className="text-sm font-medium">
+                                  <span className="text-sm font-medium text-slate-200">
                                     {cumulativeStatuses?.filter(status => status.invoiceStatus === 'red').length || 0}
                                   </span>
                                 </div>
@@ -1172,16 +1172,16 @@ export default function ProjectStatusPage() {
                       </Card>
                     </div>
                     
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Project Status Summary</CardTitle>
-                        <CardDescription>
+                    <Card className="bg-slate-800 border border-slate-700 shadow-lg">
+                      <CardHeader className="border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
+                        <CardTitle className="text-xl bg-gradient-to-r from-blue-300 to-indigo-300 text-transparent bg-clip-text font-bold">Project Status Summary</CardTitle>
+                        <CardDescription className="text-slate-300">
                           All project statuses for the week: {getWeekRangeDisplayFromEndDate(weekEndDate)}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
                         {cumulativeStatuses?.length === 0 ? (
-                          <div className="text-center py-6 text-muted-foreground">
+                          <div className="text-center py-6 text-slate-300">
                             No project status reports found for this week.
                           </div>
                         ) : (
