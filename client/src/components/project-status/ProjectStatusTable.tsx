@@ -4,7 +4,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
-import { useLocation } from "wouter";
 
 // Status badge component for the colored status indicators
 const StatusBadge: React.FC<{ status: string | null }> = ({ status }) => {
@@ -43,8 +42,6 @@ const ProjectStatusTable: React.FC<ProjectStatusTableProps> = ({
   weekRange,
   onProjectClick
 }) => {
-  const [, navigate] = useLocation();
-  
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -53,24 +50,6 @@ const ProjectStatusTable: React.FC<ProjectStatusTableProps> = ({
       </div>
     );
   }
-  
-  // Handle project click with direct navigation
-  const handleProjectClick = (projectId: number) => {
-    console.log("Clicked on project:", projectId);
-    // First find the weekEndDate for this project
-    const weekEndDate = projectStatuses.find(s => s.projectId === projectId)?.weekEndDate || '';
-    
-    if (onProjectClick) {
-      // Use the callback if provided
-      console.log("Using callback for project navigation");
-      onProjectClick(projectId);
-    } else {
-      // Otherwise, navigate directly to project status page with correct parameters
-      console.log("Directly navigating to project status page");
-      const hash = `project=${projectId}&tab=byProject&week=${weekEndDate}`;
-      navigate(`/project-status#${hash}`);
-    }
-  };
 
   const truncateText = (text: string | null, maxLength: number = 30) => {
     if (!text) return '-';
@@ -128,7 +107,7 @@ const ProjectStatusTable: React.FC<ProjectStatusTableProps> = ({
             <TableRow 
               key={status.id} 
               className="cursor-pointer hover:bg-muted"
-              onClick={() => handleProjectClick(status.projectId)}
+              onClick={() => onProjectClick && onProjectClick(status.projectId)}
             >
               <TableCell className="font-medium">
                 {status.project?.name || `Project ${status.projectId}`}
@@ -158,7 +137,7 @@ const ProjectStatusTable: React.FC<ProjectStatusTableProps> = ({
                   size="icon" 
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleProjectClick(status.projectId);
+                    onProjectClick && onProjectClick(status.projectId);
                   }}
                 >
                   <span className="sr-only">View details</span>
