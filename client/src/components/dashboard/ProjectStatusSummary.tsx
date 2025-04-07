@@ -260,9 +260,6 @@ const ProjectStatusSummary: React.FC = () => {
               ))}
             </SelectContent>
           </Select>
-          <Link href={detailsLink}>
-            <Button size="sm" className="w-full sm:w-auto">View Details</Button>
-          </Link>
         </div>
       </CardHeader>
       <CardContent>

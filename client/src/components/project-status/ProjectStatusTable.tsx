@@ -58,12 +58,12 @@ const ProjectStatusTable: React.FC<ProjectStatusTableProps> = ({
 
   return (
     <div className="overflow-auto max-w-[calc(100vw-4rem)]">
-      <Table className="w-full min-w-[1800px]">
+      <Table className="w-full min-w-[1700px]">
         <TableHeader>
           <TableRow>
             <TableHead className="w-[180px]">Project</TableHead>
             {/* Delivery Status Headers */}
-            <TableHead colSpan={8} className="text-center text-blue-700 bg-blue-50 border-b border-blue-100">
+            <TableHead colSpan={7} className="text-center text-blue-700 bg-blue-50 border-b border-blue-100">
               Delivery Status
             </TableHead>
             {/* Account Management Headers */}
@@ -85,7 +85,6 @@ const ProjectStatusTable: React.FC<ProjectStatusTableProps> = ({
             <TableHead className="bg-blue-50">Resources</TableHead>
             <TableHead className="bg-blue-50">Right Team</TableHead>
             <TableHead className="bg-blue-50">Comments</TableHead>
-            <TableHead className="bg-blue-50">Details</TableHead>
             
             {/* Account Management Subheaders */}
             <TableHead className="bg-emerald-50">AM Status</TableHead>
@@ -130,23 +129,6 @@ const ProjectStatusTable: React.FC<ProjectStatusTableProps> = ({
               </TableCell>
               <TableCell className="max-w-[200px] truncate" title={status.deliveryComments || ''}>
                 {truncateText(status.deliveryComments)}
-              </TableCell>
-              <TableCell>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onProjectClick && onProjectClick(status.projectId);
-                  }}
-                >
-                  <span className="sr-only">View details</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                    <polyline points="15 3 21 3 21 9" />
-                    <line x1="10" x2="21" y1="14" y2="3" />
-                  </svg>
-                </Button>
               </TableCell>
               
               {/* Account Management Data */}
