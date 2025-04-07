@@ -522,7 +522,7 @@ export default function ProjectStatusPage() {
               </Table>
               
               {/* Delivery Updates Section */}
-              <Card className="mb-6 border-t-4 border-t-blue-600/80 bg-slate-800 border border-slate-700 shadow-lg">
+              <Card className="mb-6 border-t-4 border-t-blue-600/80 bg-slate-800 border border-slate-700 shadow-lg rounded-xl overflow-hidden">
                 <CardHeader className="border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
                   <CardTitle className="text-xl bg-gradient-to-r from-blue-300 to-cyan-300 text-transparent bg-clip-text font-bold">Delivery Updates</CardTitle>
                   <CardDescription className="text-slate-300">Information related to project delivery</CardDescription>
@@ -692,7 +692,7 @@ export default function ProjectStatusPage() {
               </Card>
               
               {/* Account Manager Updates Section */}
-              <Card className="mb-6 border-t-4 border-t-emerald-600/80 bg-slate-800 border border-slate-700 shadow-lg">
+              <Card className="mb-6 border-t-4 border-t-emerald-600/80 bg-slate-800 border border-slate-700 shadow-lg rounded-xl overflow-hidden">
                 <CardHeader className="border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
                   <CardTitle className="text-xl bg-gradient-to-r from-emerald-300 to-teal-300 text-transparent bg-clip-text font-bold">Account Manager Updates</CardTitle>
                   <CardDescription className="text-slate-300">Information related to account management</CardDescription>
@@ -863,7 +863,7 @@ export default function ProjectStatusPage() {
               </Card>
               
               {/* Other Updates Section */}
-              <Card className="mb-6 border-t-4 border-t-purple-600/80 bg-slate-800 border border-slate-700 shadow-lg">
+              <Card className="mb-6 border-t-4 border-t-purple-600/80 bg-slate-800 border border-slate-700 shadow-lg rounded-xl overflow-hidden">
                 <CardHeader className="border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
                   <CardTitle className="text-xl bg-gradient-to-r from-purple-300 to-fuchsia-300 text-transparent bg-clip-text font-bold">Other Updates</CardTitle>
                   <CardDescription className="text-slate-300">Additional project information</CardDescription>
@@ -984,7 +984,7 @@ export default function ProjectStatusPage() {
                     {/* Status Summary Cards */}
                     <div className="space-y-6 mb-6">
                       {/* Delivery Status */}
-                      <Card className="bg-slate-800 border border-slate-700 shadow-lg border-t-4 border-t-blue-600/80 rounded-lg overflow-hidden">
+                      <Card className="bg-slate-800 border border-slate-700 shadow-lg border-t-4 border-t-blue-600/80 rounded-xl overflow-hidden">
                         <CardHeader className="pb-2 border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
                           <CardTitle className="text-xl bg-gradient-to-r from-blue-300 to-indigo-300 text-transparent bg-clip-text font-bold">Delivery Status</CardTitle>
                         </CardHeader>
@@ -1090,7 +1090,7 @@ export default function ProjectStatusPage() {
                       </Card>
                       
                       {/* Account Management Status */}
-                      <Card className="bg-slate-800 border border-slate-700 shadow-lg border-t-4 border-t-emerald-600/80 rounded-lg overflow-hidden">
+                      <Card className="bg-slate-800 border border-slate-700 shadow-lg border-t-4 border-t-emerald-600/80 rounded-xl overflow-hidden">
                         <CardHeader className="pb-2 border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
                           <CardTitle className="text-xl bg-gradient-to-r from-emerald-300 to-teal-300 text-transparent bg-clip-text font-bold">Account Management Status</CardTitle>
                         </CardHeader>
@@ -1172,9 +1172,9 @@ export default function ProjectStatusPage() {
                       </Card>
                     </div>
                     
-                    <Card className="bg-slate-800 border border-slate-700 shadow-lg rounded-lg overflow-hidden border-t-4 border-t-purple-600/80">
+                    <Card className="bg-slate-800 border border-slate-700 shadow-lg rounded-xl overflow-hidden border-t-4 border-t-purple-600/80">
                       <CardHeader className="border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
-                        <CardTitle className="text-xl bg-gradient-to-r from-blue-300 to-indigo-300 text-transparent bg-clip-text font-bold">Project Status Summary</CardTitle>
+                        <CardTitle className="text-xl bg-gradient-to-r from-purple-300 to-fuchsia-300 text-transparent bg-clip-text font-bold">Project Status Summary</CardTitle>
                         <CardDescription className="text-slate-300">
                           All project statuses for the week: {getWeekRangeDisplayFromEndDate(weekEndDate)}
                         </CardDescription>
