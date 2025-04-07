@@ -313,11 +313,11 @@ const Projects: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Active</Badge>;
+        return <Badge className="bg-green-900/60 text-green-300 border border-green-700/70 hover:bg-green-900/80">Active</Badge>;
       case "completed":
-        return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Completed</Badge>;
+        return <Badge className="bg-blue-900/60 text-blue-300 border border-blue-700/70 hover:bg-blue-900/80">Completed</Badge>;
       case "pending":
-        return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">Pending</Badge>;
+        return <Badge className="bg-amber-900/60 text-amber-300 border border-amber-700/70 hover:bg-amber-900/80">Pending</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -637,7 +637,7 @@ const Projects: React.FC = () => {
       </div>
 
       {/* Results count */}
-      <div className="mb-4 text-sm text-slate-500">
+      <div className="mb-4 text-sm text-slate-400">
         {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'} found
       </div>
 
@@ -645,28 +645,28 @@ const Projects: React.FC = () => {
         {filteredProjects.map((project) => (
           <Card 
             key={project.id} 
-            className="overflow-hidden hover:shadow-md transition-shadow duration-300"
+            className="overflow-hidden hover:shadow-md transition-shadow duration-300 bg-slate-800 border-slate-700"
           >
             <div className="h-2" style={{ backgroundColor: project.color }}></div>
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
-                <CardTitle className="text-lg font-semibold truncate">{project.name}</CardTitle>
+                <CardTitle className="text-lg font-semibold truncate text-slate-200">{project.name}</CardTitle>
                 {getStatusBadge(project.status)}
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-slate-600 mb-4 line-clamp-2">
+              <p className="text-sm text-slate-300 mb-4 line-clamp-2">
                 {project.description || "No description provided."}
               </p>
               
-              <div className="text-xs text-slate-500 space-y-2">
+              <div className="text-xs text-slate-400 space-y-2">
                 <div className="flex justify-between">
                   <span>Start Date:</span>
-                  <span className="font-medium">{format(new Date(project.startDate), "MMM d, yyyy")}</span>
+                  <span className="font-medium text-slate-300">{format(new Date(project.startDate), "MMM d, yyyy")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>End Date:</span>
-                  <span className="font-medium">{format(new Date(project.endDate), "MMM d, yyyy")}</span>
+                  <span className="font-medium text-slate-300">{format(new Date(project.endDate), "MMM d, yyyy")}</span>
                 </div>
 
                 
@@ -698,11 +698,11 @@ const Projects: React.FC = () => {
                 </div>
               </div>
               
-              <div className="mt-4 pt-4 border-t border-slate-200 flex justify-between">
+              <div className="mt-4 pt-4 border-t border-slate-700 flex justify-between">
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-slate-600"
+                  className="text-slate-300 hover:text-white hover:bg-slate-700"
                   onClick={() => handleProjectDetailView(project)}
                 >
                   <span className="material-icons mr-1 text-sm">visibility</span>
@@ -711,7 +711,7 @@ const Projects: React.FC = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-slate-600"
+                  className="text-slate-300 hover:text-white hover:bg-slate-700"
                   onClick={() => handleProjectEdit(project)}
                 >
                   <span className="material-icons mr-1 text-sm">edit</span>

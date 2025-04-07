@@ -390,9 +390,9 @@ const Team: React.FC = () => {
   };
 
   const getAvailabilityStatus = (allocation: number) => {
-    if (allocation >= 100) return { label: "Fully Allocated", class: "bg-green-100 text-green-800" };
-    if (allocation >= 75) return { label: "Partially Allocated", class: "bg-yellow-100 text-yellow-800" };
-    return { label: "Needs Allocation", class: "bg-red-100 text-red-800" };
+    if (allocation >= 100) return { label: "Fully Allocated", class: "bg-green-900/60 text-green-300 border border-green-700/70" };
+    if (allocation >= 75) return { label: "Partially Allocated", class: "bg-amber-900/60 text-amber-300 border border-amber-700/70" };
+    return { label: "Needs Allocation", class: "bg-red-900/60 text-red-300 border border-red-700/70" };
   };
 
   // Extract all skills from team members
@@ -567,7 +567,7 @@ const Team: React.FC = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Team Members</h1>
+        <h1 className="text-2xl font-bold text-slate-200">Team Members</h1>
         <Button onClick={() => setIsNewMemberDialogOpen(true)}>
           <span className="material-icons mr-1 text-sm">person_add</span>
           Add Member
@@ -798,12 +798,12 @@ const Team: React.FC = () => {
             <Badge 
               key={`role-tag-${role}`}
               variant="secondary" 
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 bg-slate-700/60 text-slate-300 border-slate-600"
             >
               Role: {role}
               <button 
                 onClick={() => setFilterRoles(filterRoles.filter(r => r !== role))} 
-                className="text-xs text-gray-500 hover:text-gray-800"
+                className="text-xs text-slate-400 hover:text-slate-100"
               >
                 <span className="material-icons text-xs">close</span>
               </button>
@@ -814,12 +814,12 @@ const Team: React.FC = () => {
             <Badge 
               key={`skill-tag-${skill}`}
               variant="secondary" 
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 bg-slate-700/60 text-slate-300 border-slate-600"
             >
               Skill: {skill}
               <button 
                 onClick={() => setFilterSkills(filterSkills.filter(s => s !== skill))} 
-                className="text-xs text-gray-500 hover:text-gray-800"
+                className="text-xs text-slate-400 hover:text-slate-100"
               >
                 <span className="material-icons text-xs">close</span>
               </button>
@@ -830,12 +830,12 @@ const Team: React.FC = () => {
             <Badge 
               key={`project-tag-${projectId}`}
               variant="secondary" 
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 bg-slate-700/60 text-slate-300 border-slate-600"
             >
               Project: {getProjectName(projectId)}
               <button 
                 onClick={() => setFilterProjects(filterProjects.filter(p => p !== projectId))} 
-                className="text-xs text-gray-500 hover:text-gray-800"
+                className="text-xs text-slate-400 hover:text-slate-100"
               >
                 <span className="material-icons text-xs">close</span>
               </button>
@@ -845,14 +845,14 @@ const Team: React.FC = () => {
           {filterAllocation && (
             <Badge 
               variant="secondary" 
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 bg-slate-700/60 text-slate-300 border-slate-600"
             >
               {filterAllocation === "fully-allocated" ? "Fully Allocated" :
                 filterAllocation === "partially-allocated" ? "Partially Allocated" :
                 "Needs Allocation"}
               <button 
                 onClick={() => setFilterAllocation(null)} 
-                className="text-xs text-gray-500 hover:text-gray-800"
+                className="text-xs text-slate-400 hover:text-slate-100"
               >
                 <span className="material-icons text-xs">close</span>
               </button>
@@ -863,7 +863,7 @@ const Team: React.FC = () => {
             <Button 
               variant="outline" 
               size="sm" 
-              className="h-7 text-xs"
+              className="h-7 text-xs bg-slate-700 text-slate-300 border-slate-600 hover:bg-slate-600 hover:text-slate-200"
               onClick={() => {
                 setFilterRoles([]);
                 setFilterSkills([]);
@@ -877,7 +877,7 @@ const Team: React.FC = () => {
         </div>
         
         {/* Results count */}
-        <div className="text-sm text-slate-500">
+        <div className="text-sm text-slate-400">
           Showing {filteredTeamMembers.length} of {teamMembers?.length || 0} team members
         </div>
       </div>
@@ -891,7 +891,7 @@ const Team: React.FC = () => {
           return (
             <Card 
               key={member.id} 
-              className="overflow-hidden hover:shadow-md transition-shadow duration-300"
+              className="overflow-hidden hover:shadow-md transition-shadow duration-300 bg-slate-800 border-slate-700"
             >
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
@@ -902,8 +902,8 @@ const Team: React.FC = () => {
                       className="w-10 h-10 rounded-full mr-3 object-cover"
                     />
                     <div>
-                      <CardTitle className="text-lg font-semibold">{member.name}</CardTitle>
-                      <p className="text-sm text-slate-500">{member.role}</p>
+                      <CardTitle className="text-lg font-semibold text-slate-200">{member.name}</CardTitle>
+                      <p className="text-sm text-slate-400">{member.role}</p>
                     </div>
                   </div>
                   <Badge className={status.class}>{status.label}</Badge>
@@ -911,7 +911,7 @@ const Team: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="mb-4">
-                  <div className="flex justify-between text-sm mb-1">
+                  <div className="flex justify-between text-sm mb-1 text-slate-300">
                     <span>Current Allocation</span>
                     <span className="font-medium">{totalAllocation}%</span>
                   </div>
@@ -920,18 +920,18 @@ const Team: React.FC = () => {
                     className="h-2"
                     indicatorClassName={
                       totalAllocation >= 100 
-                        ? "bg-green-500" 
+                        ? "bg-green-600" 
                         : totalAllocation >= 75 
-                          ? "bg-yellow-500" 
-                          : "bg-red-500"
+                          ? "bg-amber-600" 
+                          : "bg-red-600"
                     }
                   />
                 </div>
 
-                <div className="text-sm">
+                <div className="text-sm text-slate-300">
                   <p className="font-medium mb-2">Current Projects:</p>
                   {memberAllocations.length === 0 ? (
-                    <p className="text-slate-500 text-xs">No current project assignments</p>
+                    <p className="text-slate-400 text-xs">No current project assignments</p>
                   ) : (
                     <div className="space-y-2">
                       {memberAllocations.map((allocation) => {
@@ -948,7 +948,7 @@ const Team: React.FC = () => {
                               )}
                               <span>{getProjectName(allocation.projectId)}</span>
                             </div>
-                            <span className="font-medium">{allocation.percentage}%</span>
+                            <span className="font-medium text-slate-200">{allocation.percentage}%</span>
                           </div>
                         );
                       })}
@@ -957,14 +957,14 @@ const Team: React.FC = () => {
                 </div>
                 
                 {member.skills && member.skills.length > 0 && (
-                  <div className="mt-4 text-sm">
+                  <div className="mt-4 text-sm text-slate-300">
                     <p className="font-medium mb-2">Skills:</p>
                     <div className="flex flex-wrap gap-1.5">
                       {member.skills.map((skill) => (
                         <Badge 
                           key={skill} 
                           variant="secondary"
-                          className="text-xs"
+                          className="text-xs bg-slate-700/70 text-slate-300 hover:bg-slate-700 border-slate-600"
                         >
                           {skill}
                         </Badge>
@@ -973,11 +973,11 @@ const Team: React.FC = () => {
                   </div>
                 )}
                 
-                <div className="mt-4 pt-4 border-t border-slate-200 flex justify-between">
+                <div className="mt-4 pt-4 border-t border-slate-700 flex justify-between">
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-slate-600"
+                    className="text-slate-300 hover:text-white hover:bg-slate-700"
                     onClick={() => handleMemberDetailView(member)}
                   >
                     <span className="material-icons mr-1 text-sm">visibility</span>
@@ -986,7 +986,7 @@ const Team: React.FC = () => {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-slate-600"
+                    className="text-slate-300 hover:text-white hover:bg-slate-700"
                     onClick={() => handleMemberEdit(member)}
                   >
                     <span className="material-icons mr-1 text-sm">edit</span>
