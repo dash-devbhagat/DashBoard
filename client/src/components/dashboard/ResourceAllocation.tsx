@@ -64,7 +64,7 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-  const itemsPerPage = 5; // Number of items to display per page
+  const itemsPerPage = 12; // Number of items to display per page
 
   const { data: teamMembers, isLoading: isLoadingTeam } = useQuery<TeamMember[]>({
     queryKey: ["/api/team-members"],
@@ -216,7 +216,7 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
             <div className="h-10 bg-slate-900/60 rounded w-full"></div>
             
             {/* Table rows skeleton */}
-            {[...Array(5)].map((_, index) => (
+            {[...Array(12)].map((_, index) => (
               <div key={index} className="flex space-x-4 py-4 border-b border-slate-700/50">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 bg-slate-700 rounded-full"></div>
@@ -269,7 +269,7 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
             <thead>
               <tr className="bg-slate-900/60">
                 <th 
-                  className="text-sm font-semibold text-left text-slate-300 px-6 py-3 cursor-pointer hover:text-primary transition-colors"
+                  className="text-sm font-semibold text-left text-slate-300 px-6 py-2.5 cursor-pointer hover:text-primary transition-colors"
                   onClick={() => handleSort("name")}
                 >
                   <div className="flex items-center">
@@ -277,11 +277,11 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
                     {renderSortIndicator("name")}
                   </div>
                 </th>
-                <th className="text-sm font-semibold text-left text-slate-300 px-6 py-3">
+                <th className="text-sm font-semibold text-left text-slate-300 px-6 py-2.5">
                   Projects
                 </th>
                 <th 
-                  className="text-sm font-semibold text-left text-slate-300 px-6 py-3 cursor-pointer hover:text-primary transition-colors"
+                  className="text-sm font-semibold text-left text-slate-300 px-6 py-2.5 cursor-pointer hover:text-primary transition-colors"
                   onClick={() => handleSort("allocation")}
                 >
                   <div className="flex items-center">
@@ -290,7 +290,7 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
                   </div>
                 </th>
                 <th 
-                  className="text-sm font-semibold text-left text-slate-300 px-6 py-3 cursor-pointer hover:text-primary transition-colors"
+                  className="text-sm font-semibold text-left text-slate-300 px-6 py-2.5 cursor-pointer hover:text-primary transition-colors"
                   onClick={() => handleSort("status")}
                 >
                   <div className="flex items-center">
@@ -303,14 +303,14 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
             <tbody>
               {currentData.map((resource, idx) => (
                 <tr key={resource.id} className={`border-b border-slate-700/50 hover:bg-slate-700/60 transition-colors ${idx % 2 === 0 ? 'bg-slate-800' : 'bg-slate-800/80'}`}>
-                  <td className="py-4 px-6">
+                  <td className="py-3 px-6">
                     <div className="flex items-center">
                       <div className="relative mr-3">
                         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/20 to-slate-500/20 blur-sm"></div>
                         <img 
                           src={resource.avatar} 
                           alt={resource.name} 
-                          className="w-10 h-10 rounded-full border-2 border-slate-700 shadow-sm relative"
+                          className="w-8 h-8 rounded-full border-2 border-slate-700 shadow-sm relative"
                         />
                       </div>
                       <div>
@@ -319,9 +319,9 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
                       </div>
                     </div>
                   </td>
-                  <td className="py-4 px-6">
+                  <td className="py-3 px-6">
                     {resource.allocations && resource.allocations.length > 0 ? (
-                      <div className="flex flex-col gap-1.5">
+                      <div className="flex flex-col gap-1">
                         {resource.allocations.map((alloc, idx) => (
                           <div key={idx} className="flex items-center">
                             <div className="w-2 h-2 rounded-full bg-primary/80 mr-2"></div>
@@ -339,11 +339,11 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
                       </div>
                     )}
                   </td>
-                  <td className="py-4 px-6">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="w-full bg-slate-700 rounded-full h-2.5 overflow-hidden">
+                  <td className="py-3 px-6">
+                    <div className="flex flex-col gap-1">
+                      <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
                         <div
-                          className={`h-2.5 rounded-full ${
+                          className={`h-2 rounded-full ${
                             resource.allocation >= 100 
                               ? "bg-gradient-to-r from-emerald-500 to-emerald-400" 
                               : resource.allocation >= 75 
@@ -361,8 +361,8 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
                       </div>
                     </div>
                   </td>
-                  <td className="py-4 px-6">
-                    <span className={`px-3 py-1.5 text-xs font-medium rounded-full ${
+                  <td className="py-3 px-6">
+                    <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
                       resource.status.label === "Fully Allocated" 
                         ? "bg-emerald-900/60 text-emerald-300 border border-emerald-700/70" 
                         : resource.status.label === "Partially Allocated"
@@ -390,13 +390,13 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
         </div>
         
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-slate-700/50 bg-slate-800/90 mt-auto">
+        <div className="px-6 py-2.5 border-t border-slate-700/50 bg-slate-800/90 mt-auto">
           <div className="flex justify-end items-center">
             <div className="flex space-x-1 shadow-sm rounded-lg overflow-hidden">
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="h-8 w-8 p-0 rounded-none border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300"
+                className="h-7 w-7 p-0 rounded-none border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300"
                 onClick={() => handlePageChange(1)}
                 disabled={currentPage === 1}
               >
@@ -405,7 +405,7 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="h-8 w-8 p-0 rounded-none border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300"
+                className="h-7 w-7 p-0 rounded-none border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
@@ -413,14 +413,14 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
               </Button>
               
               {/* Page indicator */}
-              <div className="h-8 px-3 flex items-center justify-center text-sm text-slate-300 font-medium bg-slate-900 border-y border-slate-700">
+              <div className="h-7 px-2 flex items-center justify-center text-xs text-slate-300 font-medium bg-slate-900 border-y border-slate-700">
                 Page {currentPage} of {totalPages}
               </div>
               
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="h-8 w-8 p-0 rounded-none border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300"
+                className="h-7 w-7 p-0 rounded-none border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >
@@ -429,7 +429,7 @@ const ResourceAllocation: React.FC<ResourceAllocationProps> = ({ onEdit }) => {
               <Button 
                 variant="outline" 
                 size="icon" 
-                className="h-8 w-8 p-0 rounded-none border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300"
+                className="h-7 w-7 p-0 rounded-none border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300"
                 onClick={() => handlePageChange(totalPages)}
                 disabled={currentPage === totalPages}
               >
