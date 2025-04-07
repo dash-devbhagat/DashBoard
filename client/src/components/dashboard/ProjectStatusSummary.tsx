@@ -195,9 +195,14 @@ const ProjectStatusSummary: React.FC = () => {
   // Handler for clicking on a project in the table
   const handleProjectClick = (projectId: number) => {
     // Log the navigation attempt for debugging
-    console.log(`Navigating to project: ${projectId}`);
-    // Use the navigate function with hash-based routing
-    navigate(`/project-status#project=${projectId}&tab=byProject&week=${weekEndDate}`);
+    console.log(`Navigating to project: ${projectId} from ProjectStatusSummary`);
+    
+    // Use the navigate function with hash-based routing using the proper order that matches parseUrlParameters function
+    const hash = `project=${projectId}&tab=byProject&week=${weekEndDate}`;
+    console.log("Setting location hash to:", hash);
+    
+    // Use the navigate function for programmatic navigation
+    navigate(`/project-status#${hash}`);
   };
 
   return (
@@ -222,9 +227,16 @@ const ProjectStatusSummary: React.FC = () => {
               ))}
             </SelectContent>
           </Select>
-          <Link href={detailsLink}>
-            <Button size="sm" className="w-full sm:w-auto">View Details</Button>
-          </Link>
+          <Button 
+            size="sm" 
+            className="w-full sm:w-auto"
+            onClick={() => {
+              console.log("View details clicked, navigating to:", detailsLink);
+              navigate(detailsLink);
+            }}
+          >
+            View Details
+          </Button>
         </div>
       </CardHeader>
       <CardContent>

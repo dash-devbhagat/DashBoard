@@ -153,10 +153,10 @@ export default function ProjectStatusPage() {
   // Ref for the tabs component to control it programmatically
   const tabsRef = React.useRef<HTMLDivElement>(null);
   
-  // Parse URL parameters from hash or query string
-  useEffect(() => {
+  // Function to parse URL parameters from hash or query string
+  const parseUrlParameters = () => {
     console.log("Checking URL parameters");
-    // First try to get parameters from hash (e.g. #week=2025-04-04&tab=project&project=4)
+    // First try to get parameters from hash (e.g. #week=2025-04-04&tab=byProject&project=4)
     const hash = window.location.hash.substring(1);
     const queryParams = window.location.search.substring(1);
     
@@ -190,6 +190,24 @@ export default function ProjectStatusPage() {
     if (projectParam && !isNaN(Number(projectParam))) {
       setSelectedProject(Number(projectParam));
     }
+  };
+  
+  // Parse URL parameters on initial load
+  useEffect(() => {
+    parseUrlParameters();
+    
+    // Add event listener for hash changes
+    const handleHashChange = () => {
+      console.log("Hash changed, parsing parameters");
+      parseUrlParameters();
+    };
+    
+    window.addEventListener('hashchange', handleHashChange);
+    
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
   
   // Fetch all projects
@@ -395,17 +413,27 @@ export default function ProjectStatusPage() {
   
   // Helper function to switch to the project tab and load a specific project
   const switchToProjectTab = (projectId: number) => {
+    console.log("Switching to project tab with projectId:", projectId);
+    
+    // First change state
     setSelectedProject(projectId);
     setActiveTab("byProject");
     
     // Update URL hash with the project ID
     const newHash = `project=${projectId}&tab=byProject&week=${weekEndDate}`;
+    console.log("Setting new hash:", newHash);
     window.location.hash = newHash;
     
-    // Find the TabsTrigger element and click it programmatically
-    const byProjectTab = document.querySelector('[data-state="inactive"][value="byProject"]') as HTMLButtonElement;
-    if (byProjectTab) {
-      byProjectTab.click();
+    // Force a click on the byProject tab if we're currently in the cumulative view
+    if (activeTab === "cumulative") {
+      // Find the TabsTrigger element and click it programmatically
+      const byProjectTab = document.querySelector('[data-state="inactive"][value="byProject"]') as HTMLButtonElement;
+      if (byProjectTab) {
+        console.log("Clicking project tab button");
+        byProjectTab.click();
+      } else {
+        console.log("Could not find project tab button");
+      }
     }
   };
   

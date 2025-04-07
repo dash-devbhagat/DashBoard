@@ -56,12 +56,18 @@ const ProjectStatusTable: React.FC<ProjectStatusTableProps> = ({
   
   // Handle project click with direct navigation
   const handleProjectClick = (projectId: number) => {
+    console.log("Clicked on project:", projectId);
+    // First find the weekEndDate for this project
+    const weekEndDate = projectStatuses.find(s => s.projectId === projectId)?.weekEndDate || '';
+    
     if (onProjectClick) {
       // Use the callback if provided
+      console.log("Using callback for project navigation");
       onProjectClick(projectId);
     } else {
       // Otherwise, navigate directly to project status page with correct parameters
-      const hash = `project=${projectId}&tab=byProject&week=${projectStatuses.find(s => s.projectId === projectId)?.weekEndDate || ''}`;
+      console.log("Directly navigating to project status page");
+      const hash = `project=${projectId}&tab=byProject&week=${weekEndDate}`;
       navigate(`/project-status#${hash}`);
     }
   };
