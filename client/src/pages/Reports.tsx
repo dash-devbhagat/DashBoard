@@ -248,6 +248,52 @@ const Reports: React.FC = () => {
   const [sortField, setSortField] = useState<string>("name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   
+  // Function to sort data based on field and direction
+  const sortData = React.useCallback((data: any[], field: string, direction: "asc" | "desc") => {
+    return [...data].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (field) {
+        case "name":
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case "role":
+          comparison = a.role.localeCompare(b.role);
+          break;
+        case "allocation":
+          comparison = a.totalAllocation - b.totalAllocation;
+          break;
+        case "projects":
+          comparison = a.projectCount - b.projectCount;
+          break;
+        case "status":
+          // Custom order: underutilized, optimal, overallocated
+          const statusOrder = {
+            "underutilized": 0,
+            "optimal": 1,
+            "overallocated": 2
+          };
+          comparison = statusOrder[a.status as keyof typeof statusOrder] - 
+                      statusOrder[b.status as keyof typeof statusOrder];
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return direction === "asc" ? comparison : -comparison;
+    });
+  }, []);
+  
+  // Handle column header click for sorting
+  const handleSort = React.useCallback((field: string) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  }, [sortField, sortDirection]);
+  
   const teamAllocationTableData = React.useMemo(() => {
     if (!allocations || !projects || !teamMembers) return [];
     
@@ -302,53 +348,7 @@ const Reports: React.FC = () => {
                 
     // Apply sorting
     return sortData(result, sortField, sortDirection);
-  }, [allocations, projects, teamMembers, sortField, sortDirection]);
-  
-  // Function to sort data based on field and direction
-  const sortData = (data: any[], field: string, direction: "asc" | "desc") => {
-    return [...data].sort((a, b) => {
-      let comparison = 0;
-      
-      switch (field) {
-        case "name":
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case "role":
-          comparison = a.role.localeCompare(b.role);
-          break;
-        case "allocation":
-          comparison = a.totalAllocation - b.totalAllocation;
-          break;
-        case "projects":
-          comparison = a.projectCount - b.projectCount;
-          break;
-        case "status":
-          // Custom order: underutilized, optimal, overallocated
-          const statusOrder = {
-            "underutilized": 0,
-            "optimal": 1,
-            "overallocated": 2
-          };
-          comparison = statusOrder[a.status as keyof typeof statusOrder] - 
-                      statusOrder[b.status as keyof typeof statusOrder];
-          break;
-        default:
-          comparison = 0;
-      }
-      
-      return direction === "asc" ? comparison : -comparison;
-    });
-  };
-  
-  // Handle column header click for sorting
-  const handleSort = (field: string) => {
-    if (field === sortField) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-  };
+  }, [allocations, projects, teamMembers, sortField, sortDirection, sortData]);
 
   // Color schemes for charts
   const COLORS = ['#2563eb', '#4f46e5', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
@@ -461,7 +461,12 @@ const Reports: React.FC = () => {
                               <span className="text-slate-400">No allocations</span>
                             ) : (
                               <div className="flex flex-col gap-2">
-                                {member.projectAllocations.map((allocation) => (
+                                {member.projectAllocations.map((allocation: {
+                                  projectId: number,
+                                  projectName: string,
+                                  projectColor: string,
+                                  percentage: number
+                                }) => (
                                   <div key={`${member.id}-${allocation.projectId}`} className="flex items-center gap-2">
                                     <div 
                                       className="w-3 h-3 rounded-full" 
