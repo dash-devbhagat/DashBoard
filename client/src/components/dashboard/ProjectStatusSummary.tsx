@@ -190,11 +190,14 @@ const ProjectStatusSummary: React.FC = () => {
   const invoiceRed = projectStatuses?.filter(status => status.invoiceStatus === 'red').length || 0;
 
   // View details link for the button
-  const detailsLink = `/project-status?week=${weekEndDate}&tab=cumulative`;
+  const detailsLink = `/project-status#week=${weekEndDate}&tab=cumulative`;
 
   // Handler for clicking on a project in the table
   const handleProjectClick = (projectId: number) => {
-    navigate(`/project-status?week=${weekEndDate}&tab=project&project=${projectId}`);
+    // Log the navigation attempt for debugging
+    console.log(`Navigating to project: ${projectId}`);
+    // Use the navigate function with hash-based routing
+    navigate(`/project-status#week=${weekEndDate}&tab=project&project=${projectId}`);
   };
 
   return (
@@ -346,10 +349,10 @@ const ProjectStatusSummary: React.FC = () => {
               <div className="overflow-hidden">
                 <ProjectStatusTable 
                   projectStatuses={
-                    projectStatuses.map(status => ({
+                    (projectStatuses || []).map(status => ({
                       ...status,
-                      project: projects?.find(p => p.id === status.projectId)
-                    })) || []
+                      project: projects?.find((p: any) => p.id === status.projectId)
+                    }))
                   }
                   isLoading={isLoading}
                   weekRange={getWeekRangeDisplayFromEndDate(weekEndDate)}
