@@ -242,6 +242,60 @@ const Reports: React.FC = () => {
       }))
       .sort((a, b) => b.allocation - a.allocation); // Sort by allocation percentage
   }, [allocations, projects, teamMembers]);
+  
+  // Prepare detailed team allocation data for the table
+  const teamAllocationTableData = React.useMemo(() => {
+    if (!allocations || !projects || !teamMembers) return [];
+    
+    // Create a map to group allocations by team member
+    const memberAllocations = new Map<number, {
+      id: number,
+      name: string,
+      role: string,
+      totalAllocation: number,
+      projectAllocations: Array<{
+        projectId: number,
+        projectName: string,
+        projectColor: string,
+        percentage: number
+      }>
+    }>();
+    
+    // Initialize with all team members
+    teamMembers.forEach(member => {
+      memberAllocations.set(member.id, {
+        id: member.id,
+        name: member.name,
+        role: member.role,
+        totalAllocation: 100 - member.availability,
+        projectAllocations: []
+      });
+    });
+    
+    // Add project allocations for each team member
+    allocations.forEach(allocation => {
+      const memberData = memberAllocations.get(allocation.teamMemberId);
+      const project = projects.find(p => p.id === allocation.projectId);
+      
+      if (memberData && project) {
+        memberData.projectAllocations.push({
+          projectId: project.id,
+          projectName: project.name,
+          projectColor: project.color,
+          percentage: allocation.percentage
+        });
+      }
+    });
+    
+    // Convert to array and add status based on allocation
+    return Array.from(memberAllocations.values())
+      .map(member => ({
+        ...member,
+        status: member.totalAllocation < 50 ? "underutilized" : 
+                member.totalAllocation > 100 ? "overallocated" : "optimal"
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name)); // Sort by name
+  }, [allocations, projects, teamMembers]);
 
   // Color schemes for charts
   const COLORS = ['#2563eb', '#4f46e5', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
@@ -385,24 +439,68 @@ const Reports: React.FC = () => {
 
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle>Team Member Allocation</CardTitle>
+                <CardTitle>Team Member Allocation Detail</CardTitle>
+                <CardDescription>Detailed allocation by team member and project</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={filteredTeamMemberData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                      layout="vertical"
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" unit="%" domain={[0, 100]} />
-                      <YAxis type="category" dataKey="name" width={150} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="allocation" name="Current Allocation" fill="#2563eb" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                <div className="border rounded-md">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-slate-50">
+                        <th className="text-left p-3 border-b font-medium">Team Member</th>
+                        <th className="text-left p-3 border-b font-medium">Projects (allocation %)</th>
+                        <th className="text-center p-3 border-b font-medium">Allocation %</th>
+                        <th className="text-center p-3 border-b font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {teamAllocationTableData.map((member) => (
+                        <tr key={member.id} className="border-b last:border-b-0 hover:bg-slate-50">
+                          <td className="p-3">
+                            <div className="font-medium">{member.name}</div>
+                            <div className="text-sm text-slate-500">{member.role}</div>
+                          </td>
+                          <td className="p-3">
+                            {member.projectAllocations.length === 0 ? (
+                              <span className="text-slate-400">No allocations</span>
+                            ) : (
+                              <div className="flex flex-col gap-2">
+                                {member.projectAllocations.map((allocation) => (
+                                  <div key={`${member.id}-${allocation.projectId}`} className="flex items-center gap-2">
+                                    <div 
+                                      className="w-3 h-3 rounded-full" 
+                                      style={{ backgroundColor: allocation.projectColor }}
+                                    />
+                                    <span className="text-sm">
+                                      {allocation.projectName} ({allocation.percentage}%)
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-3 text-center">
+                            <div className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full font-medium">
+                              {member.totalAllocation}%
+                            </div>
+                          </td>
+                          <td className="p-3 text-center">
+                            <div 
+                              className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                ${member.status === 'optimal' ? 'bg-green-100 text-green-800' : 
+                                  member.status === 'underutilized' ? 'bg-amber-100 text-amber-800' : 
+                                  'bg-red-100 text-red-800'}`
+                              }
+                            >
+                              {member.status === 'optimal' ? 'Optimal' : 
+                                member.status === 'underutilized' ? 'Underutilized' : 
+                                'Overallocated'}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </CardContent>
             </Card>
