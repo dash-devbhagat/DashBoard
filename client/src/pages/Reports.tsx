@@ -365,7 +365,7 @@ const Reports: React.FC = () => {
         id: member.id,
         name: member.name,
         role: member.role,
-        totalAllocation: 100 - member.availability,
+        totalAllocation: 0, // Start at 0 and calculate from actual allocations
         projectAllocations: []
       });
     });
@@ -382,6 +382,9 @@ const Reports: React.FC = () => {
           projectColor: project.color,
           percentage: allocation.percentage
         });
+        
+        // Add the allocation percentage to the total
+        memberData.totalAllocation += allocation.percentage;
       }
     });
     
