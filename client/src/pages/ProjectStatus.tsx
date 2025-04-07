@@ -368,12 +368,13 @@ export default function ProjectStatusPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">Project Status</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-white">Project Status</h1>
         <div className="flex gap-2">
           {activeTab === "byProject" && isEditing ? (
             <>
               <Button 
                 variant="outline" 
+                className="bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white"
                 onClick={() => {
                   setIsEditing(false);
                   setValidationErrors({});

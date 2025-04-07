@@ -408,9 +408,9 @@ const Reports: React.FC = () => {
   if (isLoading) {
     return (
       <div className="animate-pulse space-y-6">
-        <div className="h-10 bg-slate-200 rounded w-1/4"></div>
-        <div className="h-80 bg-slate-200 rounded w-full"></div>
-        <div className="h-80 bg-slate-200 rounded w-full"></div>
+        <div className="h-10 bg-slate-700/50 rounded w-1/4"></div>
+        <div className="h-80 bg-slate-700/50 rounded w-full"></div>
+        <div className="h-80 bg-slate-700/50 rounded w-full"></div>
       </div>
     );
   }
@@ -418,7 +418,7 @@ const Reports: React.FC = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Reports & Analytics</h1>
+        <h1 className="text-2xl font-bold text-slate-200">Reports & Analytics</h1>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select time range" />
@@ -444,68 +444,68 @@ const Reports: React.FC = () => {
         <TabsContent value="resource">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Team Member Allocation Detail - Moved to the top */}
-            <Card className="lg:col-span-2">
-              <CardHeader className="flex flex-row items-center justify-between">
+            <Card className="lg:col-span-2 bg-slate-800 border-slate-700 shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
                 <div>
-                  <CardTitle>Team Member Allocation Detail</CardTitle>
-                  <CardDescription>Detailed allocation by team member and project</CardDescription>
+                  <CardTitle className="text-white">Team Member Allocation Detail</CardTitle>
+                  <CardDescription className="text-slate-300">Detailed allocation by team member and project</CardDescription>
                 </div>
                 <Button 
                   onClick={() => exportToExcel(teamAllocationTableData)} 
                   variant="outline" 
                   size="sm" 
-                  className="ml-auto"
+                  className="ml-auto bg-slate-700/50 hover:bg-slate-700 text-slate-200 border-slate-600"
                 >
                   <DownloadIcon className="mr-2 h-4 w-4" />
                   Export to Excel
                 </Button>
               </CardHeader>
-              <CardContent>
-                <div className="border rounded-md">
+              <CardContent className="bg-slate-800 p-0">
+                <div className="rounded-md overflow-hidden">
                   <table className="w-full">
                     <thead>
-                      <tr className="bg-slate-50">
+                      <tr className="bg-slate-900">
                         <th 
-                          className="text-left p-3 border-b font-medium cursor-pointer hover:bg-slate-100"
+                          className="text-left p-3 border-b border-slate-700 font-medium text-slate-300 cursor-pointer hover:bg-slate-800"
                           onClick={() => handleSort("name")}
                         >
                           <div className="flex items-center gap-1">
                             Team Member
                             {sortField === "name" && (
-                              <span className="text-xs">{sortDirection === "asc" ? "↑" : "↓"}</span>
+                              <span className="text-xs text-slate-300">{sortDirection === "asc" ? "↑" : "↓"}</span>
                             )}
                           </div>
                         </th>
                         <th 
-                          className="text-left p-3 border-b font-medium cursor-pointer hover:bg-slate-100"
+                          className="text-left p-3 border-b border-slate-700 font-medium cursor-pointer hover:bg-slate-700"
                           onClick={() => handleSort("projects")}
                         >
                           <div className="flex items-center gap-1">
                             Projects (allocation %)
                             {sortField === "projects" && (
-                              <span className="text-xs">{sortDirection === "asc" ? "↑" : "↓"}</span>
+                              <span className="text-xs text-slate-300">{sortDirection === "asc" ? "↑" : "↓"}</span>
                             )}
                           </div>
                         </th>
                         <th 
-                          className="text-center p-3 border-b font-medium cursor-pointer hover:bg-slate-100"
+                          className="text-center p-3 border-b border-slate-700 font-medium cursor-pointer hover:bg-slate-700"
                           onClick={() => handleSort("allocation")}
                         >
                           <div className="flex items-center justify-center gap-1">
                             Allocation %
                             {sortField === "allocation" && (
-                              <span className="text-xs">{sortDirection === "asc" ? "↑" : "↓"}</span>
+                              <span className="text-xs text-slate-300">{sortDirection === "asc" ? "↑" : "↓"}</span>
                             )}
                           </div>
                         </th>
                         <th 
-                          className="text-center p-3 border-b font-medium cursor-pointer hover:bg-slate-100"
+                          className="text-center p-3 border-b border-slate-700 font-medium cursor-pointer hover:bg-slate-700"
                           onClick={() => handleSort("status")}
                         >
                           <div className="flex items-center justify-center gap-1">
                             Status
                             {sortField === "status" && (
-                              <span className="text-xs">{sortDirection === "asc" ? "↑" : "↓"}</span>
+                              <span className="text-xs text-slate-300">{sortDirection === "asc" ? "↑" : "↓"}</span>
                             )}
                           </div>
                         </th>
@@ -513,14 +513,14 @@ const Reports: React.FC = () => {
                     </thead>
                     <tbody>
                       {teamAllocationTableData.map((member) => (
-                        <tr key={member.id} className="border-b last:border-b-0 hover:bg-slate-50">
+                        <tr key={member.id} className="border-b border-slate-700 last:border-b-0 hover:bg-slate-800/50">
                           <td className="p-3">
-                            <div className="font-medium">{member.name}</div>
-                            <div className="text-sm text-slate-500">{member.role}</div>
+                            <div className="font-medium text-slate-200">{member.name}</div>
+                            <div className="text-sm text-slate-400">{member.role}</div>
                           </td>
                           <td className="p-3">
                             {member.projectAllocations.length === 0 ? (
-                              <span className="text-slate-400">No allocations</span>
+                              <span className="text-slate-500">No allocations</span>
                             ) : (
                               <div className="flex flex-col gap-2">
                                 {member.projectAllocations.map((allocation: {
@@ -534,7 +534,7 @@ const Reports: React.FC = () => {
                                       className="w-3 h-3 rounded-full" 
                                       style={{ backgroundColor: allocation.projectColor }}
                                     />
-                                    <span className="text-sm">
+                                    <span className="text-sm text-slate-300">
                                       {allocation.projectName} ({allocation.percentage}%)
                                     </span>
                                   </div>
@@ -543,16 +543,16 @@ const Reports: React.FC = () => {
                             )}
                           </td>
                           <td className="p-3 text-center">
-                            <div className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full font-medium">
+                            <div className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full font-medium text-slate-200">
                               {member.totalAllocation}%
                             </div>
                           </td>
                           <td className="p-3 text-center">
                             <div 
                               className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                ${member.status === 'fullyAllocated' ? 'bg-green-100 text-green-800' : 
-                                  member.status === 'partiallyAllocated' ? 'bg-amber-100 text-amber-800' : 
-                                  'bg-red-100 text-red-800'}`
+                                ${member.status === 'fullyAllocated' ? 'bg-green-900/60 text-green-300 border border-green-700/70' : 
+                                  member.status === 'partiallyAllocated' ? 'bg-amber-900/60 text-amber-300 border border-amber-700/70' : 
+                                  'bg-red-900/60 text-red-300 border border-red-700/70'}`
                               }
                             >
                               {member.status === 'fullyAllocated' ? 'Fully Allocated' : 
@@ -569,15 +569,15 @@ const Reports: React.FC = () => {
             </Card>
             
             {/* Team Utilization by Project */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Team Utilization by Project</CardTitle>
-                <CardDescription>Average allocation percentage by project</CardDescription>
+            <Card className="lg:col-span-2 bg-slate-800 border-slate-700 shadow-lg">
+              <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
+                <CardTitle className="text-white">Team Utilization by Project</CardTitle>
+                <CardDescription className="text-slate-300">Average allocation percentage by project</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-slate-800 p-5">
                 <div className="space-y-4">
                   {projectAllocationData.length === 0 ? (
-                    <div className="flex items-center justify-center h-40 text-slate-500">
+                    <div className="flex items-center justify-center h-40 text-slate-400">
                       No allocation data available
                     </div>
                   ) : (
@@ -586,13 +586,13 @@ const Reports: React.FC = () => {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <div className="w-4 h-4 rounded-full mr-2" style={{ backgroundColor: project.color }} />
-                            <span className="font-medium">{project.name}</span>
+                            <span className="font-medium text-slate-200">{project.name}</span>
                           </div>
-                          <div className="text-sm text-slate-500">
+                          <div className="text-sm text-slate-400">
                             {project.allocation.toFixed(0)}% avg allocation ({project.memberCount} team members)
                           </div>
                         </div>
-                        <div className="h-2 bg-slate-200 rounded-full">
+                        <div className="h-2 bg-slate-700/50 rounded-full">
                           <div
                             className="h-2 rounded-full"
                             style={{
@@ -608,36 +608,36 @@ const Reports: React.FC = () => {
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>Utilization by Role</CardTitle>
+            <Card className="bg-slate-800 border-slate-700 shadow-lg">
+              <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
+                <CardTitle className="text-white">Utilization by Role</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-slate-800 p-5">
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={utilizationByRoleData}
                       margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis yAxisId="left" orientation="left" unit="%" />
-                      <YAxis yAxisId="right" orientation="right" />
-                      <Tooltip />
-                      <Legend />
-                      <Bar yAxisId="left" dataKey="utilization" name="Utilization %" fill="#2563eb" />
-                      <Bar yAxisId="right" dataKey="members" name="Team Members" fill="#4f46e5" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis dataKey="name" stroke="#94a3b8" />
+                      <YAxis yAxisId="left" orientation="left" unit="%" stroke="#94a3b8" />
+                      <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" />
+                      <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }} />
+                      <Legend wrapperStyle={{ color: '#e2e8f0' }} />
+                      <Bar yAxisId="left" dataKey="utilization" name="Utilization %" fill="#3b82f6" />
+                      <Bar yAxisId="right" dataKey="members" name="Team Members" fill="#8b5cf6" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Resource Allocation</CardTitle>
+            <Card className="bg-slate-800 border-slate-700 shadow-lg">
+              <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
+                <CardTitle className="text-white">Resource Allocation</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-slate-800 p-5">
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -658,8 +658,8 @@ const Reports: React.FC = () => {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip />
-                      <Legend />
+                      <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }} />
+                      <Legend wrapperStyle={{ color: '#e2e8f0' }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -671,11 +671,11 @@ const Reports: React.FC = () => {
         {/* Project Status Tab */}
         <TabsContent value="project">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Status Overview</CardTitle>
+            <Card className="bg-slate-800 border-slate-700 shadow-lg">
+              <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
+                <CardTitle className="text-white">Project Status Overview</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-slate-800 p-5">
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -693,19 +693,19 @@ const Reports: React.FC = () => {
                           <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
                         ))}
                       </Pie>
-                      <Tooltip />
-                      <Legend />
+                      <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }} />
+                      <Legend wrapperStyle={{ color: '#e2e8f0' }} />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Project Timeline</CardTitle>
+            <Card className="bg-slate-800 border-slate-700 shadow-lg">
+              <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
+                <CardTitle className="text-white">Project Timeline</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-slate-800 p-5">
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -713,12 +713,12 @@ const Reports: React.FC = () => {
                       data={filteredProjectTimeline}
                       margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis type="number" unit=" days" />
-                      <YAxis type="category" dataKey="name" width={150} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="duration" name="Project Duration" fill="#2563eb" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                      <XAxis type="number" unit=" days" stroke="#94a3b8" />
+                      <YAxis type="category" dataKey="name" width={150} stroke="#94a3b8" />
+                      <Tooltip contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }} />
+                      <Legend wrapperStyle={{ color: '#e2e8f0' }} />
+                      <Bar dataKey="duration" name="Project Duration" fill="#3b82f6" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
