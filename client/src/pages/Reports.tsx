@@ -244,6 +244,10 @@ const Reports: React.FC = () => {
   }, [allocations, projects, teamMembers]);
   
   // Prepare detailed team allocation data for the table
+  // Define sorting state
+  const [sortField, setSortField] = useState<string>("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  
   const teamAllocationTableData = React.useMemo(() => {
     if (!allocations || !projects || !teamMembers) return [];
     
@@ -288,14 +292,63 @@ const Reports: React.FC = () => {
     });
     
     // Convert to array and add status based on allocation
-    return Array.from(memberAllocations.values())
+    const result = Array.from(memberAllocations.values())
       .map(member => ({
         ...member,
         status: member.totalAllocation < 50 ? "underutilized" : 
-                member.totalAllocation > 100 ? "overallocated" : "optimal"
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name)); // Sort by name
-  }, [allocations, projects, teamMembers]);
+                member.totalAllocation > 100 ? "overallocated" : "optimal",
+        projectCount: member.projectAllocations.length
+      }));
+                
+    // Apply sorting
+    return sortData(result, sortField, sortDirection);
+  }, [allocations, projects, teamMembers, sortField, sortDirection]);
+  
+  // Function to sort data based on field and direction
+  const sortData = (data: any[], field: string, direction: "asc" | "desc") => {
+    return [...data].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (field) {
+        case "name":
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case "role":
+          comparison = a.role.localeCompare(b.role);
+          break;
+        case "allocation":
+          comparison = a.totalAllocation - b.totalAllocation;
+          break;
+        case "projects":
+          comparison = a.projectCount - b.projectCount;
+          break;
+        case "status":
+          // Custom order: underutilized, optimal, overallocated
+          const statusOrder = {
+            "underutilized": 0,
+            "optimal": 1,
+            "overallocated": 2
+          };
+          comparison = statusOrder[a.status as keyof typeof statusOrder] - 
+                      statusOrder[b.status as keyof typeof statusOrder];
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return direction === "asc" ? comparison : -comparison;
+    });
+  };
+  
+  // Handle column header click for sorting
+  const handleSort = (field: string) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
 
   // Color schemes for charts
   const COLORS = ['#2563eb', '#4f46e5', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
@@ -339,6 +392,115 @@ const Reports: React.FC = () => {
         {/* Resource Utilization Tab */}
         <TabsContent value="resource">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Team Member Allocation Detail - Moved to the top */}
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Team Member Allocation Detail</CardTitle>
+                <CardDescription>Detailed allocation by team member and project</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="border rounded-md">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-slate-50">
+                        <th 
+                          className="text-left p-3 border-b font-medium cursor-pointer hover:bg-slate-100"
+                          onClick={() => handleSort("name")}
+                        >
+                          <div className="flex items-center gap-1">
+                            Team Member
+                            {sortField === "name" && (
+                              <span className="text-xs">{sortDirection === "asc" ? "↑" : "↓"}</span>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="text-left p-3 border-b font-medium cursor-pointer hover:bg-slate-100"
+                          onClick={() => handleSort("projects")}
+                        >
+                          <div className="flex items-center gap-1">
+                            Projects (allocation %)
+                            {sortField === "projects" && (
+                              <span className="text-xs">{sortDirection === "asc" ? "↑" : "↓"}</span>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="text-center p-3 border-b font-medium cursor-pointer hover:bg-slate-100"
+                          onClick={() => handleSort("allocation")}
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            Allocation %
+                            {sortField === "allocation" && (
+                              <span className="text-xs">{sortDirection === "asc" ? "↑" : "↓"}</span>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="text-center p-3 border-b font-medium cursor-pointer hover:bg-slate-100"
+                          onClick={() => handleSort("status")}
+                        >
+                          <div className="flex items-center justify-center gap-1">
+                            Status
+                            {sortField === "status" && (
+                              <span className="text-xs">{sortDirection === "asc" ? "↑" : "↓"}</span>
+                            )}
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {teamAllocationTableData.map((member) => (
+                        <tr key={member.id} className="border-b last:border-b-0 hover:bg-slate-50">
+                          <td className="p-3">
+                            <div className="font-medium">{member.name}</div>
+                            <div className="text-sm text-slate-500">{member.role}</div>
+                          </td>
+                          <td className="p-3">
+                            {member.projectAllocations.length === 0 ? (
+                              <span className="text-slate-400">No allocations</span>
+                            ) : (
+                              <div className="flex flex-col gap-2">
+                                {member.projectAllocations.map((allocation) => (
+                                  <div key={`${member.id}-${allocation.projectId}`} className="flex items-center gap-2">
+                                    <div 
+                                      className="w-3 h-3 rounded-full" 
+                                      style={{ backgroundColor: allocation.projectColor }}
+                                    />
+                                    <span className="text-sm">
+                                      {allocation.projectName} ({allocation.percentage}%)
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-3 text-center">
+                            <div className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full font-medium">
+                              {member.totalAllocation}%
+                            </div>
+                          </td>
+                          <td className="p-3 text-center">
+                            <div 
+                              className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                ${member.status === 'optimal' ? 'bg-green-100 text-green-800' : 
+                                  member.status === 'underutilized' ? 'bg-amber-100 text-amber-800' : 
+                                  'bg-red-100 text-red-800'}`
+                              }
+                            >
+                              {member.status === 'optimal' ? 'Optimal' : 
+                                member.status === 'underutilized' ? 'Underutilized' : 
+                                'Overallocated'}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+            
             {/* Team Utilization by Project */}
             <Card className="lg:col-span-2">
               <CardHeader>
@@ -433,74 +595,6 @@ const Reports: React.FC = () => {
                       <Legend />
                     </PieChart>
                   </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Team Member Allocation Detail</CardTitle>
-                <CardDescription>Detailed allocation by team member and project</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="border rounded-md">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-slate-50">
-                        <th className="text-left p-3 border-b font-medium">Team Member</th>
-                        <th className="text-left p-3 border-b font-medium">Projects (allocation %)</th>
-                        <th className="text-center p-3 border-b font-medium">Allocation %</th>
-                        <th className="text-center p-3 border-b font-medium">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {teamAllocationTableData.map((member) => (
-                        <tr key={member.id} className="border-b last:border-b-0 hover:bg-slate-50">
-                          <td className="p-3">
-                            <div className="font-medium">{member.name}</div>
-                            <div className="text-sm text-slate-500">{member.role}</div>
-                          </td>
-                          <td className="p-3">
-                            {member.projectAllocations.length === 0 ? (
-                              <span className="text-slate-400">No allocations</span>
-                            ) : (
-                              <div className="flex flex-col gap-2">
-                                {member.projectAllocations.map((allocation) => (
-                                  <div key={`${member.id}-${allocation.projectId}`} className="flex items-center gap-2">
-                                    <div 
-                                      className="w-3 h-3 rounded-full" 
-                                      style={{ backgroundColor: allocation.projectColor }}
-                                    />
-                                    <span className="text-sm">
-                                      {allocation.projectName} ({allocation.percentage}%)
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </td>
-                          <td className="p-3 text-center">
-                            <div className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full font-medium">
-                              {member.totalAllocation}%
-                            </div>
-                          </td>
-                          <td className="p-3 text-center">
-                            <div 
-                              className={`inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                ${member.status === 'optimal' ? 'bg-green-100 text-green-800' : 
-                                  member.status === 'underutilized' ? 'bg-amber-100 text-amber-800' : 
-                                  'bg-red-100 text-red-800'}`
-                              }
-                            >
-                              {member.status === 'optimal' ? 'Optimal' : 
-                                member.status === 'underutilized' ? 'Underutilized' : 
-                                'Overallocated'}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
                 </div>
               </CardContent>
             </Card>
