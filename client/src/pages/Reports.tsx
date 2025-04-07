@@ -3,6 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   BarChart,
   Bar,
@@ -15,15 +18,11 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
 } from "recharts";
 
 type DashboardStats = {
   activeProjects: number;
   teamUtilizationAvg: number;
-  completedTasks: number;
-  unassignedTasks: number;
 };
 
 type TeamUtilization = {
@@ -41,29 +40,10 @@ type TeamMember = {
   skills: string[] | null;
 };
 
-type TeamPerformance = {
-  month: string;
-  completion: number; // percent of completion rate
-  efficiency: number; // efficiency rate in percent
-};
-
 type CategoryHours = {
   category: string;
   estimated: number;
   actual: number;
-};
-
-type Task = {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  status: string;
-  estimatedHours: number;
-  dueDate: string;
-  category: string;
-  projectId: number | null;
-  assigneeId: number | null;
 };
 
 type Project = {
@@ -78,7 +58,11 @@ type Project = {
 
 const Reports: React.FC = () => {
   const [timeRange, setTimeRange] = useState("thisMonth");
-
+  const [projectFilter, setProjectFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  
+  // Get all the data
   const { data: dashboardStats, isLoading: statsLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
   });
@@ -91,23 +75,39 @@ const Reports: React.FC = () => {
     queryKey: ["/api/team-members"],
   });
 
-  const { data: tasks, isLoading: tasksLoading } = useQuery<Task[]>({
-    queryKey: ["/api/tasks"],
-  });
-
   const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
-  });
-
-  const { data: teamPerformance, isLoading: performanceLoading } = useQuery<TeamPerformance[]>({
-    queryKey: ["/api/dashboard/team-performance"],
   });
 
   const { data: categoryHours, isLoading: hoursLoading } = useQuery<CategoryHours[]>({
     queryKey: ["/api/dashboard/category-hours"],
   });
 
-  const isLoading = statsLoading || utilizationLoading || membersLoading || tasksLoading || projectsLoading || performanceLoading || hoursLoading;
+  // Filter projects based on search input and status
+  const filteredProjects = React.useMemo(() => {
+    if (!projects) return [];
+    
+    return projects.filter(project => {
+      const matchesName = project.name.toLowerCase().includes(projectFilter.toLowerCase());
+      const matchesStatus = statusFilter.length === 0 || statusFilter.includes(project.status);
+      
+      return matchesName && matchesStatus;
+    });
+  }, [projects, projectFilter, statusFilter]);
+
+  // Filter team members based on search input and role
+  const filteredTeamMembers = React.useMemo(() => {
+    if (!teamMembers) return [];
+    
+    return teamMembers.filter(member => {
+      const matchesName = member.name.toLowerCase().includes(roleFilter.toLowerCase());
+      const matchesRole = member.role.toLowerCase().includes(roleFilter.toLowerCase());
+      
+      return matchesName || matchesRole;
+    });
+  }, [teamMembers, roleFilter]);
+  
+  const isLoading = statsLoading || utilizationLoading || membersLoading || projectsLoading || hoursLoading;
 
   // Prepare utilization by role chart data
   const utilizationByRoleData = React.useMemo(() => {
@@ -141,49 +141,29 @@ const Reports: React.FC = () => {
     }));
   }, [projects]);
 
-  // Prepare task status chart data
-  const taskStatusData = React.useMemo(() => {
-    if (!tasks) return [];
-    
-    const statusCounts = {
-      unassigned: 0,
-      "in-progress": 0,
-      completed: 0,
-    };
-    
-    tasks.forEach(task => {
-      if (statusCounts.hasOwnProperty(task.status)) {
-        statusCounts[task.status as keyof typeof statusCounts]++;
-      }
-    });
-    
-    return Object.entries(statusCounts).map(([status, count]) => ({
-      name: status.charAt(0).toUpperCase() + status.slice(1).replace('-', ' '),
-      tasks: count
+  // Updated team data for filtered chart display
+  const filteredTeamMemberData = React.useMemo(() => {
+    return filteredTeamMembers.map(member => ({
+      name: member.name,
+      role: member.role,
+      allocation: 100 - member.availability,
     }));
-  }, [tasks]);
-
-  // Prepare task category chart data
-  const taskCategoryData = React.useMemo(() => {
-    if (!tasks) return [];
-    
-    const categoryMap = new Map<string, number>();
-    
-    tasks.forEach(task => {
-      const count = categoryMap.get(task.category) || 0;
-      categoryMap.set(task.category, count + 1);
+  }, [filteredTeamMembers]);
+  
+  // Updated project data for filtered chart display
+  const filteredProjectTimeline = React.useMemo(() => {
+    return filteredProjects.map(project => {
+      const startDate = new Date(project.startDate);
+      const endDate = new Date(project.endDate);
+      const duration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      return {
+        name: project.name,
+        duration: duration,
+        status: project.status
+      };
     });
-    
-    return Array.from(categoryMap.entries()).map(([category, count]) => ({
-      name: category,
-      tasks: count
-    }));
-  }, [tasks]);
-
-  // Prepare team performance data from API
-  const teamPerformanceData = React.useMemo(() => {
-    return teamPerformance || [];
-  }, [teamPerformance]);
+  }, [filteredProjects]);
 
   // Color schemes for charts
   const COLORS = ['#2563eb', '#4f46e5', '#22c55e', '#eab308', '#ef4444', '#8b5cf6'];
@@ -215,13 +195,86 @@ const Reports: React.FC = () => {
           </SelectContent>
         </Select>
       </div>
+      
+      {/* Filter controls */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div>
+          <Label htmlFor="projectFilter" className="mb-2 block">Project Filter</Label>
+          <Input
+            id="projectFilter"
+            placeholder="Filter by project name"
+            value={projectFilter}
+            onChange={(e) => setProjectFilter(e.target.value)}
+            className="w-full"
+          />
+        </div>
+        
+        <div>
+          <Label htmlFor="roleFilter" className="mb-2 block">Role/Team Member Filter</Label>
+          <Input
+            id="roleFilter"
+            placeholder="Filter by role or team member"
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="w-full"
+          />
+        </div>
+        
+        <div>
+          <Label className="mb-2 block">Project Status</Label>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="active" 
+                checked={statusFilter.includes('active')}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setStatusFilter([...statusFilter, 'active']);
+                  } else {
+                    setStatusFilter(statusFilter.filter(s => s !== 'active'));
+                  }
+                }}
+              />
+              <label htmlFor="active" className="cursor-pointer">Active</label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="completed" 
+                checked={statusFilter.includes('completed')}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setStatusFilter([...statusFilter, 'completed']);
+                  } else {
+                    setStatusFilter(statusFilter.filter(s => s !== 'completed'));
+                  }
+                }}
+              />
+              <label htmlFor="completed" className="cursor-pointer">Completed</label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="on-hold" 
+                checked={statusFilter.includes('on-hold')}
+                onCheckedChange={(checked) => {
+                  if (checked) {
+                    setStatusFilter([...statusFilter, 'on-hold']);
+                  } else {
+                    setStatusFilter(statusFilter.filter(s => s !== 'on-hold'));
+                  }
+                }}
+              />
+              <label htmlFor="on-hold" className="cursor-pointer">On Hold</label>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <Tabs defaultValue="resource" className="mb-6">
         <TabsList className="mb-4">
           <TabsTrigger value="resource">Resource Utilization</TabsTrigger>
           <TabsTrigger value="project">Project Status</TabsTrigger>
-          <TabsTrigger value="task">Task Management</TabsTrigger>
-          <TabsTrigger value="performance">Team Performance</TabsTrigger>
         </TabsList>
 
         {/* Resource Utilization Tab */}
@@ -293,11 +346,7 @@ const Reports: React.FC = () => {
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={teamMembers?.map(member => ({
-                        name: member.name,
-                        role: member.role,
-                        allocation: 100 - member.availability,
-                      }))}
+                      data={filteredTeamMemberData}
                       margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                       layout="vertical"
                     >
@@ -357,17 +406,7 @@ const Reports: React.FC = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       layout="vertical"
-                      data={projects?.map(project => {
-                        const startDate = new Date(project.startDate);
-                        const endDate = new Date(project.endDate);
-                        const duration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-                        
-                        return {
-                          name: project.name,
-                          duration: duration,
-                          status: project.status
-                        };
-                      })}
+                      data={filteredProjectTimeline}
                       margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
@@ -376,169 +415,6 @@ const Reports: React.FC = () => {
                       <Tooltip />
                       <Legend />
                       <Bar dataKey="duration" name="Project Duration" fill="#2563eb" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Task Management Tab */}
-        <TabsContent value="task">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Task Status Distribution</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={taskStatusData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="tasks" name="Number of Tasks" fill="#2563eb" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Tasks by Category</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={taskCategoryData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="tasks"
-                      >
-                        {taskCategoryData.map((_, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Tasks by Priority</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={[
-                        { priority: 'High', completed: tasks?.filter(t => t.priority === 'high' && t.status === 'completed').length || 0, pending: tasks?.filter(t => t.priority === 'high' && t.status !== 'completed').length || 0 },
-                        { priority: 'Medium', completed: tasks?.filter(t => t.priority === 'medium' && t.status === 'completed').length || 0, pending: tasks?.filter(t => t.priority === 'medium' && t.status !== 'completed').length || 0 },
-                        { priority: 'Low', completed: tasks?.filter(t => t.priority === 'low' && t.status === 'completed').length || 0, pending: tasks?.filter(t => t.priority === 'low' && t.status !== 'completed').length || 0 }
-                      ]}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="priority" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="completed" name="Completed Tasks" stackId="a" fill="#22c55e" />
-                      <Bar dataKey="pending" name="Pending Tasks" stackId="a" fill="#eab308" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Team Performance Tab */}
-        <TabsContent value="performance">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Team Performance Trends</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={teamPerformanceData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis unit="%" domain={[0, 100]} />
-                      <Tooltip />
-                      <Legend />
-                      <Line type="monotone" dataKey="completion" name="Task Completion Rate" stroke="#2563eb" strokeWidth={2} />
-                      <Line type="monotone" dataKey="efficiency" name="Resource Efficiency" stroke="#4f46e5" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Tasks Completed by Role</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={utilizationByRoleData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="members" name="Team Size" fill="#2563eb" />
-                      <Bar dataKey="utilization" name="Tasks Completed" fill="#22c55e" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Estimated vs Actual Hours</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={categoryHours}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="category" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="estimated" name="Estimated Hours" fill="#2563eb" />
-                      <Bar dataKey="actual" name="Actual Hours" fill="#eab308" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
