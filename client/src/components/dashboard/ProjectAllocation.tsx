@@ -96,13 +96,13 @@ const ProjectAllocation: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "active":
-        return "bg-emerald-100 text-emerald-800";
+        return "bg-emerald-900/60 text-emerald-300 border border-emerald-700/70";
       case "completed":
-        return "bg-slate-100 text-slate-800";
+        return "bg-slate-900/60 text-slate-300 border border-slate-700/70";
       case "pending":
-        return "bg-amber-100 text-amber-800";
+        return "bg-amber-900/60 text-amber-300 border border-amber-700/70";
       default:
-        return "bg-slate-100 text-slate-800";
+        return "bg-slate-900/60 text-slate-300 border border-slate-700/70";
     }
   };
 
@@ -167,52 +167,54 @@ const ProjectAllocation: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader className="border-b border-slate-200 px-5 py-4">
-          <CardTitle className="text-slate-800 text-lg font-semibold">Project Allocation</CardTitle>
+      <Card className="h-full flex flex-col overflow-hidden border-none shadow-md bg-slate-800">
+        <CardHeader className="border-b border-slate-700/50 px-5 py-4 bg-gradient-to-r from-slate-900 to-slate-800">
+          <CardTitle className="text-lg font-bold bg-gradient-to-r from-slate-100 to-white bg-clip-text text-transparent">Project Allocation</CardTitle>
         </CardHeader>
         <CardContent className="p-5 animate-pulse">
-          <div className="h-64 bg-slate-200 rounded"></div>
+          <div className="h-64 bg-slate-700/60 rounded"></div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card>
-      <CardHeader className="border-b border-slate-200 px-5 py-4">
-        <CardTitle className="text-slate-800 text-lg font-semibold">Project Allocation</CardTitle>
+    <Card className="h-full flex flex-col overflow-hidden border-none shadow-md bg-slate-800">
+      <CardHeader className="border-b border-slate-700/50 px-5 py-4 bg-gradient-to-r from-slate-900 to-slate-800">
+        <CardTitle className="text-lg font-bold bg-gradient-to-r from-slate-100 to-white bg-clip-text text-transparent">Project Allocation</CardTitle>
       </CardHeader>
-      <CardContent className="p-5">
+      <CardContent className="p-5 flex-grow flex flex-col relative bg-slate-800">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full filter blur-xl opacity-20 -mt-20 -mr-20 pointer-events-none"></div>
+        
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="text-sm font-medium text-left text-slate-500 border-b border-slate-200">
-                <th className="pb-3 pl-2">
+              <tr className="text-sm font-medium text-left text-slate-300 border-b border-slate-700/50 bg-slate-900/60">
+                <th className="pb-3 pl-2 pt-3">
                   <Button
                     variant="ghost"
-                    className="p-0 font-medium text-slate-500 hover:text-slate-900 flex items-center"
+                    className="p-0 font-medium text-slate-300 hover:text-white flex items-center"
                     onClick={() => handleSort('name')}
                   >
                     Project
                     {getSortIcon('name')}
                   </Button>
                 </th>
-                <th className="pb-3">
+                <th className="pb-3 pt-3">
                   <Button
                     variant="ghost"
-                    className="p-0 font-medium text-slate-500 hover:text-slate-900 flex items-center"
+                    className="p-0 font-medium text-slate-300 hover:text-white flex items-center"
                     onClick={() => handleSort('totalMembers')}
                   >
                     Total Members
                     {getSortIcon('totalMembers')}
                   </Button>
                 </th>
-                <th className="pb-3">Team Members</th>
-                <th className="pb-3">
+                <th className="pb-3 pt-3">Team Members</th>
+                <th className="pb-3 pt-3">
                   <Button
                     variant="ghost"
-                    className="p-0 font-medium text-slate-500 hover:text-slate-900 flex items-center"
+                    className="p-0 font-medium text-slate-300 hover:text-white flex items-center"
                     onClick={() => handleSort('status')}
                   >
                     Status
@@ -222,19 +224,19 @@ const ProjectAllocation: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {projectAllocations.map((project) => (
-                <tr key={project.id} className="border-b border-slate-100 hover:bg-slate-50">
+              {projectAllocations.map((project, idx) => (
+                <tr key={project.id} className={`border-b border-slate-700/50 hover:bg-slate-700/60 transition-colors ${idx % 2 === 0 ? 'bg-slate-800' : 'bg-slate-800/80'}`}>
                   <td className="py-3 pl-2">
                     <div className="flex items-center">
                       <div
                         className="w-3 h-3 rounded-full mr-2"
                         style={{ backgroundColor: project.color }}
                       ></div>
-                      <span className="font-medium text-slate-800">{project.name}</span>
+                      <span className="font-medium text-white">{project.name}</span>
                     </div>
                   </td>
                   <td className="py-3">
-                    <span className="text-sm text-slate-600">{project.totalMembers}</span>
+                    <span className="text-sm text-slate-300">{project.totalMembers}</span>
                   </td>
                   <td className="py-3">
                     <div className="flex flex-col gap-2">
@@ -244,15 +246,15 @@ const ProjectAllocation: React.FC = () => {
                             <img 
                               src={member.avatar} 
                               alt={member.name} 
-                              className="w-6 h-6 rounded-full mr-2"
+                              className="w-6 h-6 rounded-full mr-2 border border-slate-700"
                             />
                           ) : (
-                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary mr-2">
+                            <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-medium text-primary mr-2 border border-primary/20">
                               {member.name.charAt(0)}
                             </div>
                           )}
-                          <span className="text-slate-700 mr-2">{member.name}</span>
-                          <Badge variant="outline" className="ml-auto">
+                          <span className="text-slate-300 mr-2">{member.name}</span>
+                          <Badge variant="outline" className="ml-auto bg-slate-700/60 text-slate-300 border-slate-600">
                             {member.percentage}%
                           </Badge>
                         </div>
@@ -272,9 +274,10 @@ const ProjectAllocation: React.FC = () => {
         
         <div className="mt-5 text-right">
           <Link href="/projects">
-            <span className="text-sm font-medium text-primary cursor-pointer">
+            <Button variant="outline" size="sm" className="text-sm font-medium gap-1 rounded-lg border-slate-600 bg-slate-700/50 hover:bg-slate-700 text-slate-200 shadow-sm">
+              <span className="material-icons text-sm">visibility</span>
               View All Projects
-            </span>
+            </Button>
           </Link>
         </div>
       </CardContent>
