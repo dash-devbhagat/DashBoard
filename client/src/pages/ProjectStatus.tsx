@@ -413,7 +413,7 @@ export default function ProjectStatusPage() {
         onValueChange={(value) => setActiveTab(value)}
         value={activeTab}
       >
-        <Card className="bg-slate-800 border border-slate-700 shadow-xl">
+        <Card className="bg-slate-800 border border-slate-700 shadow-xl rounded-xl overflow-hidden">
           <CardHeader className="border-b border-slate-700 bg-gradient-to-r from-slate-900 to-slate-800">
             <div className="flex justify-between items-center">
               <div>
@@ -422,9 +422,9 @@ export default function ProjectStatusPage() {
                   View and update project status reports
                 </CardDescription>
               </div>
-              <TabsList className="bg-slate-900/70 border border-slate-700">
-                <TabsTrigger value="byProject" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">By Project</TabsTrigger>
-                <TabsTrigger value="cumulative" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white">Cumulative Report</TabsTrigger>
+              <TabsList className="bg-slate-900/70 border border-slate-700 rounded-lg">
+                <TabsTrigger value="byProject" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white rounded-md">By Project</TabsTrigger>
+                <TabsTrigger value="cumulative" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white rounded-md">Cumulative Report</TabsTrigger>
               </TabsList>
             </div>
           </CardHeader>
@@ -984,7 +984,7 @@ export default function ProjectStatusPage() {
                     {/* Status Summary Cards */}
                     <div className="space-y-6 mb-6">
                       {/* Delivery Status */}
-                      <Card className="bg-slate-800 border border-slate-700 shadow-lg border-t-4 border-t-blue-600/80">
+                      <Card className="bg-slate-800 border border-slate-700 shadow-lg border-t-4 border-t-blue-600/80 rounded-lg overflow-hidden">
                         <CardHeader className="pb-2 border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
                           <CardTitle className="text-xl bg-gradient-to-r from-blue-300 to-indigo-300 text-transparent bg-clip-text font-bold">Delivery Status</CardTitle>
                         </CardHeader>
@@ -1090,7 +1090,7 @@ export default function ProjectStatusPage() {
                       </Card>
                       
                       {/* Account Management Status */}
-                      <Card className="bg-slate-800 border border-slate-700 shadow-lg border-t-4 border-t-emerald-600/80">
+                      <Card className="bg-slate-800 border border-slate-700 shadow-lg border-t-4 border-t-emerald-600/80 rounded-lg overflow-hidden">
                         <CardHeader className="pb-2 border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
                           <CardTitle className="text-xl bg-gradient-to-r from-emerald-300 to-teal-300 text-transparent bg-clip-text font-bold">Account Management Status</CardTitle>
                         </CardHeader>
@@ -1172,7 +1172,7 @@ export default function ProjectStatusPage() {
                       </Card>
                     </div>
                     
-                    <Card className="bg-slate-800 border border-slate-700 shadow-lg">
+                    <Card className="bg-slate-800 border border-slate-700 shadow-lg rounded-lg overflow-hidden border-t-4 border-t-purple-600/80">
                       <CardHeader className="border-b border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800">
                         <CardTitle className="text-xl bg-gradient-to-r from-blue-300 to-indigo-300 text-transparent bg-clip-text font-bold">Project Status Summary</CardTitle>
                         <CardDescription className="text-slate-300">
