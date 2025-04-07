@@ -14,7 +14,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 
 type TeamMember = {
   id: number;
@@ -48,6 +52,8 @@ const AssignResourceDialog: React.FC<AssignResourceDialogProps> = ({
   const [selectedTeamMember, setSelectedTeamMember] = React.useState<string>("");
   const [selectedProject, setSelectedProject] = React.useState<string>("");
   const [allocationPercentage, setAllocationPercentage] = React.useState<number>(50);
+  const [startDate, setStartDate] = React.useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = React.useState<Date | undefined>(undefined);
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -69,25 +75,42 @@ const AssignResourceDialog: React.FC<AssignResourceDialogProps> = ({
       setSelectedTeamMember("");
       setSelectedProject("");
       setAllocationPercentage(50);
+      setStartDate(new Date());
+      setEndDate(undefined);
     }
   }, [open, teamMemberId]);
+  
+  // Update end date when project is selected
+  React.useEffect(() => {
+    if (selectedProject && projects) {
+      const project = projects.find(p => p.id.toString() === selectedProject);
+      if (project) {
+        setEndDate(new Date(project.endDate));
+      }
+    }
+  }, [selectedProject, projects]);
 
   const assignResourceMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedTeamMember || !selectedProject) {
-        throw new Error("Please select both a team member and a project");
+      if (!selectedTeamMember || !selectedProject || !startDate || !endDate) {
+        throw new Error("Please select both a team member and a project with valid dates");
       }
       
       const project = projects?.find(p => p.id.toString() === selectedProject);
       if (!project) throw new Error("Invalid project selected");
       
       // Create a new allocation
-      return apiRequest("POST", "/api/allocations", {
+      const payload = {
         teamMemberId: parseInt(selectedTeamMember),
         projectId: parseInt(selectedProject),
         percentage: allocationPercentage,
-        startDate: new Date().toISOString(),
-        endDate: project.endDate
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString()
+      };
+      
+      return apiRequest("/api/allocations", {
+        method: "POST",
+        body: payload
       });
     },
     onSuccess: () => {
@@ -163,6 +186,63 @@ const AssignResourceDialog: React.FC<AssignResourceDialogProps> = ({
             </Select>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Start Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="startDate"
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !startDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="endDate">End Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="endDate"
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !endDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? format(endDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    initialFocus
+                    disabled={(date) => startDate ? date < startDate : false}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
           <div className="space-y-4">
             <div className="flex justify-between">
               <Label htmlFor="allocation">Allocation Percentage</Label>
@@ -195,7 +275,7 @@ const AssignResourceDialog: React.FC<AssignResourceDialogProps> = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={!selectedTeamMember || !selectedProject || assignResourceMutation.isPending}
+              disabled={!selectedTeamMember || !selectedProject || !startDate || !endDate || assignResourceMutation.isPending}
             >
               {assignResourceMutation.isPending ? "Assigning..." : "Assign Resource"}
             </Button>
