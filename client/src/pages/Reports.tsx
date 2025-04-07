@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -70,6 +70,16 @@ type Allocation = {
 
 const Reports: React.FC = () => {
   const [timeRange, setTimeRange] = useState("thisMonth");
+  const queryClient = useQueryClient();
+  
+  // Refetch data when component mounts
+  useEffect(() => {
+    // Force refetch the data to ensure we have the latest
+    queryClient.invalidateQueries({ queryKey: ["/api/allocations"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/dashboard/team-utilization"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/team-members"] });
+  }, [queryClient]);
   
   // Function to export team allocation data to Excel
   const exportToExcel = (data: any[]) => {
