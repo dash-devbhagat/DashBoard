@@ -13,6 +13,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import ProjectStatusTable from '@/components/project-status/ProjectStatusTable';
 
 // Helper function to get the week range display (Saturday to Friday) from a Friday end date
 const getWeekRangeDisplayFromEndDate = (endDateStr: string): string => {
@@ -1183,123 +1184,17 @@ export default function ProjectStatusPage() {
                             No project status reports found for this week.
                           </div>
                         ) : (
-                          <div className="overflow-auto max-w-[calc(100vw-4rem)]">
-                            <Table className="w-full min-w-[1800px]">
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead className="w-[180px]">Project</TableHead>
-                                  {/* Delivery Status Headers */}
-                                  <TableHead colSpan={8} className="text-center text-blue-700 bg-blue-50 border-b border-blue-100">
-                                    Delivery Status
-                                  </TableHead>
-                                  {/* Account Management Headers */}
-                                  <TableHead colSpan={7} className="text-center text-emerald-700 bg-emerald-50 border-b border-emerald-100">
-                                    Account Management
-                                  </TableHead>
-                                  {/* Other Updates */}
-                                  <TableHead colSpan={3} className="text-center text-purple-700 bg-purple-50 border-b border-purple-100">
-                                    Other Updates
-                                  </TableHead>
-                                </TableRow>
-                                <TableRow>
-                                  <TableHead></TableHead>
-                                  {/* Delivery Status Subheaders */}
-                                  <TableHead className="bg-blue-50">Contract Hours</TableHead>
-                                  <TableHead className="bg-blue-50">Worked Hours</TableHead>
-                                  <TableHead className="bg-blue-50">Schedule</TableHead>
-                                  <TableHead className="bg-blue-50">Quality</TableHead>
-                                  <TableHead className="bg-blue-50">Resources</TableHead>
-                                  <TableHead className="bg-blue-50">Right Team</TableHead>
-                                  <TableHead className="bg-blue-50">Delivery Comments</TableHead>
-                                  
-                                  {/* Account Management Subheaders */}
-                                  <TableHead className="bg-emerald-50">AM Status</TableHead>
-                                  <TableHead className="bg-emerald-50">AM Comments</TableHead>
-                                  <TableHead className="bg-emerald-50">Governance</TableHead>
-                                  <TableHead className="bg-emerald-50">Last Governance</TableHead>
-                                  <TableHead className="bg-emerald-50">Last Invoice</TableHead>
-                                  <TableHead className="bg-emerald-50">Next Invoice</TableHead>
-                                  <TableHead className="bg-emerald-50">Invoice Status</TableHead>
-                                  
-                                  {/* Other Updates Subheaders */}
-                                  <TableHead className="bg-purple-50">Risks</TableHead>
-                                  <TableHead className="bg-purple-50">Action Items</TableHead>
-                                  <TableHead className="bg-purple-50">Owner</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {cumulativeStatuses?.map((status) => {
-                                  const project = projects?.find(p => p.id === status.projectId);
-                                  return (
-                                    <TableRow key={status.id} className="hover:bg-gray-50">
-                                      <TableCell className="font-medium">
-                                        <Button 
-                                          variant="link" 
-                                          className="p-0 h-auto font-medium text-primary hover:underline"
-                                          onClick={() => switchToProjectTab(status.projectId)}
-                                        >
-                                          {project?.name || `Project #${status.projectId}`}
-                                        </Button>
-                                      </TableCell>
-                                      
-                                      {/* Delivery Status Values */}
-                                      <TableCell>{status.contractHours || '-'}</TableCell>
-                                      <TableCell>{status.workedHours || '-'}</TableCell>
-                                      <TableCell>
-                                        <StatusBadge status={status.scheduleStatus} />
-                                      </TableCell>
-                                      <TableCell>
-                                        <StatusBadge status={status.qualityStatus} />
-                                      </TableCell>
-                                      <TableCell>
-                                        <StatusBadge status={status.resourceUtilizationStatus} />
-                                      </TableCell>
-                                      <TableCell>
-                                        <StatusBadge status={status.rightTeamStatus} />
-                                      </TableCell>
-                                      <TableCell className="max-w-[200px] truncate" title={status.deliveryComments || ''}>
-                                        {status.deliveryComments || '-'}
-                                      </TableCell>
-                                      
-                                      {/* Account Management Values */}
-                                      <TableCell>
-                                        <StatusBadge status={status.amStatus} />
-                                      </TableCell>
-                                      <TableCell className="max-w-[200px] truncate" title={status.amComments || ''}>
-                                        {status.amComments || '-'}
-                                      </TableCell>
-                                      <TableCell>
-                                        <StatusBadge status={status.governanceStatus} />
-                                      </TableCell>
-                                      <TableCell>
-                                        {status.lastGovernanceMeetingDate ? formatDate(status.lastGovernanceMeetingDate) : '-'}
-                                      </TableCell>
-                                      <TableCell>
-                                        {status.lastInvoiceDate ? formatDate(status.lastInvoiceDate) : '-'}
-                                      </TableCell>
-                                      <TableCell>
-                                        {status.nextInvoiceDate ? formatDate(status.nextInvoiceDate) : '-'}
-                                      </TableCell>
-                                      <TableCell>
-                                        <StatusBadge status={status.invoiceStatus} />
-                                      </TableCell>
-                                      
-                                      {/* Other Updates */}
-                                      <TableCell className="max-w-[200px] truncate" title={status.risks || ''}>
-                                        {status.risks || '-'}
-                                      </TableCell>
-                                      <TableCell className="max-w-[200px] truncate" title={status.actionItems || ''}>
-                                        {status.actionItems || '-'}
-                                      </TableCell>
-                                      <TableCell>
-                                        {status.actionItemOwner || '-'}
-                                      </TableCell>
-                                    </TableRow>
-                                  );
-                                })}
-                              </TableBody>
-                            </Table>
-                          </div>
+                          <ProjectStatusTable 
+                            projectStatuses={
+                              cumulativeStatuses.map(status => ({
+                                ...status,
+                                project: projects?.find(p => p.id === status.projectId)
+                              })) || []
+                            } 
+                            isLoading={isLoadingCumulative}
+                            weekRange={getWeekRangeDisplayFromEndDate(weekEndDate)}
+                            onProjectClick={switchToProjectTab}
+                          />
                         )}
                       </CardContent>
                     </Card>
