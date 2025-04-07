@@ -2,7 +2,6 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProjectStatus } from "@shared/schema";
 import { Link, useLocation } from "wouter";
@@ -119,7 +118,6 @@ const StatusBadge = ({ status, count }: { status: string | null, count: number }
 
 const ProjectStatusSummary: React.FC = () => {
   const [weekEndDate, setWeekEndDate] = React.useState<string>(getPreviousWeekEndDate());
-  const [activeTab, setActiveTab] = React.useState<string>("summary");
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
@@ -236,128 +234,19 @@ const ProjectStatusSummary: React.FC = () => {
             No project status reports found for this week.
           </div>
         ) : (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-4 grid grid-cols-2 w-full max-w-md mx-auto">
-              <TabsTrigger value="summary">Summary Cards</TabsTrigger>
-              <TabsTrigger value="table">Detailed Table</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="summary" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Delivery Status Cards */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-blue-700">Delivery Status</h3>
-                  
-                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                    <h4 className="text-xs font-medium mb-2">Schedule Status</h4>
-                    <div className="flex gap-3">
-                      <StatusBadge status="green" count={scheduleGreen} />
-                      <StatusBadge status="amber" count={scheduleAmber} />
-                      <StatusBadge status="red" count={scheduleRed} />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                    <h4 className="text-xs font-medium mb-2">Quality Status</h4>
-                    <div className="flex gap-3">
-                      <StatusBadge status="green" count={qualityGreen} />
-                      <StatusBadge status="amber" count={qualityAmber} />
-                      <StatusBadge status="red" count={qualityRed} />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                    <h4 className="text-xs font-medium mb-2">Resource Status</h4>
-                    <div className="flex gap-3">
-                      <StatusBadge status="green" count={resourceGreen} />
-                      <StatusBadge status="amber" count={resourceAmber} />
-                      <StatusBadge status="red" count={resourceRed} />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Account Manager Status Cards */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-emerald-700">Account Management</h3>
-                  
-                  <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                    <h4 className="text-xs font-medium mb-2">AM Status</h4>
-                    <div className="flex gap-3">
-                      <StatusBadge status="green" count={amGreen} />
-                      <StatusBadge status="amber" count={amAmber} />
-                      <StatusBadge status="red" count={amRed} />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                    <h4 className="text-xs font-medium mb-2">Governance Status</h4>
-                    <div className="flex gap-3">
-                      <StatusBadge status="green" count={govGreen} />
-                      <StatusBadge status="amber" count={govAmber} />
-                      <StatusBadge status="red" count={govRed} />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                    <h4 className="text-xs font-medium mb-2">Invoice Status</h4>
-                    <div className="flex gap-3">
-                      <StatusBadge status="green" count={invoiceGreen} />
-                      <StatusBadge status="amber" count={invoiceAmber} />
-                      <StatusBadge status="red" count={invoiceRed} />
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Project Overview */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-gray-700">Project Overview</h3>
-                  
-                  <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <h4 className="text-xs font-medium mb-2">Total Projects</h4>
-                    <div className="text-2xl font-bold">{projectStatuses?.length || 0}</div>
-                    <div className="text-xs text-gray-500 mt-1">with status reports</div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                    <h4 className="text-xs font-medium mb-2">Status Summary</h4>
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      <div className="text-center">
-                        <div className="w-3 h-3 rounded-full bg-green-500 mx-auto mb-1"></div>
-                        <div className="text-xs">Green</div>
-                        <div className="font-medium">{Math.round((scheduleGreen + qualityGreen + resourceGreen + amGreen + govGreen + invoiceGreen) / 6)}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-3 h-3 rounded-full bg-amber-500 mx-auto mb-1"></div>
-                        <div className="text-xs">Amber</div>
-                        <div className="font-medium">{Math.round((scheduleAmber + qualityAmber + resourceAmber + amAmber + govAmber + invoiceAmber) / 6)}</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-3 h-3 rounded-full bg-red-500 mx-auto mb-1"></div>
-                        <div className="text-xs">Red</div>
-                        <div className="font-medium">{Math.round((scheduleRed + qualityRed + resourceRed + amRed + govRed + invoiceRed) / 6)}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="table">
-              <div className="overflow-hidden">
-                <ProjectStatusTable 
-                  projectStatuses={
-                    projectStatuses.map(status => ({
-                      ...status,
-                      project: projects?.find(p => p.id === status.projectId)
-                    })) || []
-                  }
-                  isLoading={isLoading}
-                  weekRange={getWeekRangeDisplayFromEndDate(weekEndDate)}
-                  onProjectClick={handleProjectClick}
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="overflow-hidden">
+            <ProjectStatusTable 
+              projectStatuses={
+                (projectStatuses || []).map(status => ({
+                  ...status,
+                  project: projects?.find((p: { id: number }) => p.id === status.projectId)
+                }))
+              }
+              isLoading={isLoading}
+              weekRange={getWeekRangeDisplayFromEndDate(weekEndDate)}
+              onProjectClick={handleProjectClick}
+            />
+          </div>
         )}
       </CardContent>
     </Card>
