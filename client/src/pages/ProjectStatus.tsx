@@ -153,6 +153,45 @@ export default function ProjectStatusPage() {
   // Ref for the tabs component to control it programmatically
   const tabsRef = React.useRef<HTMLDivElement>(null);
   
+  // Parse URL parameters from hash or query string
+  useEffect(() => {
+    console.log("Checking URL parameters");
+    // First try to get parameters from hash (e.g. #week=2025-04-04&tab=project&project=4)
+    const hash = window.location.hash.substring(1);
+    const queryParams = window.location.search.substring(1);
+    
+    let params: URLSearchParams;
+    if (hash) {
+      console.log("Using hash parameters:", hash);
+      params = new URLSearchParams(hash);
+    } else if (queryParams) {
+      console.log("Using query parameters:", queryParams);
+      params = new URLSearchParams(queryParams);
+    } else {
+      return; // No parameters
+    }
+    
+    // Get parameters
+    const weekParam = params.get('week');
+    const tabParam = params.get('tab');
+    const projectParam = params.get('project');
+    
+    console.log("URL parameters:", { weekParam, tabParam, projectParam });
+    
+    // Set state based on parameters
+    if (weekParam) {
+      setWeekEndDate(weekParam);
+    }
+    
+    if (tabParam && (tabParam === 'byProject' || tabParam === 'cumulative')) {
+      setActiveTab(tabParam);
+    }
+    
+    if (projectParam && !isNaN(Number(projectParam))) {
+      setSelectedProject(Number(projectParam));
+    }
+  }, []);
+  
   // Fetch all projects
   const { data: projects, isLoading: isLoadingProjects } = useQuery({
     queryKey: ['/api/projects'],
@@ -358,6 +397,11 @@ export default function ProjectStatusPage() {
   const switchToProjectTab = (projectId: number) => {
     setSelectedProject(projectId);
     setActiveTab("byProject");
+    
+    // Update URL hash with the project ID
+    const newHash = `project=${projectId}&tab=byProject&week=${weekEndDate}`;
+    window.location.hash = newHash;
+    
     // Find the TabsTrigger element and click it programmatically
     const byProjectTab = document.querySelector('[data-state="inactive"][value="byProject"]') as HTMLButtonElement;
     if (byProjectTab) {
@@ -1186,7 +1230,7 @@ export default function ProjectStatusPage() {
                         ) : (
                           <ProjectStatusTable 
                             projectStatuses={
-                              cumulativeStatuses.map(status => ({
+                              (cumulativeStatuses || []).map(status => ({
                                 ...status,
                                 project: projects?.find(p => p.id === status.projectId)
                               })) || []

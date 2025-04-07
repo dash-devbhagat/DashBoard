@@ -197,7 +197,7 @@ const ProjectStatusSummary: React.FC = () => {
     // Log the navigation attempt for debugging
     console.log(`Navigating to project: ${projectId}`);
     // Use the navigate function with hash-based routing
-    navigate(`/project-status#week=${weekEndDate}&tab=project&project=${projectId}`);
+    navigate(`/project-status#project=${projectId}&tab=byProject&week=${weekEndDate}`);
   };
 
   return (
