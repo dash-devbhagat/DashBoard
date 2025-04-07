@@ -110,7 +110,7 @@ const AssignResourceDialog: React.FC<AssignResourceDialogProps> = ({
       
       return apiRequest("/api/allocations", {
         method: "POST",
-        body: payload
+        body: payload as any
       });
     },
     onSuccess: () => {

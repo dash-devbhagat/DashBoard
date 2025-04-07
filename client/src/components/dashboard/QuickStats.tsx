@@ -1,9 +1,10 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
+import { DashboardStats } from "@shared/schema";
 
 const QuickStats: React.FC = () => {
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/dashboard/stats"],
   });
 
@@ -26,7 +27,7 @@ const QuickStats: React.FC = () => {
     );
   }
 
-  const dashboardStats = stats || {
+  const dashboardStats: DashboardStats = stats || {
     activeProjects: 0,
     teamUtilizationAvg: 0,
     zeroAllocationCount: 0,

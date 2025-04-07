@@ -170,7 +170,7 @@ const Team: React.FC = () => {
       
       return apiRequest<TeamMember>("/api/team-members", { 
         method: "POST", 
-        body: memberData
+        body: memberData as any
       });
     },
     onSuccess: () => {
@@ -196,7 +196,7 @@ const Team: React.FC = () => {
       
       return apiRequest<TeamMember>(`/api/team-members/${member.id}`, { 
         method: "PATCH", 
-        body: memberData
+        body: memberData as any
       });
     },
     onSuccess: () => {
@@ -235,7 +235,7 @@ const Team: React.FC = () => {
       
       return apiRequest<Allocation>("/api/allocations", { 
         method: "POST", 
-        body: allocationData
+        body: allocationData as any
       });
     },
     onSuccess: () => {
@@ -272,7 +272,7 @@ const Team: React.FC = () => {
       
       return apiRequest<Allocation>(`/api/allocations/${allocation.id}`, { 
         method: "PATCH", 
-        body: allocationData
+        body: allocationData as any
       });
     },
     onSuccess: () => {
