@@ -16,19 +16,26 @@ function Router() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
       <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
-          <Switch>
-            <Route path="/" component={Dashboard} />
-            <Route path="/projects" component={Projects} />
-            <Route path="/team" component={Team} />
-            <Route path="/project-status" component={ProjectStatusPage} />
-            <Route path="/reports" component={Reports} />
-            <Route component={NotFound} />
-          </Switch>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 relative">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full filter blur-3xl opacity-30 -mt-24 -mr-24 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/5 rounded-full filter blur-3xl opacity-30 -mb-20 -ml-20 pointer-events-none"></div>
+          
+          {/* Content */}
+          <div className="relative z-10">
+            <Switch>
+              <Route path="/" component={Dashboard} />
+              <Route path="/projects" component={Projects} />
+              <Route path="/team" component={Team} />
+              <Route path="/project-status" component={ProjectStatusPage} />
+              <Route path="/reports" component={Reports} />
+              <Route component={NotFound} />
+            </Switch>
+          </div>
         </main>
       </div>
     </div>
